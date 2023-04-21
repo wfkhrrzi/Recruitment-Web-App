@@ -33,8 +33,8 @@ class Users(PermissionsMixin,AbstractBaseUser):
     user_name = models.CharField(max_length=50)
     email = models.EmailField(max_length=100,unique=True)
     password = models.CharField(max_length=200)
-    user_privilege = models.ForeignKey(UserPrivilege,on_delete=models.CASCADE,null=True)
-    user_category = models.ForeignKey(UserCategory,on_delete=models.CASCADE,null=True)
+    user_privilege = models.ForeignKey(UserPrivilege,on_delete=models.SET_NULL,null=True)
+    user_category = models.ForeignKey(UserCategory,on_delete=models.SET_NULL,null=True)
 
     #debugging admin site
     is_staff = models.BooleanField(default=False,)
@@ -97,54 +97,94 @@ class Candidate(models.Model):
     ds_background = models.CharField(max_length=100)
     hr_remarks = models.TextField(null=True)
     cv_link = models.CharField(max_length=255)
-    source = models.ForeignKey(Source,on_delete=models.CASCADE,null=True)
-    category = models.ForeignKey(EmpCategory,on_delete=models.CASCADE,null=True)
+    source = models.ForeignKey(Source,on_delete=models.SET_NULL,null=True)
+    category = models.ForeignKey(EmpCategory,on_delete=models.SET_NULL,null=True)
 
     def __str__(self) -> str:
         return self.name
 
-class Screening(models.Model):
+class InitialScreening(models.Model):
     candidate = models.ForeignKey(Candidate,on_delete=models.CASCADE)
     selection_status = models.ForeignKey(Status,on_delete=models.CASCADE,null=False)
-    comment = models.TextField(null=True)
+    remarks = models.TextField(null=True)
     selection_date = models.DateField(null=True)
-    referred_hr_date = models.DateField(null=True)
-    rereferred_hr_date = models.DateField(null=True)
-    availability = models.BooleanField(null=True)
+    last_modified_at = models.DateTimeField(auto_now=True)
+    last_modified_by = models.ForeignKey(Users,on_delete=models.SET_NULL,null=True,blank=True)
     # revision for assessment results 
 
-class ScreeningEvaluation(models.Model):
+class InitialScreeningEvaluation(models.Model):
     status = models.ForeignKey(Status,on_delete=models.CASCADE)
-    user = models.ForeignKey(Users,on_delete=models.CASCADE)
-    screening = models.ForeignKey(Screening,on_delete=models.CASCADE)
+    user = models.ForeignKey(Users,on_delete=models.SET_NULL,null=True,related_name='initscreening_user')
+    initial_screening = models.ForeignKey(InitialScreening,on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(Users,on_delete=models.SET_NULL,null=True,blank=True,related_name='initscreening_user_created_by')
 
-class ScreeningSubmission(models.Model):
+class Prescreening(models.Model):
+    candidate = models.ForeignKey(Candidate,on_delete=models.CASCADE)
+    status = models.ForeignKey(Status,on_delete=models.CASCADE)
+    user = models.ForeignKey(Users,on_delete=models.SET_NULL,null=True)
+    initial_screening = models.ForeignKey(InitialScreening,on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(Users,on_delete=models.SET_NULL,null=True,blank=True,related_name='prescreening_user_created_by')
+    last_modified_at = models.DateTimeField(auto_now=True)
+    last_modified_by = models.ForeignKey(Users,on_delete=models.SET_NULL,null=True,blank=True,related_name='prescreening_user_last_modified_by')
 
-    def candidate_directory(instance,filename):
-        return f"{instance.screening.candidate.name}/{filename}"
 
-    submission = models.FileField(upload_to=candidate_directory)
+
+class Submission(models.Model):
+
+    def upload_directory(instance):
+        raise NotImplementedError
+
+    submission = models.FileField(upload_to=upload_directory)
     is_active = models.BooleanField(default=True,null=False)
-    screening = models.ForeignKey(Screening,on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def delete(self):
         '''Set self.is_active = False'''
         self.is_active = False
         self.save()
 
-class AssessorAvailability(models.Model):
-    date = models.DateField()
-    user = models.ForeignKey(Users,on_delete=models.CASCADE)
+    class Meta:
+        abstract = True
+
+class PrescreeningSubmission(Submission):
+
+    def upload_directory(instance,filename):
+        return f"Prescreening/{instance.initial_screening.candidate.name}/{filename}"
+
+    prescreening = models.ForeignKey(InitialScreening,on_delete=models.CASCADE,null=False,blank=False)
 
 class CBI(models.Model):
     date = models.DateField(null=True)
-    feedback = models.TextField(null=True)
+    remarks = models.TextField(null=True)
     status = models.ForeignKey(Status,on_delete=models.CASCADE,null=False)
     candidate = models.ForeignKey(Candidate,on_delete=models.CASCADE,null=False)
-    assessor1 = models.ForeignKey(Users,on_delete=models.CASCADE,related_name='user1_CBI')
-    assessor2 = models.ForeignKey(Users,on_delete=models.CASCADE,related_name='user2_CBI')
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(Users,on_delete=models.SET_NULL,null=True,blank=True,related_name='cbi_user_created_by')
+    last_modified_at = models.DateTimeField(auto_now=True)
+    last_modified_by = models.ForeignKey(Users,on_delete=models.SET_NULL,null=True,blank=True,related_name='cbi_user_last_modified_by')
 
-class Joining(models.Model):
+class CBISchedule(models.Model):
+    cbi = models.ForeignKey(CBI,on_delete=models.CASCADE,null=False)
+    status = models.ForeignKey(Status,on_delete=models.CASCADE,null=False)
+    datetime = models.DateTimeField()
+    remarks = models.TextField(null=True)
+    assessor1 = models.ForeignKey(Users,on_delete=models.SET_NULL,related_name='user1_CBISchedule',null=True)
+    assessor1_status = models.ForeignKey(Status,on_delete=models.SET_NULL,related_name='user1_status',null=True)
+    assessor2 = models.ForeignKey(Users,on_delete=models.SET_NULL,related_name='user2_CBISchedule',null=True)
+    assessor2_status = models.ForeignKey(Status,on_delete=models.SET_NULL,related_name='user2_status',null=True)
+    assessor3 = models.ForeignKey(Users,on_delete=models.SET_NULL,related_name='user3_CBISchedule',null=True)
+    assessor3_status = models.ForeignKey(Status,on_delete=models.SET_NULL,related_name='user3_status',null=True)
+
+class CBISubmission(Submission):
+    
+    def upload_directory(instance,filename):
+        return f"CBI/{instance.cbi.candidate.name}/{filename}"
+    
+    cbi = models.ForeignKey(CBI,on_delete=models.CASCADE,null=False,blank=False)
+
+class Hiring(models.Model):
     salary_proposal = models.DateField(null=True)
     offer_letter_rollout = models.DateField(null=True)
     offer_letter_accept = models.DateField(null=True)

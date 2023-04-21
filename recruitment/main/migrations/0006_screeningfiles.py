@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
             name='ScreeningFiles',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('submission', models.FileField(upload_to=main.models.ScreeningSubmission.candidate_directory)),
+                ('submission', models.FileField(upload_to=main.models.PrescreeningSubmission.upload_directory)),
                 ('screening', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='main.screening')),
             ],
         ),

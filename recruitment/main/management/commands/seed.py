@@ -16,7 +16,7 @@ MODE_CLEAR = 'clear'
 MODE_SEED = 'seed'
 """ Add another instances """
 
-lst_models = [Status,EmpCategory,Source,Users,Candidate,Screening,ScreeningSubmission]
+lst_models = [Status,EmpCategory,Source,Users,Candidate,InitialScreening,Prescreening,PrescreeningSubmission]
 
 class Command(BaseCommand):
     help = "Seed database for testing and development"
@@ -60,7 +60,9 @@ class Command(BaseCommand):
         # Clear data from tables
         if mode == MODE_REFRESH:
             self.clear_data()
+        
         if mode == MODE_CLEAR:
+            self.clear_data()
             return
         
         #run factories

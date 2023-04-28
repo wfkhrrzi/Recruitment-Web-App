@@ -3,8 +3,9 @@ from django.urls import path
 from . import view
 from . import auth
 from main.views.candidate import CandidateIndex,CandidateEdit
-from main.views.pre_screening import PrescreeningCreate, PrescreeningSubmissionCreate, PrescreeningSubmissionDelete, PrescreeningInstructionSent, PrescreeningIndex
+from main.views.pre_screening import PrescreeningCreate, PrescreeningSubmissionCreate, PrescreeningSubmissionDelete, PrescreeningInstructionSent, PrescreeningIndex, PrescreeningUpdate
 from main.views.init_screening import InitialScreeningIndex, InitialScreeningCreate, InitialScreeningEdit, InitialScreeningUpdate,InitialScreeningEvaluationCreate, InitialScreeningEvaluationDelete
+from main.views.cbi import CBICreate, CBIIndex, CBIScheduleCreate, CBIScheduleUpdate
 
 app_name = 'main'
 
@@ -23,8 +24,15 @@ urlpatterns = [
 
     path('prescreening/<int:prescreening_id>', PrescreeningIndex.as_view(), name='prescreening.index'),
     path('prescreening/create', PrescreeningCreate.as_view(), name='prescreening.create'),
+    path('prescreening/update', PrescreeningUpdate.as_view(), name='prescreening.update'),
     path('prescreening/send_instruction', PrescreeningInstructionSent.as_view(), name='prescreening.send_instruction'),
     path("prescreening/submission/create", PrescreeningSubmissionCreate.as_view(), name='prescreening.submission.create'),
     path("prescreening/submission/delete", PrescreeningSubmissionDelete.as_view(), name='prescreening.submission.update'),
+
+    path('cbi/<int:cbi_id>', CBIIndex.as_view(), name='cbi.index'),
+    path('cbi/create', CBICreate.as_view(), name='cbi.create'),
+    path('cbi/schedule/create', CBIScheduleCreate.as_view(), name='cbi.schedule.create'),
+    path('cbi/schedule/update', CBIScheduleUpdate.as_view(), name='cbi.schedule.update'),
+
 
 ]

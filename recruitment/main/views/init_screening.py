@@ -193,14 +193,14 @@ class InitialScreeningUpdate(CustomLoginRequired,View):
         if initial_screening.is_proceed:
 
             prescreening_request = request
-            prescreening_request.POST = QueryDict(f'candidate={initial_screening.candidate.id}&initial_screening=success')
+            prescreening_request.POST = QueryDict(f'candidate={initial_screening.candidate.id}&initial_screening={True}')
 
             return PrescreeningCreate.post(prescreening_request)
         
         else:
             if return_json(request):
                 return JsonResponse({
-                    'initial_screening:decision':'success',
+                    'initial_screening:update':'success',
                     'instance':{
                         'is_proceed':initial_screening.is_proceed,
                         'selection_status':initial_screening.selection_status.status,

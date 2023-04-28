@@ -3,6 +3,7 @@ from django.core.management.base import BaseCommand, CommandParser
 from main.seeder.factories import *
 from django.db import connection
 import warnings
+from django.apps import apps
 
 warnings.filterwarnings('ignore')
 
@@ -16,11 +17,10 @@ MODE_CLEAR = 'clear'
 MODE_SEED = 'seed'
 """ Add another instances """
 
-lst_models = [
-    Status,EmpCategory,Source,Users,Candidate,
-    InitialScreening,Prescreening,PrescreeningSubmission,
-    InitialScreeningEvaluation
-]
+# get list of all registered models
+app = apps.get_app_config('main')
+lst_models = list(app.get_models())
+
 
 class Command(BaseCommand):
     help = "Seed database for testing and development"

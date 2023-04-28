@@ -12,9 +12,13 @@ dict_status = {
     'prescreening:send instruction':'pending instruction',
     'prescreening:pending submission':'pending response',
     'prescreening:assessment submitted':'ready for validation',
-    'cbi:send invitation':'pending RSVP invitation',
-    'cbi:rescheduled':'cancelled',
-    'cbi:conducted':'conducted',
+    'cbi:unscheduled':'unscheduled',
+    'cbi_schedule:pending send RSVP':'pending RSVP invitation',
+    'cbi_schedule:pending RSVP response':'pending RSVP response',
+    'cbi_schedule:RSVP proceed':'available',
+    'cbi_schedule:RSVP cancel':'unavailable',
+    'cbi_schedule:rescheduled':'cancelled',
+    'cbi_schedule:conducted':'conducted',
     'proceed':'proceed',
     'do not proceed':'do not proceed',
     'accepted':'accepted',
@@ -100,6 +104,7 @@ class CandidateFactory(DjangoModelFactory):
     hr_remarks = Faker('text')
     source = LazyAttribute(lambda o:random.choice(Source.objects.all()))
     category = LazyAttribute(lambda o:random.choice(EmpCategory.objects.all()))
+
 
 
        

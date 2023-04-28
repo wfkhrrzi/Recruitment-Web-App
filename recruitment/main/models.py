@@ -182,7 +182,6 @@ class PrescreeningSubmission(Submission):
 
 
 class CBI(CreatedMixin,LastModifiedMixin,models.Model):
-    date = models.DateField(null=True)
     remarks = models.TextField(null=True)
     status = models.ForeignKey(Status,on_delete=models.CASCADE,null=False)
     candidate = models.OneToOneField(Candidate,on_delete=models.CASCADE,null=False)
@@ -193,14 +192,15 @@ class CBISchedule(models.Model):
     cbi = models.ForeignKey(CBI,on_delete=models.CASCADE,null=False)
     status = models.ForeignKey(Status,on_delete=models.CASCADE,null=False)
     datetime = models.DateTimeField()
-    remarks = models.TextField(null=True)
+    remarks = models.TextField(null=True,blank=True)
     assessor1 = models.ForeignKey(Users,on_delete=models.SET_NULL,related_name='user1_CBISchedule',null=True)
     assessor1_status = models.ForeignKey(Status,on_delete=models.SET_NULL,related_name='user1_status',null=True)
-    assessor2 = models.ForeignKey(Users,on_delete=models.SET_NULL,related_name='user2_CBISchedule',null=True)
-    assessor2_status = models.ForeignKey(Status,on_delete=models.SET_NULL,related_name='user2_status',null=True)
-    assessor3 = models.ForeignKey(Users,on_delete=models.SET_NULL,related_name='user3_CBISchedule',null=True)
-    assessor3_status = models.ForeignKey(Status,on_delete=models.SET_NULL,related_name='user3_status',null=True)
+    assessor2 = models.ForeignKey(Users,on_delete=models.SET_NULL,related_name='user2_CBISchedule',null=True,blank=True)
+    assessor2_status = models.ForeignKey(Status,on_delete=models.SET_NULL,related_name='user2_status',null=True,blank=True)
+    assessor3 = models.ForeignKey(Users,on_delete=models.SET_NULL,related_name='user3_CBISchedule',null=True,blank=True)
+    assessor3_status = models.ForeignKey(Status,on_delete=models.SET_NULL,related_name='user3_status',null=True,blank=True)
     is_proceed = models.BooleanField(null=True)
+    is_RSVP = models.BooleanField(default=False)
 
 
 class CBISubmission(Submission):

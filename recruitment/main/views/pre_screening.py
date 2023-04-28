@@ -1,17 +1,20 @@
 from django.shortcuts import render, redirect
-from django.http import JsonResponse,HttpResponse, HttpRequest, HttpResponseBadRequest
+from django.http import JsonResponse,HttpResponse, HttpRequest, HttpResponseBadRequest, QueryDict
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.contrib.auth.mixins import UserPassesTestMixin
-from ..auth import CustomLoginRequired
-from ..models import Prescreening,PrescreeningSubmission,Candidate,Status
-from ..forms import PrescreeningSubmissionForm
-from ..utils import return_json
+
+from main.views.cbi import CBICreate
+from main.auth import CustomLoginRequired
+from main.models import Prescreening,PrescreeningSubmission,Candidate,Status
+from main.forms import PrescreeningSubmissionForm
+from main.utils import return_json
 from django.forms.models import model_to_dict
 from django.urls import reverse
 from datetime import datetime
 from django.core import serializers
+
 
 class PrescreeningIndex(CustomLoginRequired,View):
     
@@ -51,7 +54,7 @@ class PrescreeningCreate(CustomLoginRequired,View):
             response = {'prescreening:create':'success'}
             
             if request.POST.get('initial_screening',None):
-                response['initial_screening:decision'] = 'success'                
+                response['initial_screening:update'] = 'success'                
             
             return JsonResponse(response)
 
@@ -123,13 +126,29 @@ class PrescreeningUpdate(CustomLoginRequired,View): # mail functionality coming 
 
         prescreening.last_modified_by = request.user
         prescreening.save()
-            
-        if return_json(request):
-            return JsonResponse({
-                'prescreening:update':'success',
-            })
 
-        return redirect(request.META.get('HTTP_REFERER') or reverse('main:candidate.index'))
+        if prescreening.is_proceed:
+
+            cbi_request = request
+            cbi_request.POST = QueryDict(f'candidate={prescreening.candidate.id}&prescreening={True}')
+
+            return CBICreate.post(cbi_request)
+        
+        else:
+            if return_json(request):
+                return JsonResponse({
+                    'prescreening:update':'success',
+                    'instance':{
+                        'is_proceed':prescreening.is_proceed,
+                        'status':prescreening.status,
+                        'candidate':{
+                            'name':prescreening.candidate.name
+                        },
+                    }
+                })
+            
+            return redirect(request.META.get('HTTP_REFERER') or reverse('main:candidate.index'))
+
         
 
 @method_decorator(csrf_exempt,name='dispatch')

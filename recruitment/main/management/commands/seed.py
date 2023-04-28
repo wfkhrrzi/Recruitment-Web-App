@@ -16,7 +16,11 @@ MODE_CLEAR = 'clear'
 MODE_SEED = 'seed'
 """ Add another instances """
 
-lst_models = [Status,EmpCategory,Source,Users,Candidate,InitialScreening,Prescreening,PrescreeningSubmission]
+lst_models = [
+    Status,EmpCategory,Source,Users,Candidate,
+    InitialScreening,Prescreening,PrescreeningSubmission,
+    InitialScreeningEvaluation
+]
 
 class Command(BaseCommand):
     help = "Seed database for testing and development"
@@ -71,7 +75,7 @@ class Command(BaseCommand):
         # status, source, emp category
         EmpCategoryFactory.create_batch(3)
         SourceFactory.create_batch(3)
-        StatusFactory.create_batch(3)
+        StatusFactory.create_batch(len(dict_status))
 
         # users
         UsersFactory.create_batch(3)

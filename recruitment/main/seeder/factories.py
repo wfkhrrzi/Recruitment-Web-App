@@ -5,12 +5,41 @@ from typing import List
 from django.contrib.auth.hashers import make_password
 import random
 
+dict_status = {
+    'initscreening:pending':'Yet to select',
+    'initscreening:selected':'selected',
+    'initscreening:not selected':'not selected',
+    'prescreening:send instruction':'pending instruction',
+    'prescreening:pending submission':'pending response',
+    'prescreening:assessment submitted':'ready for validation',
+    'cbi:send invitation':'pending RSVP invitation',
+    'cbi:rescheduled':'cancelled',
+    'cbi:conducted':'conducted',
+    'proceed':'proceed',
+    'do not proceed':'do not proceed',
+    'accepted':'accepted',
+    'rejected':'rejected',
+    'pending':'pending',
+    'recommended':'recommended',
+    'not recommended':'not recommended',        
+}
+
+lst_codename = list()
+lst_status = list()
+
+for key, value in dict_status.items():
+    lst_codename.append(key)
+    lst_status.append(value)
+
 
 class StatusFactory(DjangoModelFactory):
+    
     class Meta:
         model = Status
-
-    status = Iterator(['pending', 'KIV', 'Not screened'])
+        
+    
+    codename = Iterator(lst_codename)
+    status = Iterator(lst_status)
 
 
 class EmpCategoryFactory(DjangoModelFactory):
@@ -60,8 +89,8 @@ class CandidateFactory(DjangoModelFactory):
     highest_education = Iterator(['bachelor', 'diploma', 'master', 'phd'])
     years_exp = Faker('random_digit_not_null')
     cv_link = LazyAttribute(lambda m: f"https://petronas.onedrive.com/{m.name}-resume.pdf")
-    created_at = Faker('iso8601')
-    modified_at = Faker('iso8601')
+    # created_at = Faker('iso8601')
+    # modified_at = Faker('iso8601')
     CGPA = Faker('pyfloat',min_value=3,max_value=4,right_digits=2,positive=True)
     recent_role = Faker('job')
     recent_emp = Faker('company')

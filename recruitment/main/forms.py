@@ -1,38 +1,38 @@
 from django.forms import ModelForm 
-from .models import Screening, ScreeningSubmission, Users, Candidate
+from .models import InitialScreening, Prescreening, PrescreeningSubmission, Users, Candidate
 from django.http import HttpRequest
 
-class ScreeningForm(ModelForm):
-
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args,**kwargs)
-
-        for field in self.fields:
-            if not field in self.Meta.required:
-                self.fields[field].required = False
+class InitialScreeningCreateForm(ModelForm):
 
     class Meta:
-        model = Screening
-        # fields = ['candidate','selection_status']
-        fields = '__all__'
-        required = ('candidate','selection_status')
+        model = InitialScreening
+        fields = ['candidate']
 
-class ScreeningSubmissionForm(ModelForm):
+class InitialScreeningUpdateForm(ModelForm):
 
-    def __init__(self, *args, **kwargs) -> None:
-        
-        self.request:HttpRequest = kwargs.pop('request',None)
+    # def __init__(self, *args, **kwargs) -> None:
+    #     super().__init__(*args,**kwargs)
 
-        super().__init__(*args,**kwargs)
+    #     for field in self.fields:
+    #         if not field in self.Meta.required:
+    #             self.fields[field].required = False
 
-        if self.request:
-            if self.request.path.strip('/').split('/')[-1] == 'delete': # dependent on endpoint name
-                self.fields['submission'].required = False
+    class Meta:
+        model = InitialScreening
+        fields = ['candidate']
+
+class PrescreeningForm(ModelForm):
+
+    class Meta:
+        model = Prescreening
+        fields = []
+
+class PrescreeningSubmissionForm(ModelForm):
     
     class Meta:
-        model = ScreeningSubmission
-        fields = ['submission']
-    
+        model = PrescreeningSubmission
+        fields = ['submission','prescreening']
+
 
 class UsersForm(ModelForm):
     class Meta:

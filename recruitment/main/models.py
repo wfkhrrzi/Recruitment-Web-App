@@ -1,3 +1,4 @@
+from typing import Any
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager, AbstractUser
 
@@ -60,6 +61,7 @@ class Users(PermissionsMixin,AbstractBaseUser):
 
 
 class Status(models.Model):
+    codename = models.CharField(max_length=255,unique=True,null=True)
     status = models.CharField(max_length=100)
 
     def __str__(self) -> str:
@@ -78,13 +80,27 @@ class EmpCategory(models.Model):
         return self.category
 
 
-class Candidate(models.Model):
+class LastModifiedMixin(models.Model):
+
+    last_modified_at = models.DateTimeField(auto_now=True)
+    last_modified_by = models.ForeignKey(Users,on_delete=models.SET_NULL,null=True,blank=True, related_name="%(app_label)s_%(class)s_last_modified_by")
+
+    class Meta:
+        abstract = True
+
+class CreatedMixin(models.Model):
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(Users,on_delete=models.SET_NULL,null=True,blank=True,related_name="%(app_label)s_%(class)s_user_created_by")
+    
+    class Meta:
+        abstract = True
+
+
+class Candidate(CreatedMixin,LastModifiedMixin,models.Model):
     name = models.CharField(max_length=100)
     date = models.DateField()
     referral_name = models.CharField(max_length=100)
-    created_at = models.DateTimeField()
-    modified_at = models.DateTimeField(max_length=100)
-    last_modified_by = models.ForeignKey(Users,on_delete=models.CASCADE,null=True)
     phone_number = models.CharField(max_length=100)
     email = models.EmailField(max_length=100)
     highest_education = models.CharField(max_length=100) # need revision on this
@@ -103,67 +119,75 @@ class Candidate(models.Model):
     def __str__(self) -> str:
         return self.name
 
-class InitialScreening(models.Model):
-    candidate = models.ForeignKey(Candidate,on_delete=models.CASCADE)
+
+class InitialScreening(LastModifiedMixin,models.Model):
+    candidate = models.OneToOneField(Candidate,on_delete=models.CASCADE)
     selection_status = models.ForeignKey(Status,on_delete=models.CASCADE,null=False)
     remarks = models.TextField(null=True)
     selection_date = models.DateField(null=True)
-    last_modified_at = models.DateTimeField(auto_now=True)
-    last_modified_by = models.ForeignKey(Users,on_delete=models.SET_NULL,null=True,blank=True)
+    is_proceed = models.BooleanField(null=True)
     # revision for assessment results 
 
-class InitialScreeningEvaluation(models.Model):
-    status = models.ForeignKey(Status,on_delete=models.CASCADE)
+
+class InitialScreeningEvaluation(CreatedMixin,LastModifiedMixin,models.Model):
+    status = models.ForeignKey(Status,on_delete=models.CASCADE,null=True)
     user = models.ForeignKey(Users,on_delete=models.SET_NULL,null=True,related_name='initscreening_user')
     initial_screening = models.ForeignKey(InitialScreening,on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(Users,on_delete=models.SET_NULL,null=True,blank=True,related_name='initscreening_user_created_by')
-
-class Prescreening(models.Model):
-    candidate = models.ForeignKey(Candidate,on_delete=models.CASCADE)
-    status = models.ForeignKey(Status,on_delete=models.CASCADE)
-    user = models.ForeignKey(Users,on_delete=models.SET_NULL,null=True)
-    initial_screening = models.ForeignKey(InitialScreening,on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(Users,on_delete=models.SET_NULL,null=True,blank=True,related_name='prescreening_user_created_by')
-    last_modified_at = models.DateTimeField(auto_now=True)
-    last_modified_by = models.ForeignKey(Users,on_delete=models.SET_NULL,null=True,blank=True,related_name='prescreening_user_last_modified_by')
+    is_proceed = models.BooleanField(null=True)
 
 
+class Submission(CreatedMixin,models.Model):
 
-class Submission(models.Model):
+    def upload_directory(self,filename):
+        model_name = self._meta.model_name
 
-    def upload_directory(instance):
-        raise NotImplementedError
+        if model_name == PrescreeningSubmission._meta.model_name:
+            ps_obj:PrescreeningSubmission = self
+            return f"Prescreening/{ps_obj.prescreening.candidate.name}/{filename}"
+        elif model_name == CBISubmission._meta.model_name:
+            cs_obj:CBISubmission = self
+            return f"CBI/{cs_obj.cbi.candidate.name}/{filename}"            
 
     submission = models.FileField(upload_to=upload_directory)
     is_active = models.BooleanField(default=True,null=False)
-    created_at = models.DateTimeField(auto_now_add=True)
+    deleted_at = models.DateTimeField(null=True)
+    deleted_by = models.ForeignKey(Users,on_delete=models.SET_NULL,null=True,blank=True,related_name='%(app_label)s_%(class)s_deleted_by')
 
-    def delete(self):
+    def delete(self,commit:bool=True):
         '''Set self.is_active = False'''
         self.is_active = False
-        self.save()
+        
+        if commit:
+            self.save()
+            return None
+        else:
+            return self
 
     class Meta:
         abstract = True
 
+
+class Prescreening(CreatedMixin,LastModifiedMixin,models.Model):
+    candidate = models.OneToOneField(Candidate,on_delete=models.CASCADE,null=False)
+    status = models.ForeignKey(Status,on_delete=models.CASCADE,null=False,related_name='prescreening_status')
+    assessment_status = models.ForeignKey(Status,on_delete=models.CASCADE,null=True,related_name='prescreening_assessment_status')
+    is_proceed = models.BooleanField(null=True)
+    is_sent_instruction = models.BooleanField(default=False)
+    instruction_date = models.DateTimeField(null=True)
+
+
 class PrescreeningSubmission(Submission):
 
-    def upload_directory(instance,filename):
-        return f"Prescreening/{instance.initial_screening.candidate.name}/{filename}"
+    prescreening = models.ForeignKey(Prescreening,on_delete=models.CASCADE,null=False,blank=False)
 
-    prescreening = models.ForeignKey(InitialScreening,on_delete=models.CASCADE,null=False,blank=False)
 
-class CBI(models.Model):
+class CBI(CreatedMixin,LastModifiedMixin,models.Model):
     date = models.DateField(null=True)
     remarks = models.TextField(null=True)
     status = models.ForeignKey(Status,on_delete=models.CASCADE,null=False)
-    candidate = models.ForeignKey(Candidate,on_delete=models.CASCADE,null=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(Users,on_delete=models.SET_NULL,null=True,blank=True,related_name='cbi_user_created_by')
-    last_modified_at = models.DateTimeField(auto_now=True)
-    last_modified_by = models.ForeignKey(Users,on_delete=models.SET_NULL,null=True,blank=True,related_name='cbi_user_last_modified_by')
+    candidate = models.OneToOneField(Candidate,on_delete=models.CASCADE,null=False)
+    is_proceed = models.BooleanField(null=True)
+
 
 class CBISchedule(models.Model):
     cbi = models.ForeignKey(CBI,on_delete=models.CASCADE,null=False)
@@ -176,13 +200,13 @@ class CBISchedule(models.Model):
     assessor2_status = models.ForeignKey(Status,on_delete=models.SET_NULL,related_name='user2_status',null=True)
     assessor3 = models.ForeignKey(Users,on_delete=models.SET_NULL,related_name='user3_CBISchedule',null=True)
     assessor3_status = models.ForeignKey(Status,on_delete=models.SET_NULL,related_name='user3_status',null=True)
+    is_proceed = models.BooleanField(null=True)
+
 
 class CBISubmission(Submission):
     
-    def upload_directory(instance,filename):
-        return f"CBI/{instance.cbi.candidate.name}/{filename}"
-    
     cbi = models.ForeignKey(CBI,on_delete=models.CASCADE,null=False,blank=False)
+    
 
 class Hiring(models.Model):
     salary_proposal = models.DateField(null=True)
@@ -190,4 +214,4 @@ class Hiring(models.Model):
     offer_letter_accept = models.DateField(null=True)
     remark = models.TextField(null=True)
     status = models.ForeignKey(Status,on_delete=models.CASCADE,null=False)
-    candidate = models.ForeignKey(Candidate,on_delete=models.CASCADE,null=False)
+    candidate = models.OneToOneField(Candidate,on_delete=models.CASCADE,null=False)

@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import JsonResponse,HttpResponse,HttpRequest
 from django.views import View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from ..auth import CustomLoginRequired
+from main.auth import CustomLoginRequired
 from main.utils import return_json
 from main.models import Candidate
 from django.core.paginator import Paginator, EmptyPage

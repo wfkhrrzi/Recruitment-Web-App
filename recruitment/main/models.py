@@ -82,7 +82,7 @@ class EmpCategory(models.Model):
 
 class LastModifiedMixin(models.Model):
 
-    last_modified_at = models.DateTimeField(auto_now=True)
+    last_modified_at = models.DateTimeField(auto_now=True,null=True)
     last_modified_by = models.ForeignKey(Users,on_delete=models.SET_NULL,null=True,blank=True, related_name="%(app_label)s_%(class)s_last_modified_by")
 
     class Meta:
@@ -90,7 +90,7 @@ class LastModifiedMixin(models.Model):
 
 class CreatedMixin(models.Model):
 
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True,null=True)
     created_by = models.ForeignKey(Users,on_delete=models.SET_NULL,null=True,blank=True,related_name="%(app_label)s_%(class)s_user_created_by")
     
     class Meta:
@@ -112,6 +112,7 @@ class Candidate(CreatedMixin,LastModifiedMixin,models.Model):
     ds_skills = models.CharField(max_length=100)
     ds_background = models.CharField(max_length=100)
     hr_remarks = models.TextField(null=True)
+    gpt_status = models.ForeignKey(Status,on_delete=models.SET_NULL,null=True)
     cv_link = models.CharField(max_length=255)
     source = models.ForeignKey(Source,on_delete=models.SET_NULL,null=True)
     category = models.ForeignKey(EmpCategory,on_delete=models.SET_NULL,null=True)
@@ -188,7 +189,7 @@ class CBI(CreatedMixin,LastModifiedMixin,models.Model):
     is_proceed = models.BooleanField(null=True)
 
 
-class CBISchedule(models.Model):
+class CBISchedule(CreatedMixin,LastModifiedMixin,models.Model):
     cbi = models.ForeignKey(CBI,on_delete=models.CASCADE,null=False)
     status = models.ForeignKey(Status,on_delete=models.CASCADE,null=False)
     datetime = models.DateTimeField()

@@ -26,6 +26,9 @@ dict_status = {
     'pending':'pending',
     'recommended':'recommended',
     'not recommended':'not recommended',        
+    'initscreening:ongoing':'ongoing initial screening',
+    'prescreening:ongoing':'ongoing prescreening',
+    'cbi:ongoing':'ongoing cbi',
 }
 
 lst_codename = list()
@@ -102,9 +105,16 @@ class CandidateFactory(DjangoModelFactory):
     ds_skills = Faker('text')
     ds_background = Faker('text')
     hr_remarks = Faker('text')
+    gpt_status = LazyAttribute(lambda o:random.choice(Status.objects.filter(codename__in=['recommended','not recommended',])))
     source = LazyAttribute(lambda o:random.choice(Source.objects.all()))
     category = LazyAttribute(lambda o:random.choice(EmpCategory.objects.all()))
 
 
+class InitialScreeningFactory(DjangoModelFactory):
+    
+    class Meta:
+        model = InitialScreening
 
+    candidate = Iterator(Candidate.objects.all())
+    selection_status= LazyAttribute(lambda o:Status.objects.get(codename='initscreening:pending'))
        

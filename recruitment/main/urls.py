@@ -6,12 +6,14 @@ from main.views.candidate import CandidateIndex,CandidateEdit
 from main.views.pre_screening import PrescreeningCreate, PrescreeningSubmissionCreate, PrescreeningSubmissionDelete, PrescreeningInstructionSent, PrescreeningIndex, PrescreeningUpdate
 from main.views.init_screening import InitialScreeningIndex, InitialScreeningCreate, InitialScreeningEdit, InitialScreeningUpdate,InitialScreeningEvaluationCreate, InitialScreeningEvaluationDelete
 from main.views.cbi import CBICreate, CBIIndex, CBIScheduleCreate, CBIScheduleUpdate
+from main.view import Browse
 
 app_name = 'main'
 
 urlpatterns = [
     path('login', auth.login_view, name='login'),
     path('', view.index, name='index'),
+    path('browse', Browse.as_view(), name='browse'),
 
     path('candidate', CandidateIndex.as_view(), name='candidate.index'),
     # path('candidate/edit/<int:screening_id>', CandidateEdit.as_view(), name='candidate.edit'),

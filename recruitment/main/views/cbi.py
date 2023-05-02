@@ -150,7 +150,7 @@ class CBIScheduleSendRSVP(CustomLoginRequired,View): # mail functionality coming
         # processes to send RSVP to respective assessors via Outlook
 
         cbischedule.is_RSVP = True
-        cbischedule.status = Status.objects.get(codename='cbi_schedule:pending RSVP response')
+        cbischedule.status = Status.objects.get(codename='proceed')
             
         if return_json(request):
             return JsonResponse({
@@ -162,7 +162,37 @@ class CBIScheduleSendRSVP(CustomLoginRequired,View): # mail functionality coming
 
 class CBIScheduleGetRSVP(CustomLoginRequired,View):
     ''' Receive RSVP from involved assessors via Outlook '''
-    pass
+    def post(self,request:HttpRequest,):
+        
+        if request.POST.get('rsvp',None) == None:
+            if return_json(request):
+                return JsonResponse({
+                    'rsvp':'rsvp is required'
+                })
+            
+            return HttpResponseBadRequest('rsvp is required')
+
+        try:
+            cbischedule = CBISchedule.objects.get(id=request.POST['cbi_schedule'])
+        except:
+            if return_json(request):
+                return JsonResponse({
+                    'cbi_schedule':'cbi_schedule id not found'
+                })
+            
+            return HttpResponseBadRequest('cbi_schedule id not found')
+        
+        # processes to send RSVP to respective assessors via Outlook
+
+        if bool(int(request.POST['rsvp'])):
+            cbischedule.is_RSVP = True
+                
+        if return_json(request):
+            return JsonResponse({
+                'cbi-schedule:send RSVP':'success',
+            })
+
+        return redirect(request.META.get('HTTP_REFERER') or reverse('main:candidate.index'))
 
 
 @method_decorator(csrf_exempt,name='dispatch')

@@ -94,7 +94,7 @@ class InitialScreeningEvaluationCreate(CustomLoginRequired,View): # create & upd
         
         if int(request.POST['proceed']) == 0: #do not proceed
             initial_screening_eval.is_proceed = False
-            initial_screening_eval.status = Status.objects.get(codename='rejected')
+            initial_screening_eval.status = Status.objects.get(codename='do not proceed')
 
         elif int(request.POST['proceed']) == 1: #proceed
             

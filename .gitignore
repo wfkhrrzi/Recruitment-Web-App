@@ -2,6 +2,7 @@
 .vscode
 test.ipynb
 submission_files/
+.prettierrc
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

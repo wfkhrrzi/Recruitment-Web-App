@@ -12,6 +12,7 @@ from django.forms.models import model_to_dict
 from django.urls import reverse
 from datetime import datetime
 from django.core import serializers
+from django.db.models import Q, Case, When, CharField, Value, Count, OuterRef, Subquery, F
 
 from main.forms import CBISubmissionForm
 
@@ -44,7 +45,7 @@ class CBICreate(CustomLoginRequired,View):
             return HttpResponseBadRequest('candidate id not found')
 
         cbi = CBI(candidate=candidate)
-        cbi.status = Status.objects.get(codename='cbi:unscheduled')
+        cbi.status = Status.objects.get(codename='cbi:pending interview') # NEED TO REVISE
         cbi.created_by = request.user
 
         cbi.save()

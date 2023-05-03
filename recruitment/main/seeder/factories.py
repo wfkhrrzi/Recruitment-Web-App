@@ -19,10 +19,12 @@ dict_status = {
     'prescreening:proceed':'proceed',
     'prescreening:not proceed':'not proceed',
 
-    'cbi:unscheduled':'unscheduled',
     'cbi:proceed':'proceed',
     'cbi:not proceed':'not proceed',
+    'cbi:pending interview':'pending interview',
+    'cbi:pending result':'pending result',
 
+    'cbi_schedule:unscheduled':'unscheduled',
     'cbi_schedule:pending send RSVP':'pending RSVP invitation',
     'cbi_schedule:pending RSVP response':'pending RSVP response',
     'cbi_schedule:RSVP proceed':'available',
@@ -30,13 +32,16 @@ dict_status = {
     'cbi_schedule:rescheduled':'cancelled',
     'cbi_schedule:conducted':'conducted',
 
-    'proceed':'proceed',
-    'do not proceed':'do not proceed',
-    'accepted':'accepted',
-    'rejected':'rejected',
-    'pending':'pending',
-    'recommended':'recommended',
-    'not recommended':'not recommended',
+    'gpt_status:recommended':'recommended',
+    'gpt_status:not recommended':'not recommended',
+    
+    # 'proceed':'proceed',
+    # 'do not proceed':'do not proceed',
+    # 'accepted':'accepted',
+    # 'rejected':'rejected',
+    # 'pending':'pending',
+    # 'recommended':'recommended',
+    # 'not recommended':'not recommended',
 
     'initscreening:ongoing':'ongoing initial screening',
     'prescreening:ongoing':'ongoing prescreening',
@@ -117,7 +122,7 @@ class CandidateFactory(DjangoModelFactory):
     ds_skills = Faker('text')
     ds_background = Faker('text')
     hr_remarks = Faker('text')
-    gpt_status = LazyAttribute(lambda o:random.choice(Status.objects.filter(codename__in=['recommended','not recommended',])))
+    gpt_status = LazyAttribute(lambda o:random.choice(Status.objects.filter(codename__in=['gpt_status:recommended','gpt_status:not recommended',])))
     source = LazyAttribute(lambda o:random.choice(Source.objects.all()))
     category = LazyAttribute(lambda o:random.choice(EmpCategory.objects.all()))
 

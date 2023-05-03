@@ -117,12 +117,12 @@ class PrescreeningUpdate(CustomLoginRequired,View): # mail functionality coming 
         if int(request.POST['proceed']) == 0: #do not proceed
 
             prescreening.is_proceed = False
-            prescreening.status = Status.objects.get(codename='do not proceed')
+            prescreening.status = Status.objects.get(codename='prescreening:not proceed')
 
         elif int(request.POST['proceed']) == 1: #proceed
             
             prescreening.is_proceed = True
-            prescreening.status = Status.objects.get(codename='proceed')
+            prescreening.status = Status.objects.get(codename='prescreening:proceed')
 
         prescreening.last_modified_by = request.user
         prescreening.save()

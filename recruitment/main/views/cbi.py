@@ -43,21 +43,21 @@ class CBICreate(CustomLoginRequired,View):
             
             return HttpResponseBadRequest('candidate id not found')
 
-        prescreening = CBI(candidate=candidate)
-        prescreening.status = Status.objects.get(codename='cbi:unscheduled')
-        prescreening.created_by = request.user
+        cbi = CBI(candidate=candidate)
+        cbi.status = Status.objects.get(codename='cbi:unscheduled')
+        cbi.created_by = request.user
 
-        prescreening.save()
+        cbi.save()
             
         if return_json(request):
             response = {'cbi:create':'success'}
             
-            if request.POST.get('prescreening',None):
-                response['prescreening:update'] = 'success'                
+            if request.POST.get('cbi',None):
+                response['cbi:update'] = 'success'                
             
             return JsonResponse(response)
 
-        return redirect(request.META.get('HTTP_REFERER') or reverse('main:cbi.index',args=[prescreening.id]))
+        return redirect(request.META.get('HTTP_REFERER') or reverse('main:cbi.index',args=[cbi.id]))
 
 
 @method_decorator(csrf_exempt,name='dispatch')
@@ -150,7 +150,7 @@ class CBIScheduleSendRSVP(CustomLoginRequired,View): # mail functionality coming
         # processes to send RSVP to respective assessors via Outlook
 
         cbischedule.is_RSVP = True
-        cbischedule.status = Status.objects.get(codename='proceed')
+        cbischedule.status = Status.objects.get(codename='cbi:proceed')
             
         if return_json(request):
             return JsonResponse({
@@ -236,31 +236,31 @@ class CBIUpdate(CustomLoginRequired,View): # mail functionality coming soon
             return HttpResponseBadRequest('proceed is required')
 
         try:
-            prescreening = CBI.objects.get(id=request.POST['prescreening'])
+            cbi = CBI.objects.get(id=request.POST['cbi'])
         except:
             if return_json(request):
                 return JsonResponse({
-                    'prescreening':'prescreening id not found'
+                    'cbi':'cbi id not found'
                 })
             
-            return HttpResponseBadRequest('prescreening id not found')
+            return HttpResponseBadRequest('cbi id not found')
 
         if int(request.POST['proceed']) == 0: #do not proceed
 
-            prescreening.is_proceed = False
-            prescreening.status = Status.objects.get(codename='do not proceed')
+            cbi.is_proceed = False
+            cbi.status = Status.objects.get(codename='cbi:not proceed')
 
         elif int(request.POST['proceed']) == 1: #proceed
             
-            prescreening.is_proceed = True
-            prescreening.status = Status.objects.get(codename='proceed')
+            cbi.is_proceed = True
+            cbi.status = Status.objects.get(codename='cbi:proceed')
 
-        prescreening.last_modified_by = request.user
-        prescreening.save()
+        cbi.last_modified_by = request.user
+        cbi.save()
             
         if return_json(request):
             return JsonResponse({
-                'prescreening:update':'success',
+                'cbi:update':'success',
             })
 
         return redirect(request.META.get('HTTP_REFERER') or reverse('main:candidate.index'))
@@ -272,8 +272,8 @@ class CBISubmissionCreate(CustomLoginRequired,View):
     def post(self,request:HttpRequest,):
         
         # check if no submission yet
-        prescreening = CBI.objects.get(id=request.POST['prescreening'])
-        prescreening_submissions = CBISubmission.objects.filter(prescreening=prescreening)
+        cbi = CBI.objects.get(id=request.POST['cbi'])
+        cbi_submissions = CBISubmission.objects.filter(cbi=cbi)
         
         files = request.FILES.getlist('submission')
 
@@ -286,21 +286,21 @@ class CBISubmissionCreate(CustomLoginRequired,View):
             form = CBISubmissionForm(request.POST,dict(submission=file))
             
             if form.is_valid():                
-                ps_obj:CBISubmission = form.save()
-                ps_obj.created_by = request.user
-                ps_obj.save()
+                cbi_obj:CBISubmission = form.save()
+                cbi_obj.created_by = request.user
+                cbi_obj.save()
             
             else:
                 return JsonResponse(form.errors)
         
-        if not prescreening_submissions:
-            prescreening.status = Status.objects.get(codename='prescreening:assessment submitted')
-            prescreening.save(update_fields=['status'])
+        if not cbi_submissions:
+            cbi.status = Status.objects.get(codename='cbi:assessment submitted')
+            cbi.save(update_fields=['status'])
 
 
         if return_json(request):
             return JsonResponse({
-                'prescreening_submission':'success',
+                'cbi_submission':'success',
             })
 
         return redirect(request.META.get('HTTP_REFERER') or reverse('main:candidate.index'))
@@ -312,31 +312,31 @@ class CBISubmissionDelete(CustomLoginRequired,View):
     def post(self,request:HttpRequest,):
 
         # fetch related screening submission & perform error handling
-        prescreening_submission:CBISubmission = CBISubmission.objects.get(id=request.POST['prescreening_submission'])
+        cbi_submission:CBISubmission = CBISubmission.objects.get(id=request.POST['cbi_submission'])
 
-        if prescreening_submission == None:
+        if cbi_submission == None:
             if return_json(request):
                 return JsonResponse({
-                    'prescreening_submission':'id is not found',
+                    'cbi_submission':'id is not found',
                 })
             
-            return HttpResponseBadRequest('prescreening_submission id not found')
+            return HttpResponseBadRequest('cbi_submission id not found')
 
-        prescreening_submission = prescreening_submission.delete(commit=False)
-        prescreening_submission.deleted_by = request.user
-        prescreening_submission.deleted_at = datetime.now()
+        cbi_submission = cbi_submission.delete(commit=False)
+        cbi_submission.deleted_by = request.user
+        cbi_submission.deleted_at = datetime.now()
 
-        prescreening_submission.save()
+        cbi_submission.save()
 
         # reset status if no submission files
-        if not CBISubmission.objects.filter(prescreening=prescreening_submission.prescreening):
-            prescreening = prescreening_submission.prescreening
-            prescreening.status = Status.objects.get(codename='prescreening:pending submission')
-            prescreening.save(update_fields=['status'])
+        if not CBISubmission.objects.filter(cbi=cbi_submission.cbi):
+            cbi = cbi_submission.cbi
+            cbi.status = Status.objects.get(codename='cbi:pending submission')
+            cbi.save(update_fields=['status'])
 
         if return_json(request):
             return JsonResponse({
-                'prescreening_submission':'success',
+                'cbi_submission':'success',
             })
 
         return redirect(request.META.get('HTTP_REFERER') or reverse('main:candidate.index'))

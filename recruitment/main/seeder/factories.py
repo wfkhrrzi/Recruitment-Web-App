@@ -9,23 +9,35 @@ dict_status = {
     'initscreening:pending':'Yet to select',
     'initscreening:selected':'selected',
     'initscreening:not selected':'not selected',
+    'initscreening:proceed':'proceed',
+    'initscreening:not proceed':'not proceed',
+
+    'prescreening:pending':'pending',
     'prescreening:send instruction':'pending instruction',
     'prescreening:pending submission':'pending response',
     'prescreening:assessment submitted':'ready for validation',
+    'prescreening:proceed':'proceed',
+    'prescreening:not proceed':'not proceed',
+
     'cbi:unscheduled':'unscheduled',
+    'cbi:proceed':'proceed',
+    'cbi:not proceed':'not proceed',
+
     'cbi_schedule:pending send RSVP':'pending RSVP invitation',
     'cbi_schedule:pending RSVP response':'pending RSVP response',
     'cbi_schedule:RSVP proceed':'available',
     'cbi_schedule:RSVP cancel':'unavailable',
     'cbi_schedule:rescheduled':'cancelled',
     'cbi_schedule:conducted':'conducted',
+
     'proceed':'proceed',
     'do not proceed':'do not proceed',
     'accepted':'accepted',
     'rejected':'rejected',
     'pending':'pending',
     'recommended':'recommended',
-    'not recommended':'not recommended',        
+    'not recommended':'not recommended',
+
     'initscreening:ongoing':'ongoing initial screening',
     'prescreening:ongoing':'ongoing prescreening',
     'cbi:ongoing':'ongoing cbi',
@@ -89,7 +101,7 @@ class CandidateFactory(DjangoModelFactory):
         model = Candidate
     
     name = Faker('name')
-    date = Faker('date')
+    date = Faker('date_between',start_date="-30d",end_date="today")
     referral_name = Faker('name')
     phone_number = Faker('phone_number')
     email = LazyAttribute(lambda m: f"{''.join(m.name.lower().split())}@example.com")

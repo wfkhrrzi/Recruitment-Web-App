@@ -5,15 +5,17 @@ from . import auth
 from main.views.candidate import CandidateIndex,CandidateEdit
 from main.views.pre_screening import PrescreeningCreate, PrescreeningSubmissionCreate, PrescreeningSubmissionDelete, PrescreeningInstructionSent, PrescreeningIndex, PrescreeningUpdate
 from main.views.init_screening import InitialScreeningIndex, InitialScreeningCreate, InitialScreeningEdit, InitialScreeningUpdate,InitialScreeningEvaluationCreate, InitialScreeningEvaluationDelete
-from main.views.cbi import CBICreate, CBIIndex, CBIScheduleCreate, CBIScheduleUpdate
-from main.view import Browse
+from main.views.cbi import CBICreate, CBIIndex, CBIScheduleCreate, CBIScheduleUpdate, CBISubmissionCreate, CBISubmissionDelete
+from main.view import BrowseIndex, BrowseView
 
 app_name = 'main'
 
 urlpatterns = [
-    path('login', auth.login_view, name='login'),
+    path('api/login', auth.login_view, name='login'),
+    path('login', auth.CustomLoginView.as_view(), name='login'),
     path('', view.index, name='index'),
-    path('browse', Browse.as_view(), name='browse'),
+    path('browse', BrowseIndex.as_view(), name='browse'),
+    path('browse/<int:candidate_id>', BrowseView.as_view(), name='browse'),
 
     path('candidate', CandidateIndex.as_view(), name='candidate.index'),
     # path('candidate/edit/<int:screening_id>', CandidateEdit.as_view(), name='candidate.edit'),
@@ -35,6 +37,8 @@ urlpatterns = [
     path('cbi/create', CBICreate.as_view(), name='cbi.create'),
     path('cbi/schedule/create', CBIScheduleCreate.as_view(), name='cbi.schedule.create'),
     path('cbi/schedule/update', CBIScheduleUpdate.as_view(), name='cbi.schedule.update'),
+    path("cbi/submission/create", CBISubmissionCreate.as_view(), name='cbi.submission.create'),
+    path("cbi/submission/delete", CBISubmissionDelete.as_view(), name='cbi.submission.update'),
 
 
 ]

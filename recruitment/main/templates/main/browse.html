@@ -1,0 +1,135 @@
+{% extends 'main/layout/base.html' %} 
+
+{% load custom_filters %}
+
+{% block content %}
+    <div class="mb-3">
+    </div>
+    <h1 class="">Browse page</h1>
+    
+    {% comment %} Action metrics {% endcomment %}
+    <div class="my-4 d-flex flex-row">
+        {% for key,value in metrics.items %}
+            <div class="shadow rounded py-4 px-5 me-4 text-center">
+                <div class="fw-semibold fs-3">
+                    {{value}}
+                </div>
+                <div class="action-items-title">
+                    {{ key|format_card_title }}
+                </div>
+            </div>
+        
+        {% endfor %}
+    </div>
+
+
+    <div class="my-5"> 
+        <table id="table-candidates" class="table" width="100%">
+            <thead>
+                <tr>
+                    {% comment %} <th scope="col">Id</th> {% endcomment %}
+                    <th scope="col">Name</th>
+                    <th scope="col">Date</th>
+                    <th scope="col">Source</th>
+                    <th scope="col">GPT Recommendation</th>
+                    <th scope="col">Initial Screening</th>
+                    <th scope="col">Prescreening</th>
+                    <th scope="col">CBI</th>
+                    <th scope="col">Overall Status</th>
+                </tr>
+
+                <tr>
+                    {% comment %} <th class="filter"></th> {% endcomment %}
+                    <th class="filter">
+                        <input type="text" class="form-control" placeholder="Filter Name">
+                    </th>
+                    <th class="filter">
+                        <input type="date" class="form-control" placeholder="Filter Date">
+                    </th>
+                    <th class="filter">
+                        <select name="source" id="" class="form-select">
+                            <option value="">None</option>
+                            {% for source in source %}
+                                <option value="{{source.id}}">{{source.source|title}}</option>
+                            {% endfor %}
+                        </select>
+                    </th>
+                    <th class="filter">
+                        <select name="gpt_status" id="" class="form-select">
+                            <option value="">None</option>
+                            {% for status in statuses.gpt %}
+                                <option value="{{status.codename}}">{{status.status|title}}</option>
+                            {% endfor %}
+                        </select>
+                    </th>
+                    <th class="filter">
+                        <select name="initscreening_status" id="" class="form-select">
+                            <option value="">None</option>
+                            {% for status in statuses.initscreening %}
+                                <option value="{{status.codename}}">{{status.status|title}}</option>
+                            {% endfor %}
+                        </select>
+                    </th>
+                    <th class="filter">
+                        <select name="prescreening_status" id="" class="form-select">
+                            <option value="">None</option>
+                            {% for status in statuses.prescreening %}
+                                <option value="{{status.codename}}">{{status.status|title}}</option>
+                            {% endfor %}
+                        </select>
+                    </th>
+                    <th class="filter">
+                        <select name="cbi_status" id="" class="form-select">
+                            <option value="">None</option>
+                            {% for status in statuses.cbi %}
+                                <option value="{{status.codename}}">{{status.status|title}}</option>
+                            {% endfor %}
+                        </select>
+                    </th>
+                    <th class="filter">
+                        <select name="overall_status" id="" class="form-select">
+                            <option value="">None</option>
+                            {% for status in statuses.overall_status %}
+                                <option value="{{status.codename}}">{{status.status|title}}</option>
+                            {% endfor %}
+                        </select>
+                    </th>
+                </tr>
+            </thead>
+        </table>
+
+    </div>
+
+{% endblock content %} 
+
+{% block import_css %}
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.2.0/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+    <link href="https://cdn.datatables.net/fixedheader/3.3.2/css/fixedHeader.bootstrap5.min.css" rel="stylesheet" />
+    <link href="https://cdn.datatables.net/responsive/2.4.1/css/responsive.bootstrap5.min.css" rel="stylesheet" />
+    <link href="https://cdn.datatables.net/select/1.6.2/css/select.dataTables.min.css" rel="stylesheet" />
+
+{% endblock import_css %} 
+
+{% block import_scripts %} 
+
+    {{block.super}}
+
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/fixedheader/3.3.2/js/dataTables.fixedHeader.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.4.1/js/dataTables.responsive.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.4.1/js/responsive.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/select/1.6.2/js/dataTables.select.min.js"></script>
+
+    <script>
+        
+    </script>
+
+    {% load static %}
+    <script src="{% static 'main/browse.js' %}"></script>
+
+
+{% endblock import_scripts %}

@@ -49,7 +49,10 @@ class CBICreate(CustomLoginRequired,View):
         cbi.created_by = request.user
 
         cbi.save()
-            
+        
+        candidate.overall_status = Status.objects.get(codename='prescreening:ongoing')
+        candidate.save()
+
         if return_json(request):
             response = {'cbi:create':'success'}
             

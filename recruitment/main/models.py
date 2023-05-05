@@ -112,10 +112,11 @@ class Candidate(CreatedMixin,LastModifiedMixin,models.Model):
     ds_skills = models.CharField(max_length=100)
     ds_background = models.CharField(max_length=100)
     hr_remarks = models.TextField(null=True)
-    gpt_status = models.ForeignKey(Status,on_delete=models.SET_NULL,null=True)
+    gpt_status = models.ForeignKey(Status,on_delete=models.SET_NULL,null=True,related_name="candidates_gpt_status")
     cv_link = models.CharField(max_length=255)
     source = models.ForeignKey(Source,on_delete=models.SET_NULL,null=True)
     category = models.ForeignKey(EmpCategory,on_delete=models.SET_NULL,null=True)
+    overall_status = models.ForeignKey(Status,on_delete=models.SET_NULL,null=True,related_name="candidates_overall_status")
 
     def __str__(self) -> str:
         return self.name
@@ -123,9 +124,9 @@ class Candidate(CreatedMixin,LastModifiedMixin,models.Model):
 
 class InitialScreening(LastModifiedMixin,models.Model):
     candidate = models.OneToOneField(Candidate,on_delete=models.CASCADE)
-    selection_status = models.ForeignKey(Status,on_delete=models.CASCADE,null=False)
+    status = models.ForeignKey(Status,on_delete=models.CASCADE,null=False)
     remarks = models.TextField(null=True)
-    selection_date = models.DateField(null=True)
+    date_selected = models.DateField(null=True)
     is_proceed = models.BooleanField(null=True)
     # revision for assessment results 
 

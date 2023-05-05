@@ -44,11 +44,14 @@ class PrescreeningCreate(CustomLoginRequired,View):
             return HttpResponseBadRequest('candidate id not found')
 
         prescreening = Prescreening(candidate=candidate)
-        prescreening.status = Status.objects.get(codename='pending')
+        prescreening.status = Status.objects.get(codename='prescreening:pending')
         prescreening.assessment_status = Status.objects.get(codename='prescreening:send instruction')
         prescreening.created_by = request.user
-
+        
         prescreening.save()
+        
+        candidate.overall_status = Status.objects.get(codename='prescreening:ongoing')
+        candidate.save()
             
         if return_json(request):
             response = {'prescreening:create':'success'}

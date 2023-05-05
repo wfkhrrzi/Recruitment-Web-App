@@ -45,7 +45,7 @@ class InitialScreeningCreate(CustomLoginRequired,View):
             
             return HttpResponseBadRequest('candidate not found')
 
-        intial_screening = InitialScreening.objects.create(candidate=candidate,selection_status=Status.objects.get(codename='initscreening:pending'))
+        intial_screening = InitialScreening.objects.create(candidate=candidate,status=Status.objects.get(codename='initscreening:pending'))
                     
         if return_json(request):
             return JsonResponse({
@@ -151,7 +151,7 @@ class InitialScreeningUpdate(CustomLoginRequired,View):
     
     def post(self,request: HttpRequest,):
         ''' 
-        Update Initial Screening's is_proceed & selection_status
+        Update Initial Screening's is_proceed & status
         
         :return InitialScreening
          
@@ -178,13 +178,13 @@ class InitialScreeningUpdate(CustomLoginRequired,View):
         
         if int(request.POST['proceed']) == 0: #do not proceed
             initial_screening.is_proceed = False
-            initial_screening.selection_status = Status.objects.get(codename='initscreening:not selected')
+            initial_screening.status = Status.objects.get(codename='initscreening:not selected')
 
         elif int(request.POST['proceed']) == 1: #proceed
             
             initial_screening.is_proceed = True
-            initial_screening.selection_status = Status.objects.get(codename='initscreening:selected')
-            initial_screening.selection_date = datetime.now()
+            initial_screening.status = Status.objects.get(codename='initscreening:selected')
+            initial_screening.date_selected = datetime.now()
         
         initial_screening.last_modified_by = request.user
         initial_screening.save()
@@ -203,7 +203,7 @@ class InitialScreeningUpdate(CustomLoginRequired,View):
                     'initial_screening:update':'success',
                     'instance':{
                         'is_proceed':initial_screening.is_proceed,
-                        'selection_status':initial_screening.selection_status.status,
+                        'status':initial_screening.status.status,
                         'candidate':{
                             'name':initial_screening.candidate.name
                         },

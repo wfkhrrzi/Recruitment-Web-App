@@ -106,15 +106,13 @@ class CandidateFactory(DjangoModelFactory):
         model = Candidate
     
     name = Faker('name')
-    date = Faker('date_between',start_date="-30d",end_date="today")
+    date = Faker('date_between',start_date="-15d",end_date="today")
     referral_name = Faker('name')
     phone_number = Faker('phone_number')
     email = LazyAttribute(lambda m: f"{''.join(m.name.lower().split())}@example.com")
     highest_education = Iterator(['bachelor', 'diploma', 'master', 'phd'])
     years_exp = Faker('random_digit_not_null')
     cv_link = LazyAttribute(lambda m: f"https://petronas.onedrive.com/{m.name}-resume.pdf")
-    # created_at = Faker('iso8601')
-    # modified_at = Faker('iso8601')
     CGPA = Faker('pyfloat',min_value=3,max_value=4,right_digits=2,positive=True)
     recent_role = Faker('job')
     recent_emp = Faker('company')
@@ -125,6 +123,10 @@ class CandidateFactory(DjangoModelFactory):
     gpt_status = LazyAttribute(lambda o:random.choice(Status.objects.filter(codename__in=['gpt_status:recommended','gpt_status:not recommended',])))
     source = LazyAttribute(lambda o:random.choice(Source.objects.all()))
     category = LazyAttribute(lambda o:random.choice(EmpCategory.objects.all()))
+    overall_status = LazyAttribute(lambda o:random.choice(Status.objects.filter(codename__in=[
+        'initscreening:ongoing',
+    ])))
+    
 
 
 class InitialScreeningFactory(DjangoModelFactory):
@@ -133,5 +135,5 @@ class InitialScreeningFactory(DjangoModelFactory):
         model = InitialScreening
 
     candidate = Iterator(Candidate.objects.all())
-    selection_status= LazyAttribute(lambda o:Status.objects.get(codename='initscreening:pending'))
+    status= LazyAttribute(lambda o:Status.objects.get(codename='initscreening:pending'))
        

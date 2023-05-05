@@ -1,6 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponseForbidden
-
+from django.shortcuts import render,redirect
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.models import User
@@ -8,6 +7,10 @@ from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+from django.urls import reverse, reverse_lazy
+from django.views import View
+from django.contrib.auth.views import LoginView
+
 
 from .models import Users
 
@@ -28,3 +31,8 @@ def login_view(request):
         return Response({'token': token.key})
     
     return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+
+class CustomLoginView(LoginView):
+    template_name = 'admin/login.html'
+    success_url = reverse_lazy('main:index')
+    redirect_authenticated_user = True

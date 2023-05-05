@@ -1,3 +1,4 @@
 django
 djangorestframework
 factory_boy
+querystring-parser

@@ -1,5 +1,7 @@
 {% extends 'main/layout/base.html' %} 
 
+{% block sidebar %}{% endblock sidebar %} <!-- overridden so does not display sidebar -->
+
 {% load custom_filters %}
 
 {% block content %}
@@ -10,7 +12,7 @@
     {% comment %} Action metrics {% endcomment %}
     <div class="my-4 d-flex flex-row">
         {% for key,value in metrics.items %}
-            <div class="shadow rounded py-4 px-5 me-4 text-center">
+            <div class="shadow rounded py-4 px-5 me-4 text-center bg-white">
                 <div class="fw-semibold fs-3">
                     {{value}}
                 </div>
@@ -24,7 +26,7 @@
 
 
     <div class="my-5"> 
-        <table id="table-candidates" class="table" width="100%">
+        <table id="table-candidates" class="table table-hover bg-white rounded" width="100%">
             <thead>
                 <tr>
                     {% comment %} <th scope="col">Id</th> {% endcomment %}
@@ -125,7 +127,7 @@
     <script src="https://cdn.datatables.net/select/1.6.2/js/dataTables.select.min.js"></script>
 
     <script>
-        
+
     </script>
 
     {% load static %}

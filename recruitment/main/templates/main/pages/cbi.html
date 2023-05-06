@@ -1,0 +1,31 @@
+{% extends 'main/layout/stage.html' %}
+
+{% block page_title %}cbi{% endblock page_title %}
+
+{% block stage_content %}
+
+<div class="accordion-item">
+    <h2 class="accordion-header">
+        <button
+            class="accordion-button"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#cbi-section"
+            aria-expanded="false"
+            aria-controls="cbi-section"
+        >
+            cbi
+        </button>
+    </h2>
+    <div
+        id="cbi-section"
+        class="accordion-collapse collapse show"
+    >
+        <div class="accordion-body">
+            <!-- cbi content starts here-->
+
+        </div>
+    </div>
+</div>
+
+{% endblock stage_content %}

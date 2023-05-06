@@ -2,14 +2,16 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.http import JsonResponse,HttpResponse,HttpRequest
 from django.views import View
-from main.models import Candidate, CBISchedule, Status, Source
+from main.models import Candidate, CBISchedule, Status, Source, CBI, Prescreening, InitialScreening
 from django.core.paginator import Paginator, EmptyPage
 from django.core import serializers
 from main.auth import CustomLoginRequired
 from main.utils import return_json
-from django.db.models import Q, Case, When, CharField, Value, Count, OuterRef, Subquery, F
+from django.db.models import Q, Case, When, Value, Count, OuterRef, Subquery, F, CharField
+from django.db.models.functions import Concat, Cast
 from django.utils import timezone
 from querystring_parser import parser
+from django.urls import reverse
 from datetime import datetime
 
 # Create your views here.
@@ -19,7 +21,7 @@ def index(request):
 
 class BrowseIndex(CustomLoginRequired, View):
 
-    def get(self,request:HttpRequest):
+    def get(self,request:HttpRequest,template_name='main/pages/browse.html'):
 
         # return JsonResponse(parser.parse(request.get_full_path().split('?')[1]),safe=False)
 
@@ -91,7 +93,7 @@ class BrowseIndex(CustomLoginRequired, View):
                 )
             )
 
-            return render(request,'main/browse.html',{"metrics":metrics, 'statuses':statuses, 'source':lst_sources})
+            return render(request,template_name,{"metrics":metrics, 'statuses':statuses, 'source':lst_sources})
 
         candidates = Candidate.objects
         
@@ -101,6 +103,8 @@ class BrowseIndex(CustomLoginRequired, View):
             dt_query_params = parser.parse(request.get_full_path().split('?')[1])
         except IndexError:
             dt_query_params = {}
+
+        # return JsonResponse(dt_query_params)
 
         
         # individual column filtering
@@ -132,8 +136,17 @@ class BrowseIndex(CustomLoginRequired, View):
         
         # fetch list of candidates
         
-        candidates = candidates.values(
-            'id',
+        candidates = candidates.annotate( # retrieve id of respective stages
+            cbi_id=Subquery(
+                CBI.objects.filter(candidate=OuterRef('pk')).values('pk')[:1]
+            ),
+            prescreening_id=Subquery(
+                Prescreening.objects.filter(candidate=OuterRef('pk')).values('pk')[:1]
+            ),
+            initialscreening_id=Subquery(
+                InitialScreening.objects.filter(candidate=OuterRef('pk')).values('pk')[:1]
+            ),
+        ).values(
             'name',
             'date',
             overall_status_name=F('overall_status__status'),
@@ -151,6 +164,23 @@ class BrowseIndex(CustomLoginRequired, View):
                 When(Q(cbi__status__status__isnull=False),then=F('cbi__status__status')),
                 default=Value('-')
             ),
+            href=Case(
+                When(
+                    Q(cbi__status__status__isnull=False),
+                    then=Concat(
+                        Value(reverse('main:cbi.index.default',)), F('cbi_id'), output_field=CharField(),
+                    )
+                ),
+                When(
+                    Q(prescreening__status__status__isnull=False),
+                    then=Concat(
+                        Value(reverse('main:prescreening.index.default',)), F('prescreening_id'), output_field=CharField(),
+                    )
+                ),
+                default=Concat(
+                    Value(reverse('main:initscreening.index.default')), F('initialscreening_id'), output_field=CharField(),
+                )
+            )
         )
 
         # sorting

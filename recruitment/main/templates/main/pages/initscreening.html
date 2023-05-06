@@ -1,0 +1,34 @@
+{% extends 'main/layout/stage.html' %}
+
+{% block page_title %}Initial Screening{% endblock page_title %}
+
+{% block stage_content %}
+
+<div class="accordion-item">
+    <h2 class="accordion-header">
+        <button
+            class="accordion-button"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#initialscreening-section"
+            aria-expanded="false"
+            aria-controls="initialscreening-section"
+        >
+            Selection
+        </button>
+    </h2>
+    <div
+        id="initialscreening-section"
+        class="accordion-collapse collapse show"
+    >
+        <div class="accordion-body">
+            <!-- initial screening content starts here-->
+
+            
+        </div>
+    </div>
+</div>
+
+{% comment %} <pre>{{sidebar|pprint}}</pre> {% endcomment %}
+
+{% endblock stage_content %}

@@ -23,6 +23,7 @@ dict_status = {
     'cbi:not proceed':'not proceed',
     'cbi:pending interview':'pending interview',
     'cbi:pending result':'pending result',
+    'cbi:pending schedule':'pending schedule', # add cbi:pending schedule
 
     'cbi_schedule:unscheduled':'unscheduled',
     'cbi_schedule:pending send RSVP':'pending RSVP invitation',

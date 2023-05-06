@@ -1,0 +1,46 @@
+<div 
+	id="sidebar"
+	class="d-flex flex-column flex-shrink-0 p-3 text-dark bg-white sticky-top shadow"
+	style="width: 280px;height: 100vh;"
+>
+	<a
+		href="/"
+		class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none"
+	>
+		<span class="fs-5 fw-semibold" >Stages</span>
+	</a>
+	<hr />
+	<ul id="sidebar-nav" class="nav nav-pills flex-column mb-auto fw-medium">
+		
+        {% for stage,phases in sidebar.items %}
+
+            <li class="nav-item">
+                <a href="#" class="nav-link text-body" aria-current="page">
+					<span>
+                        <i class="fa-solid fa-circle fa-sm me-2 fa-sb-stroke" style="color: {{phases.overall.fill_color}};text-shadow: 0 0 3px {{phases.overall.stroke_color}};"></i>
+                    </span>
+					{% if stage == 'cbi' %}
+						{{stage|upper}}
+					{% else %}
+                    	{{stage|title}}					
+					{% endif %}
+                </a>
+            </li>
+
+            {% for phase,properties in phases.items %}
+                {% if phase != 'overall' %}
+                    <li class="nav-item ms-4">
+                        <a href="#" class="nav-link text-body" aria-current="page">
+                            <i class="fa-solid fa-circle fa-sm me-2" style="color: {{properties.fill_color}};text-shadow: 0 0 3px {{properties.stroke_color}};"></i>    
+                            {{phase|title}}
+                        </a>
+                    </li>
+                
+                {% endif %}
+            
+            {% endfor %}
+        
+        {% endfor %}
+
+	</ul>
+</div>

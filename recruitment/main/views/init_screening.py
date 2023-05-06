@@ -17,14 +17,19 @@ from django.core import serializers
 
 class InitialScreeningIndex(CustomLoginRequired,View):
     
-    def get(self,request,initial_screening_id):
+    def get(self,request:HttpRequest,initial_screening_id=None):
         
-        prescreening_obj = InitialScreening.objects.get(id=initial_screening_id)
+        initial_screening = InitialScreening.objects.get(id=initial_screening_id)
 
         if return_json(request):
-            return JsonResponse(serializers.serialize('python',[prescreening_obj]),safe=False)
+            return JsonResponse(serializers.serialize('python',[initial_screening]),safe=False)
 
-        return HttpResponse(prescreening_obj)
+        context = {
+            'initial_screening':serializers.serialize('python',[initial_screening])[0],
+            'candidate':serializers.serialize('python',[initial_screening.candidate])[0],
+        }
+
+        return render(request,'main/pages/initscreening.html',context)
 
 
 @method_decorator(csrf_exempt,name='dispatch')

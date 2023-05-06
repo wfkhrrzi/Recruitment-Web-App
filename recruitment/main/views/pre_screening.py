@@ -18,14 +18,19 @@ from django.core import serializers
 
 class PrescreeningIndex(CustomLoginRequired,View):
     
-    def get(self,request,prescreening_id):
+    def get(self,request,prescreening_id=None):
         
-        prescreening_obj = Prescreening.objects.get(id=prescreening_id)
+        prescreening = Prescreening.objects.get(id=prescreening_id)
 
         if return_json(request):
-            return JsonResponse(serializers.serialize('python',[prescreening_obj]),safe=False)
+            return JsonResponse(serializers.serialize('python',[prescreening]),safe=False)
 
-        return HttpResponse(prescreening_obj)
+        context = {
+            'prescreening':serializers.serialize('python',[prescreening])[0],
+            'candidate':serializers.serialize('python',[prescreening.candidate])[0],
+        }
+
+        return render(request,'main/pages/prescreening.html',context)
 
 @method_decorator(csrf_exempt,name='dispatch')
 class PrescreeningCreate(CustomLoginRequired,View):

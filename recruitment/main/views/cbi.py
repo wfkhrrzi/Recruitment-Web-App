@@ -20,13 +20,18 @@ class CBIIndex(CustomLoginRequired,View):
     
     def get(self,request,cbi_id):
         
-        cbi_obj = CBI.objects.get(id=cbi_id)
+        cbi = CBI.objects.get(id=cbi_id)
 
         if return_json(request):
-            return JsonResponse(serializers.serialize('python',[cbi_obj]),safe=False)
+            return JsonResponse(serializers.serialize('python',[cbi]),safe=False)
             # return JsonResponse({'view':True})
 
-        return HttpResponse(cbi_obj)
+        context = {
+            'cbi':serializers.serialize('python',[cbi])[0],
+            'candidate':serializers.serialize('python',[cbi.candidate])[0],
+        }
+
+        return render(request,'main/pages/cbi.html',context)
 
 @method_decorator(csrf_exempt,name='dispatch')
 class CBICreate(CustomLoginRequired,View):
@@ -45,12 +50,12 @@ class CBICreate(CustomLoginRequired,View):
             return HttpResponseBadRequest('candidate id not found')
 
         cbi = CBI(candidate=candidate)
-        cbi.status = Status.objects.get(codename='cbi:pending interview') # NEED TO REVISE
+        cbi.status = Status.objects.get(codename='cbi:pending schedule') # change status to 'cbi:pending schedule'
         cbi.created_by = request.user
 
         cbi.save()
         
-        candidate.overall_status = Status.objects.get(codename='prescreening:ongoing')
+        candidate.overall_status = Status.objects.get(codename='cbi:ongoing')
         candidate.save()
 
         if return_json(request):
@@ -89,8 +94,8 @@ class CBIScheduleCreate(CustomLoginRequired,View): # mail functionality coming s
         cbischedule.status = Status.objects.get(codename='cbi_schedule:pending send RSVP')
         cbischedule.cbi = cbi
         
-        if request.POST.get('cbi_reschedule',None): # return model instance to CBIReschedule
-            return 
+        # if request.POST.get('cbi_reschedule',None): # return model instance to CBIReschedule
+        #     return 
         
         cbischedule.save()
         

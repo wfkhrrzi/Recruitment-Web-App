@@ -1,8 +1,5 @@
 $(document).ready(function () {
 	
-	$('#table-candidates thead tr:eq(0)').prepend('<th>Id</th>');
-	$('#table-candidates thead tr:eq(1)').prepend('<th class="filter"></th>');
-
 	$("#table-candidates").DataTable({
 		orderCellsTop: true,
 		fixedHeader: true,
@@ -17,7 +14,6 @@ $(document).ready(function () {
 			},
 		},
 		columns: [
-			{ data: "id", visible:false},
 			{ data: "name", width:"15%" },
 			{ data: "date", },
 			{ data: "source_name" ,width:"10%"},
@@ -33,6 +29,7 @@ $(document).ready(function () {
 			var api = this.api();
 
 			$(".filter", api.table().header()).each(function (i) {
+
 				var column = api.column(i);
 				var input = $(this).find("input[type='text']");
 				input
@@ -68,29 +65,38 @@ $(document).ready(function () {
 
 			// Linkable row
 
-			$('tr',api.table().body()).each(function (row_i,element) { 
-				
-				// console.log(row_i)
-				// console.log(api.row(row_i).data()['id'])
-				// console.log(this)
+			$('tr',api.table().body()).each(function (row_i,element) {
 
 				$(this).on('click', function() {
-	
-					var id = api.row(row_i).data()['id'];
 					
-					// Construct the URL to navigate to
-					var url = '/browse/' + id;
-	
-					console.log(url)
-					
-					// Navigate to the URL
-					window.location.href = url;
-				});
+					window.location.href = api.row(row_i).data()['href'];
+
+				})
+				.css('cursor','pointer');
 
 			});
 			
-
-
 		}, //end initComplete
+
+		drawCallback: function () {  
+			var api = this.api();
+
+			// Linkable row
+
+			$('tr',api.table().body()).each(function (row_i,element) { 
+
+				$(this)
+				.on('click', function() {
+	
+					window.location.href = api.row(row_i).data()['href'];
+
+				})
+				.css('cursor','pointer');
+
+			});
+
+		}
+
+
 	});
 });

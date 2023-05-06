@@ -1,0 +1,54 @@
+<header id="navbar" class="px-3 py-2 text-white shadow">
+	<div class="container-fluid">
+		<div
+			class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start"
+		>
+			<a
+				href="/"
+				class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none"
+			>
+				<div class="d-flex flex-column align-items-center text-capitalize fw-semibold lh-sm">
+                    <div style="font-size:1.4em;letter-spacing:0.03em;">Applicant</div>
+                    <div style="font-size:0.9em">Tracking System</div>
+                </div>
+			</a>
+
+			<ul
+				class="nav nav-pills col-12 col-lg-auto ms-5 me-lg-auto mb-2 justify-content-center mb-md-0 fw-medium"
+			>
+				<li>
+					<a href="#" class="nav-link px-3 text-decoration-none text-white">Home</a>
+				</li>
+				<li>
+					<a href="{% url 'main:browse.index' %}" class="nav-link px-3 text-decoration-none text-white">Candidates</a>
+				</li>
+				<li>
+					{% comment %} <a href="#" class="nav-link px-2 text-white">Pricing</a>
+				</li>
+				<li><a href="#" class="nav-link px-2 text-white">FAQs</a></li>
+				<li><a href="#" class="nav-link px-2 text-white">About</a></li> {% endcomment %}
+			</ul>
+
+			<form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3">
+				<input
+					type="search"
+					class="form-control form-control-dark"
+					placeholder="Search Candidate"
+					aria-label="Search Candidate"
+				/>
+			</form>
+
+			<div class="text-end">
+				<a href="#" role="button" class="btn btn-primary me-2">
+					Logout
+				</a>
+				{% comment %} <button type="button" class="btn btn-warning">Sign-up</button> {% endcomment %}
+			</div>
+
+            <div class="ms-5">
+                <img src="https://1000logos.net/wp-content/uploads/2020/09/Petronas-Logo.png" alt="petronas-logo" height="50px">
+            </div>
+
+		</div>
+	</div>
+</header>

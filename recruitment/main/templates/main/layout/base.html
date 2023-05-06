@@ -11,18 +11,24 @@
 			crossorigin="anonymous"
 		/>
 		{% load static %}
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/fontawesome.min.css" integrity="sha512-SgaqKKxJDQ/tAUAAXzvxZz33rmn7leYDYfBP+YoMRSENhf3zJyx3SBASt/OfeQwBHA1nxMis7mM3EV/oYT6Fdw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/solid.min.css" integrity="sha512-yDUXOUWwbHH4ggxueDnC5vJv4tmfySpVdIcN1LksGZi8W8EVZv4uKGrQc0pVf66zS7LDhFJM7Zdeow1sw1/8Jw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 		<link rel="icon" href="{% static 'main/image/test.svg' %}">
+		<link rel="stylesheet" href="{% static 'main/styles/styles.css' %}">
 		{% block import_css %}{% endblock import_css %}
 
 	</head>
 	<body>
-		{% block navbar %} 
-		{% endblock navbar %} 
+		{% include 'main/layout/navbar.html' %}
 		
-		{% block sidebar %} 
-		{% endblock sidebar %}
-
-		<div class="container-fluid">{% block content %} {% endblock content %}</div>
+		<div class="d-flex">
+			{% block sidebar %}
+				{% include 'main/layout/sidebar.html' %}
+			{% endblock sidebar %}
+	
+			<div id="content" class="container-fluid">{% block content %} {% endblock content %}</div>
+			
+		</div>
 
 		{% block import_scripts %}
 			<script

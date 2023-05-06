@@ -1,0 +1,75 @@
+{% extends 'main/layout/base.html' %} 
+
+{% block content %}
+
+{% url 'main:initscreening.index.default' as initialscreening_url%} 
+
+<div class="p-3 mt-3">
+	<!-- back button & page title & gpt recommendation  -->
+	<div class="d-flex justify-content-between align-items-center mb-3">
+		<div class="d-flex align-items-center">
+			<a
+				href="{{ request.META.HTTP_REFERER }}"
+				role="button"
+				class="btn btn-secondary btn-sm me-4"
+				style="
+                    --bs-btn-border-radius: 10px;
+                    {% comment %} --bs-btn-bg: #ffffff; {% endcomment %}
+                "
+			>
+				<i class="fa-solid fa-angle-up fa-rotate-270"></i>
+				back
+			</a>
+			<div class="text-capitalize fw-semibold text-body fs-4">
+				{% block page_title %}Override this title{% endblock page_title%}
+			</div>
+		</div>
+		<div class="">
+			<div class="text-capitalize fw-medium" style="font-size: 0.8em">
+				<span class="text-uppercase">gpt</span> recommendation
+			</div>
+			<div
+				class="badge bg-success"
+				style="--bs-badge-font-size: 0.8em; width: 100%"
+			>
+				Recommended
+			</div>
+		</div>
+	</div>
+
+	<div class="accordion" id="accordionMain">
+
+		<div class="accordion-item">
+			<h2 class="accordion-header">
+				<button
+					class="accordion-button {% if initialscreening_url not in request.path %}collapsed{% endif %}"
+					type="button"
+					data-bs-toggle="collapse"
+					data-bs-target="#candidateSection"
+					aria-expanded="{% if initialscreening_url in request.path %}true{% else %}false{% endif %}"
+					aria-controls="candidateSection"
+				>
+					Candidate
+				</button>
+			</h2>
+			<div
+                
+				id="candidateSection"
+				class="accordion-collapse collapse {% if initialscreening_url in request.path %}show{% endif %}"
+			>
+				<div class="accordion-body">
+					candidate profile
+				</div>
+			</div>
+		</div>
+
+        {% block stage_content %}{% endblock stage_content %}
+
+        {% comment %} {{current_stage}} {% endcomment %}
+
+	</div>
+
+
+</div>
+
+{% endblock content %}

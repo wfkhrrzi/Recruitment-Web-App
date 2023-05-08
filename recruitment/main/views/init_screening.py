@@ -13,6 +13,8 @@ from django.forms.models import model_to_dict
 from django.urls import reverse
 from datetime import datetime
 from django.core import serializers
+from django.db.models import Q, Case, When, Value, Count, OuterRef, Subquery, F, CharField, JSONField
+from django.db.models.functions import Concat, Cast
 
 
 class InitialScreeningIndex(CustomLoginRequired,View):
@@ -20,14 +22,48 @@ class InitialScreeningIndex(CustomLoginRequired,View):
     def get(self,request:HttpRequest,initial_screening_id=None):
         
         initial_screening = InitialScreening.objects.get(id=initial_screening_id)
-
-        if return_json(request):
-            return JsonResponse(serializers.serialize('python',[initial_screening]),safe=False)
+        
+        ds_leads = Users.objects.filter(
+            user_category__category__iexact='ds lead',
+        ).annotate(
+            full_name=Concat(F('first_name'),Value(' '),F('last_name'),output_field=CharField()),
+            eval_id=Subquery(
+                InitialScreeningEvaluation.objects.filter(
+                    initial_screening=initial_screening,
+                    user=OuterRef('pk')
+                ).values('id')[:1]
+            ),
+            eval_is_proceed=Subquery(
+                InitialScreeningEvaluation.objects.filter(
+                    initial_screening=initial_screening,
+                    user=OuterRef('pk')
+                ).values('is_proceed')[:1]
+            ),
+            eval_status=Subquery(
+                InitialScreeningEvaluation.objects.filter(
+                    initial_screening=initial_screening,
+                    user=OuterRef('pk')
+                ).values('status__status')[:1]
+            ),
+        ).values(
+            'id',
+            'full_name',
+            'alias',
+            'eval_id',
+            'eval_is_proceed',
+            'eval_status',
+            # is_selected=F('initialscreeningevaluation__is_proceed'),
+            # selection_status=F('initialscreeningevaluation__status__status'),
+        )
 
         context = {
             'initial_screening':serializers.serialize('python',[initial_screening])[0],
             'candidate':serializers.serialize('python',[initial_screening.candidate])[0],
+            'ds_leads':list(ds_leads),
         }
+
+        if return_json(request):
+            return JsonResponse(context,safe=False)
 
         return render(request,'main/pages/initscreening.html',context)
 

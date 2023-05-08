@@ -2,6 +2,8 @@
 
 {% block page_title %}Initial Screening{% endblock page_title %}
 
+{% load custom_filters %}
+
 {% block stage_content %}
 
 <div class="accordion-item">
@@ -23,7 +25,134 @@
     >
         <div class="accordion-body">
             <!-- initial screening content starts here-->
+            <div class="row mb-4">
+                <!-- Pending decision -->
+                <div class="
+                    {% if ds_leads|any_ds_leads:None %}
+                        {% if ds_leads|any_ds_leads:True and ds_leads|any_ds_leads:False %}
+                        col-5
+                        {% else %}
+                            {% if ds_leads|any_ds_leads:True or ds_leads|any_ds_leads:False %}
+                            col-8 {% comment %} single bool {% endcomment %}
+                            {% else %}
+                            col-12 {% comment %} no evaluation {% endcomment %}
+                            {% endif %}
+                        {% endif %}
+                    {% else %}
+                    d-none
+                    {% endif %}
+                "
+                >
+                    <div class="fw-medium mb-3" style="">Pending decision</div>
+                    <div class="mb-3">
+                        <!-- checkbox for list of leads -->
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for lead in ds_leads %}
+                                {% if lead.eval_is_proceed == None %}
+                                    {% include 'main/components/initscreening/label_leads.html' with lead=lead %}
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <!-- Lead Evaluation buttons -->
+                    
+                    <div class="d-flex align-items-end flex-column">
+                        <div>
+                            <small class="d-block text-body-secondary mb-1" style="font-size: 0.75em;">Applies to selected leads</small>
+                            <div class="d-flex gap-2">
+                                <button name="proceedIS" id="proceedIS" class="btn btn-success btn-evaluation text-capitalize" type="submit" value="proceed">
+                                    <span class="me-1"><i class="fa-solid fa-check"></i></span>
+                                    proceed
+                                </button>
+                                <button name="rejectIS" id="rejectIS" class="btn btn-danger btn-evaluation text-capitalize" type="submit" value="reject">
+                                    <span class="me-1"><i class="fa-solid fa-xmark"></i></span>
+                                    reject
+                                </button>
+                            </div>
+                        </div>
+                    </div>
 
+                </div>
+
+                <!-- Evaluation Results -->
+                <div class="
+                    {% if ds_leads|all_ds_leads:None %}
+                    d-none
+                    {% else %}
+                        {% if ds_leads|any_ds_leads:None %}
+                            {% if ds_leads|any_ds_leads:True and ds_leads|any_ds_leads:False %}
+                            col-7
+                            {% else %}
+                            col-4 {% comment %} single bool {% endcomment %}
+                            {% endif %}
+                        {% else %}
+                        col-12
+                        {% endif %}
+                        
+                    {% endif %}
+                ">
+                    <div class="fw-medium mb-3" style="">Evaluation Results</div>
+                    <div class="d-flex gap-3" style='font-size: 0.9em;'>
+                        
+                        {% if ds_leads|any_ds_leads:True %}
+                            <div class="flex-fill">
+                                {% for lead in ds_leads %}
+                                    {% if lead.eval_is_proceed %}
+                                        {% include 'main/components/initscreening/eval_label_leads.html' with lead=lead %}
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        {% if ds_leads|any_ds_leads:False %}
+                            <div class="flex-fill">
+                                {% for lead in ds_leads %}
+                                    {% if lead.eval_is_proceed == False %}
+                                        {% include 'main/components/initscreening/eval_label_leads.html' with lead=lead %}
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+            </div>
+
+            {% if ds_leads|any_ds_leads:False %}{% endif %}
+                        
+            
+            <div class="row">
+                <!-- final selection -->
+                <div class="col-5">
+                    <div class="fw-medium mb-3" style="">Final Decision</div>
+                    <div class="d-flex align-items-center" style='font-size: 0.9em;'>
+                        <div class="me-5">Selection</div>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="fw-semibold text-success">
+                                <span style='font-size: 0.93em;' class="
+                                        badge rounded-pill
+                                        {% if lead.eval_is_proceed %}
+                                            text-bg-success
+                                        {% else %}
+                                            text-bg-danger
+                                        {% endif %} 
+                                    ">Not proceed
+                                </span>
+                            </div>
+                            <button type="submit" name="result-edit" name="result-edit" class="btn btn-sm text-secondary"  style="font-size: 1.2em;">
+                                <i class="fa-regular fa-pen-to-square"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-7">
+                    <div class="fw-medium mb-3" style="">Remarks</div>
+                    <div>
+                        <small class="d-block text-body-secondary mb-2" style="font-size: 0.75em;">If any, please fill in the below field.</small>
+                        <textarea type="text" name="initialscreening-remark" id="initialscreening-remark" class="form-control remarks" rows="3" placeholder="Input remarks here"></textarea>
+                    </div>
+                </div>
+            </div>
             
         </div>
     </div>
@@ -32,3 +161,6 @@
 {% comment %} <pre>{{sidebar|pprint}}</pre> {% endcomment %}
 
 {% endblock stage_content %}
+
+{% block next_stage_rej_title %}Reject{% endblock next_stage_rej_title %}
+{% block next_stage_proc_title %}Proceed <span class="text-lowercase">to</span> Prescreening{% endblock next_stage_proc_title %}

@@ -31,6 +31,7 @@ class UsersManager(BaseUserManager):
 class Users(PermissionsMixin,AbstractBaseUser):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
+    alias = models.CharField(max_length=10,null=True)
     user_name = models.CharField(max_length=50)
     email = models.EmailField(max_length=100,unique=True)
     password = models.CharField(max_length=200)
@@ -133,7 +134,7 @@ class InitialScreening(LastModifiedMixin,models.Model):
 
 class InitialScreeningEvaluation(CreatedMixin,LastModifiedMixin,models.Model):
     status = models.ForeignKey(Status,on_delete=models.CASCADE,null=True)
-    user = models.ForeignKey(Users,on_delete=models.SET_NULL,null=True,related_name='initscreening_user')
+    user = models.ForeignKey(Users,on_delete=models.SET_NULL,null=True,related_name='initialscreeningevaluation_user')
     initial_screening = models.ForeignKey(InitialScreening,on_delete=models.CASCADE)
     is_proceed = models.BooleanField(null=True)
 

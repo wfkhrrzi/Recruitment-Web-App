@@ -56,6 +56,9 @@ for key, value in dict_status.items():
     lst_codename.append(key)
     lst_status.append(value)
 
+lst_emp_category = ['Fresh DS', 'Head', 'Experienced DS']
+lst_source = ['LinkedIn', 'HeadHunter', 'JobStreet']
+lst_user_category = ['DS Lead', 'HR']
 
 class StatusFactory(DjangoModelFactory):
     
@@ -71,35 +74,46 @@ class EmpCategoryFactory(DjangoModelFactory):
     class Meta:
         model = EmpCategory
 
-    category = Iterator(['Fresh DS', 'Head', 'Experienced DS'])
+    category = Iterator(lst_emp_category)
 
 
 class SourceFactory(DjangoModelFactory):
     class Meta:
         model = Source
 
-    source = Iterator(['LinkedIn', 'HeadHunter', 'JobStreet'])
+    source = Iterator(lst_source)
+
+class UserCategoryFactory(DjangoModelFactory):
+    class Meta:
+        model = UserCategory
+
+    category = Iterator(lst_user_category)
+
+class BaseUsersFactory(DjangoModelFactory):
+    first_name = Faker('first_name')
+    last_name = Faker('last_name')
+    alias = LazyAttribute(lambda m: m.first_name)
+    email = LazyAttribute(lambda m: f"{m.first_name.lower()}_{m.last_name.lower()}@test.com")
+    user_name = LazyAttribute(lambda m: m.email.split('@')[0])
+    password = make_password('test')    
 
 
-class UsersFactory(DjangoModelFactory):
+class UsersFactory(BaseUsersFactory):
     class Meta:
         model = Users
     
-    email = Sequence(lambda i: f"user{i}@test.com")
-    password = make_password('test')
-    user_name = LazyAttribute(lambda m: m.email.split('@')[0])
     is_superuser = False
     is_staff = True
+    user_category = LazyAttribute(lambda o:random.choice(UserCategory.objects.all()))
 
-class AdminFactory(DjangoModelFactory):
+
+class AdminFactory(BaseUsersFactory):
     class Meta:
         model = Users
     
-    email = Sequence(lambda i: f"admin{i}@test.com")
-    password = make_password('test')
-    user_name = LazyAttribute(lambda m: m.email.split('@')[0])
     is_superuser = True
     is_staff = True
+    user_category = LazyAttribute(lambda o:UserCategory.objects.get(category__iexact='ds lead'))
 
 
 class CandidateFactory(DjangoModelFactory):

@@ -1,0 +1,24 @@
+<div class="d-flex gap-2 p-2 align-items-center nav-pills">
+    <button class="btn text-secondary" type="submit" value="{{lead.id}}" 
+        style="--bs-btn-padding-x: 0.1em;--bs-btn-padding-y: 0.1em;"
+    >
+        <span class="fa-stack fa-2xs">
+            <i class="fa-regular fa-circle fa-stack-2x" style=" margin:0;"></i>
+            <i class="fa-solid fa-minus fa-stack-1x" style=" margin:0;"></i>
+        </span>
+    </button>
+    <span>
+        {{lead.alias}}
+        <small class="d-block text-body-secondary" style="font-size: 0.75em;">{{lead.full_name}}</small>
+    </span>
+    <div class="ms-auto">
+        <span class="
+            badge rounded-pill
+            {% if lead.eval_is_proceed %}
+                text-bg-success
+            {% else %}
+                text-bg-danger
+            {% endif %} 
+        ">{{lead.eval_status|title}}</span>
+    </div>
+</div>

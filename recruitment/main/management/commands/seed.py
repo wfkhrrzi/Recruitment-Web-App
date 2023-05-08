@@ -73,13 +73,15 @@ class Command(BaseCommand):
         self.stdout.write('Seeding database...')
 
         # status, source, emp category
-        EmpCategoryFactory.create_batch(3)
-        SourceFactory.create_batch(3)
+        UserCategoryFactory.create_batch(len(lst_user_category))
+        EmpCategoryFactory.create_batch(len(lst_emp_category))
+        SourceFactory.create_batch(len(lst_source))
         StatusFactory.create_batch(len(dict_status))
 
         # users
-        UsersFactory.create_batch(3)
-        AdminFactory.create_batch(2)
+        UsersFactory.create_batch(7)
+        AdminFactory.create_batch(4)
+        AdminFactory.create(email='admin1@test.com')
 
         # candidates
         NUM_CANDIDATES = 30

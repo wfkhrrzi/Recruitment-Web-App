@@ -61,7 +61,7 @@ class BrowseIndex(CustomLoginRequired, View):
             end_of_week = start_of_week + timezone.timedelta(days=6)
 
             # fetch action metrics
-            latest_cbischedule_status = CBISchedule.objects.filter(cbi__candidate=OuterRef('pk')).order_by('-created_at').values('status__codename')[:1]
+            latest_cbischedule_status = CBISchedule.objects.filter(cbi__candidate=OuterRef('pk')).order_by('-created_at').values('is_proceed')[:1]
             metrics = Candidate.objects.annotate(
                 latest_cbischedule_status = Subquery(latest_cbischedule_status),
             ).aggregate(
@@ -69,14 +69,14 @@ class BrowseIndex(CustomLoginRequired, View):
                     'id',
                     filter=
                         Q(initialscreening__status__isnull=False) & 
-                        ~Q(initialscreening__status__codename="proceed") & 
+                        ~Q(initialscreening__status__codename="initscreening:proceed") & 
                         Q(prescreening__status__isnull=True) &
                         Q(cbi__status__isnull=True)
                 ),
                 pending_prescreening=Count(
                     'id',
                     filter=
-                        ~Q(prescreening__status__codename="proceed") & 
+                        ~Q(prescreening__status__codename="prescreening:proceed") & 
                         Q(prescreening__status__isnull=False) &
                         Q(cbi__status__isnull=True)
                 ),
@@ -84,7 +84,7 @@ class BrowseIndex(CustomLoginRequired, View):
                     'id',
                     filter=
                         Q(cbi__status__isnull=False) &
-                        Q(latest_cbischedule_status="proceed")
+                        Q(latest_cbischedule_status=True)
                 ),
                 new_application=Count(
                     'id',

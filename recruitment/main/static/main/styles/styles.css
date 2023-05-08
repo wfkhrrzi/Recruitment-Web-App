@@ -28,3 +28,13 @@ html body {
 .badge {
     --bs-badge-font-weight: 600
 }
+
+.btn-evaluation {
+    --bs-btn-font-size: 0.8em;
+    --bs-btn-padding-y: 0.2rem;
+        
+}
+
+.remarks{
+    font-size: 0.8em;
+}

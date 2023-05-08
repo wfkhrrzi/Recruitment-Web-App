@@ -69,6 +69,20 @@
 
 	</div>
 
+	<div class="d-flex justify-content-end gap-3 p-3 pe-0 align-items-center">
+		<div>
+			<button name="rejectIS" id="rejectIS" class="btn btn-danger btn-evaluation text-capitalize" type="submit" value="0">
+				{% block next_stage_rej_title %}Override this reject button{% endblock next_stage_rej_title %}
+			</button>
+		</div>
+		<div>
+			<button name="proceedIS" id="proceedIS" class="btn btn-success btn-evaluation text-capitalize" type="submit" value="1">
+				{% block next_stage_proc_title %}Override this proceed button{% endblock next_stage_proc_title %}
+			</button>
+		</div>
+
+	</div>
+
 
 </div>
 

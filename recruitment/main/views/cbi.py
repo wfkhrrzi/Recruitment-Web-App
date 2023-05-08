@@ -61,8 +61,8 @@ class CBICreate(CustomLoginRequired,View):
         if return_json(request):
             response = {'cbi:create':'success'}
             
-            if request.POST.get('cbi',None):
-                response['cbi:update'] = 'success'                
+            if request.POST.get('prescreening',None):
+                response['prescreening:update'] = 'success'                
             
             return JsonResponse(response)
 

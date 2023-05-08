@@ -1,5 +1,7 @@
 {% extends 'main/layout/base.html' %} 
 
+{% block tabtitle %}Override this 'tabtitle'{% endblock tabtitle %}
+
 {% block content %}
 
 {% url 'main:initscreening.index.default' as initialscreening_url%} 
@@ -25,24 +27,24 @@
 			</div>
 		</div>
 		<div class="">
-			<div class="text-capitalize fw-medium" style="font-size: 0.8em">
+			<div class="text-capitalize fw-medium" style="font-size: 0.8rem">
 				<span class="text-uppercase">gpt</span> recommendation
 			</div>
 			<div
 				class="badge bg-success"
-				style="--bs-badge-font-size: 0.8em; width: 100%"
+				style="--bs-badge-font-size: 0.8rem; width: 100%"
 			>
 				Recommended
 			</div>
 		</div>
 	</div>
 
+	<!-- candidate profile -->
 	<div class="accordion" id="accordionMain">
-
 		<div class="accordion-item">
 			<h2 class="accordion-header">
 				<button
-					class="accordion-button {% if initialscreening_url not in request.path %}collapsed{% endif %}"
+					class="accordion-button accordion-btn-theme fw-semibold {% if initialscreening_url not in request.path %}collapsed{% endif %}"
 					type="button"
 					data-bs-toggle="collapse"
 					data-bs-target="#candidateSection"
@@ -76,7 +78,7 @@
 			</button>
 		</div>
 		<div>
-			<button name="proceedIS" id="proceedIS" class="btn btn-success btn-evaluation text-capitalize" type="submit" value="1">
+			<button name="proceedIS" id="proceedIS" class="btn btn-success btn-theme btn-evaluation text-capitalize" type="submit" value="1">
 				{% block next_stage_proc_title %}Override this proceed button{% endblock next_stage_proc_title %}
 			</button>
 		</div>

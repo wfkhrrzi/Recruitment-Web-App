@@ -1,5 +1,7 @@
 {% extends 'main/layout/stage.html' %}
 
+{% block tabtitle %}Prescreening{% endblock tabtitle %}
+
 {% block page_title %}prescreening{% endblock page_title %}
 
 {% block stage_content %}
@@ -7,7 +9,7 @@
 <div class="accordion-item">
     <h2 class="accordion-header">
         <button
-            class="accordion-button"
+            class="accordion-button accordion-btn-theme fw-semibold"
             type="button"
             data-bs-toggle="collapse"
             data-bs-target="#prescreening-section"
@@ -22,7 +24,108 @@
         class="accordion-collapse collapse show"
     >
         <div class="accordion-body">
-            <!-- initial screening content starts here-->
+            <!-- prescreening content starts here-->
+            <div class="d-flex">
+                <!-- status -->
+                <div class="flex-fill section-child-text p-2">
+
+                    {% with status_class="badge badge-status bg-secondary rounded-pill text-capitalize" %}
+                    <!-- instruction -->
+                    <div class="d-flex align-items-center py-3">
+                        <div class="me-4 prescreening-label">
+                            Instruction sent to candidate?
+                        </div>
+                        <div>
+                            {% if send_instruction %}
+                            <span class="badge rounded-pill text-capitalize">sent</span>
+                            {% else %}
+                            <button name="prescreening_send_instruction" id="prescreening_send_instruction" class="btn btn-secondary btn-theme btn-evaluation text-capitalize" type="submit" value="0">
+                                Send instruction
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- hackerrank/online evaluation -->
+                    <div class="d-flex py-3">
+                        <div class="me-4 prescreening-label">
+                            Online Evaluation
+                        </div>
+                        <div>
+                            {% if send_instruction %}
+                            <span class="badge rounded-pill text-capitalize">sent</span>
+                            {% else %}
+                            <span class="{{status_class}}">Pending</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- submission status -->
+                    <div class="d-flex py-3">
+                        <div class="me-4 prescreening-label">
+                            Submission Status
+                        </div>
+                        <div>
+                            {% if send_instruction %}
+                            <span class="badge rounded-pill text-capitalize">sent</span>
+                            {% else %}
+                            <span class="{{status_class}}">Pending</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- final status -->
+                    <div class="d-flex py-3">
+                        <div class="me-4 prescreening-label">
+                            Prescreening Status
+                        </div>
+                        <div>
+                            {% if send_instruction %}
+                            <span class="badge rounded-pill text-capitalize">sent</span>
+                            {% else %}
+                            <span class="{{status_class}}">Pending</span>
+                            {% endif %}
+                        </div>
+                    </div>                    
+                    {% endwith %}
+                
+                </div>
+
+                <!-- submission files window -->
+                <div class="p-2 flex-fill">
+                    <div class="submission-content-wrapper">
+                        <div class="submission-title">Assessment Submission</div>
+                        {% for i in "aaaa" %}
+                        <div class="d-flex align-items-center py-1">
+                            <div class="submission-items flex-fill">
+                                {% comment %} {% lorem 10 w random %}{{lorem}} {% endcomment %}
+                                files-{{forloop.counter}}.py
+                            </div>
+                            <div>
+                                <button class="btn text-secondary" type="submit" value="{{lead.id}}" 
+                                    style="--bs-btn-padding-x: 0.1rem;--bs-btn-padding-y: 0.1rem;"
+                                >
+                                    <span class="fa-stack fa-2xs">
+                                        <i class="fa-regular fa-circle fa-stack-2x" style=" margin:0;"></i>
+                                        <i class="fa-solid fa-xmark fa-stack-1x" style=" margin:0;"></i>
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center">No files has been uploaded</div>    
+                        {% endfor %}
+                        <div class="mt-3 d-flex gap-3 justify-content-center">
+                            <button name="prescreening_upload" id="prescreening_upload" class="btn btn-secondary btn-theme btn-evaluation text-capitalize" type="submit" value="0">
+                                Upload
+                            </button>
+                            <button name="prescreening_download" id="prescreening_download" class="btn btn-secondary btn-theme btn-evaluation text-capitalize" type="submit" value="0">
+                                Download All
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
         </div>
     </div>
@@ -32,3 +135,6 @@
 
 
 {% endblock stage_content %}
+
+{% block next_stage_rej_title %}Reject{% endblock next_stage_rej_title %}
+{% block next_stage_proc_title %}Proceed <span class="text-lowercase">to</span> <span class="text-uppercase">cbi</span>{% endblock next_stage_proc_title %}

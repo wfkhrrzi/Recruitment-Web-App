@@ -114,9 +114,7 @@
 
 {% endblock import_css %} 
 
-{% block import_scripts %} 
-
-    {{block.super}}
+{% block import_scripts %}
 
     <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
@@ -125,10 +123,6 @@
     <script src="https://cdn.datatables.net/responsive/2.4.1/js/dataTables.responsive.min.js"></script>
     <script src="https://cdn.datatables.net/responsive/2.4.1/js/responsive.bootstrap5.min.js"></script>
     <script src="https://cdn.datatables.net/select/1.6.2/js/dataTables.select.min.js"></script>
-
-    <script>
-
-    </script>
 
     {% load static %}
     <script src="{% static 'main/js/browse.js' %}"></script>

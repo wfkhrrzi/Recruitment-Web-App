@@ -38,3 +38,38 @@ html body {
 .remarks{
     font-size: 0.8em;
 }
+
+.submission-content-wrapper{
+    background: rgba(91, 91, 91, 0.05);
+    border-radius: 1.4rem;
+    padding: 2rem;
+    width: 20rem;
+}
+
+.submission-title{
+    font-weight: 600;
+    margin-bottom: 1rem;
+    text-align: center;
+    /* font-size: 0.9rem; */
+}
+
+.submission-items{
+    font-size: 0.8rem;
+}
+
+.btn-theme{
+    --bs-btn-bg:#00a19c;
+    --bs-btn-border-color:#00635B;
+
+}
+
+.accordion-btn-theme{
+    /* --bs-accordion-border-color: #00635B; */
+    --bs-accordion-active-bg: rgba(0, 161, 156, 0.25);
+    --bs-accordion-btn-focus-box-shadow: 0 0 0 0.25rem rgba(0, 161, 156, 0.25);
+    --bs-accordion-active-color: #00635B
+}
+
+#cbi-schedule-table th{
+    font-weight: 600!important;
+}

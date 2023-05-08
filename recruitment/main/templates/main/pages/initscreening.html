@@ -1,5 +1,7 @@
 {% extends 'main/layout/stage.html' %}
 
+{% block tabtitle %}Initial Screening{% endblock tabtitle %}
+
 {% block page_title %}Initial Screening{% endblock page_title %}
 
 {% load custom_filters %}
@@ -9,7 +11,7 @@
 <div class="accordion-item">
     <h2 class="accordion-header">
         <button
-            class="accordion-button"
+            class="accordion-button accordion-btn-theme fw-semibold"
             type="button"
             data-bs-toggle="collapse"
             data-bs-target="#initialscreening-section"
@@ -58,9 +60,9 @@
                     
                     <div class="d-flex align-items-end flex-column">
                         <div>
-                            <small class="d-block text-body-secondary mb-1" style="font-size: 0.75em;">Applies to selected leads</small>
+                            <small class="d-block text-body-secondary mb-1" style="font-size: 0.75rem;">Applies to selected leads</small>
                             <div class="d-flex gap-2">
-                                <button name="proceedIS" id="proceedIS" class="btn btn-success btn-evaluation text-capitalize" type="submit" value="proceed">
+                                <button name="proceedIS" id="proceedIS" class="btn btn-success btn-theme btn-evaluation text-capitalize" type="submit" value="proceed">
                                     <span class="me-1"><i class="fa-solid fa-check"></i></span>
                                     proceed
                                 </button>
@@ -92,7 +94,7 @@
                     {% endif %}
                 ">
                     <div class="fw-medium mb-3" style="">Evaluation Results</div>
-                    <div class="d-flex gap-3" style='font-size: 0.9em;'>
+                    <div class="d-flex gap-3" style='font-size: 0.9rem;'>
                         
                         {% if ds_leads|any_ds_leads:True %}
                             <div class="flex-fill">
@@ -124,11 +126,11 @@
                 <!-- final selection -->
                 <div class="col-5">
                     <div class="fw-medium mb-3" style="">Final Decision</div>
-                    <div class="d-flex align-items-center" style='font-size: 0.9em;'>
+                    <div class="d-flex align-items-center section-child-text">
                         <div class="me-5">Selection</div>
                         <div class="d-flex align-items-center gap-3">
                             <div class="fw-semibold text-success">
-                                <span style='font-size: 0.93em;' class="
+                                <span style='font-size: 0.93rem;' class="
                                         badge rounded-pill
                                         {% if lead.eval_is_proceed %}
                                             text-bg-success
@@ -138,7 +140,8 @@
                                     ">Not proceed
                                 </span>
                             </div>
-                            <button type="submit" name="result-edit" name="result-edit" class="btn btn-sm text-secondary"  style="font-size: 1.2em;">
+                            <!-- edit final status button -->
+                            <button type="submit" name="result-edit" name="result-edit" class="btn btn-sm text-secondary"  style="font-size: 1.2rem;">
                                 <i class="fa-regular fa-pen-to-square"></i>
                             </button>
                         </div>
@@ -148,7 +151,7 @@
                 <div class="col-7">
                     <div class="fw-medium mb-3" style="">Remarks</div>
                     <div>
-                        <small class="d-block text-body-secondary mb-2" style="font-size: 0.75em;">If any, please fill in the below field.</small>
+                        <small class="d-block text-body-secondary mb-2" style="font-size: 0.75rem;">If any, please fill in the below field.</small>
                         <textarea type="text" name="initialscreening-remark" id="initialscreening-remark" class="form-control remarks" rows="3" placeholder="Input remarks here"></textarea>
                     </div>
                 </div>

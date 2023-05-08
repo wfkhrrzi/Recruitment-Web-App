@@ -17,3 +17,7 @@ def any_ds_leads(lst_lead, bool_val):
 @register.filter
 def all_ds_leads(lst_lead, bool_val):
     return all([True if lead['eval_is_proceed'] == bool_val else False for lead in lst_lead])
+
+@register.filter('split')
+def split_string(string:str,arg:str):
+    return string.split(arg)

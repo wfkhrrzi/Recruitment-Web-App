@@ -1,3 +1,5 @@
+{% load custom_filters %}
+
 <div 
 	id="sidebar"
 	class="d-flex flex-column flex-shrink-0 p-3 text-dark bg-white sticky-top shadow"
@@ -15,22 +17,34 @@
         {% for stage,phases in sidebar.items %}
 
             <li class="nav-item">
-                <a href="#" class="nav-link text-body" aria-current="page">
+                <a 
+                    href="{% if phases.url %}{{phases.url}}{% else %}#{% endif %}" 
+                    class="nav-link text-body {% if not phases.url %}disabled{% endif %}" aria-current="page"
+                >
 					<span>
                         <i class="fa-solid fa-circle fa-sm me-2 fa-sb-stroke" style="color: {{phases.overall.fill_color}};text-shadow: 0 0 3px {{phases.overall.stroke_color}};"></i>
                     </span>
 					{% if stage == 'cbi' %}
 						{{stage|upper}}
 					{% else %}
+                        {% if stage == 'initialscreening' %}
+                        Initial Screening
+                        {% else %}
                     	{{stage|title}}					
+                        {% endif %}
 					{% endif %}
                 </a>
             </li>
 
             {% for phase,properties in phases.items %}
-                {% if phase != 'overall' %}
+                {% if phase != 'overall' and phase != 'url'  %}
                     <li class="nav-item ms-4">
-                        <a href="#" class="nav-link text-body" aria-current="page">
+                        <a 
+                            href="
+                                {% if phases.url %}{{phases.url}}#{{phase|split:" "|join:"_"}}{% else %}#{% endif %}
+                            " 
+                            class="nav-link text-body {% if not phases.url %}disabled{% endif %}" aria-current="page"
+                        >
                             <i class="fa-solid fa-circle fa-sm me-2" style="color: {{properties.fill_color}};text-shadow: 0 0 3px {{properties.stroke_color}};"></i>    
                             {{phase|title}}
                         </a>

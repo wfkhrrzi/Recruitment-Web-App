@@ -32,89 +32,107 @@ def sidebar(request:HttpRequest):
 
     # initialize sidebar
     dict_sidebar={
-        'initial screening':{
+        'initialscreening':{
             'overall':SB_DISABLED,
+            'url':None,
         },
         'prescreening':{
             'overall':SB_DISABLED,
             'instruction sent':SB_DISABLED,
             'assessment submitted':SB_DISABLED,
             'assessment validated':SB_DISABLED,
+            'url':None,
         },
         'cbi':{
             'overall':SB_DISABLED,
             'interview scheduled':SB_DISABLED,
             'interview conducted':SB_DISABLED,
             'interview assessed':SB_DISABLED,
-
+            'url':None,
         },
         'hiring':{
             'overall':SB_DISABLED,
             'joining confirmation':SB_DISABLED,
+            'url':None,
         },    
     }
     
     # retrieve candidate 
     stage,stage_id = tuple(request.path.strip('/').split('/'))
     stage_model = app.get_model(stage).objects.get(id=stage_id)
+
+    url_kwargs = {}
+    for i in ['initialscreening','prescreening','cbi']:
+        url_kwargs[f'{i}_url'] = F(f'{i}__id')
     
     # fetch status of stages
     dict_status = list(Candidate.objects.filter(id=stage_model.candidate.id).values(
+        **url_kwargs,
         initialscreening_status=F('initialscreening__status__codename'),
         prescreening_status=F('prescreening__status__codename'),
         cbi_status=F('cbi__status__codename'),
         overall_status_ = F('overall_status__codename')
     ))[0]
 
-    # return {"dict_status":dict_status}
-
-    # dict_sidebar['overall_status_']=dict_status['overall_status_']
 
     # parse status
     if 'initscreening' in dict_status['overall_status_']:
-        dict_sidebar['initial screening']['overall'] = SB_ONGOING
+        dict_sidebar['initialscreening']['overall'] = SB_ONGOING
 
-        return {'sidebar':dict_sidebar}
+    else:
 
-    for x in ['prescreening','cbi',]:
-        if x in dict_status['overall_status_']:
-            for stage in dict_sidebar:
-                if stage != x:
-                    dict_sidebar[stage] = {phase:SB_PROCEED for phase,v in dict_sidebar[stage].items()}
-                else:
-                    dict_sidebar[stage] = {phase:SB_ONGOING for phase,v in dict_sidebar[stage].items()}
-                    break
+        for x in ['prescreening','cbi',]:
+            if x in dict_status['overall_status_']:
+                for stage in dict_sidebar:
+                    if stage != x:
+                        dict_sidebar[stage] = {phase:SB_PROCEED for phase,v in dict_sidebar[stage].items()}
+                    else:
+                        dict_sidebar[stage] = {phase:SB_ONGOING for phase,v in dict_sidebar[stage].items()}
+                        break
 
-    # return {'sidebar':dict_sidebar}
 
-    if 'cbi' in dict_status['overall_status_']:
-        if 'proceed' in dict_status['cbi_status']:
-            dict_sidebar['cbi'] = {phase:SB_PROCEED for phase,v in dict_sidebar[stage].items()}
-            if 'not proceed' in dict_status['cbi_status']:
-                dict_sidebar['cbi']['overall'] = SB_FAILED
+        if 'cbi' in dict_status['overall_status_']:
+            if 'proceed' in dict_status['cbi_status']:
+                dict_sidebar['cbi'] = {phase:SB_PROCEED for phase,v in dict_sidebar[stage].items()}
+                if 'not proceed' in dict_status['cbi_status']:
+                    dict_sidebar['cbi']['overall'] = SB_FAILED
 
-        elif 'interview' in dict_status['cbi_status']:
-            dict_sidebar['cbi']['interview scheduled'] = SB_PROCEED
+            elif 'interview' in dict_status['cbi_status']:
+                dict_sidebar['cbi']['interview scheduled'] = SB_PROCEED
 
-        elif 'result' in dict_status['cbi_status']:
-            dict_sidebar['cbi']['interview scheduled'] = SB_PROCEED
-            dict_sidebar['cbi']['interview conducted'] = SB_PROCEED
+            elif 'result' in dict_status['cbi_status']:
+                dict_sidebar['cbi']['interview scheduled'] = SB_PROCEED
+                dict_sidebar['cbi']['interview conducted'] = SB_PROCEED
 
-    if 'prescreening' in dict_status['overall_status_']:
-        if 'proceed' in dict_status['prescreening_status']:
-            dict_sidebar['prescreening'] = {phase:SB_PROCEED for phase,v in dict_sidebar[stage].items()}
-            if 'not proceed' in dict_status['prescreening_status']:
-                dict_sidebar['prescreening']['overall'] = SB_FAILED
+        if 'prescreening' in dict_status['overall_status_']:
+            if 'proceed' in dict_status['prescreening_status']:
+                dict_sidebar['prescreening'] = {phase:SB_PROCEED for phase,v in dict_sidebar[stage].items()}
+                if 'not proceed' in dict_status['prescreening_status']:
+                    dict_sidebar['prescreening']['overall'] = SB_FAILED
 
-        elif 'submission' in dict_status['prescreening_status']:
-            dict_sidebar['prescreening']['instruction sent'] = SB_PROCEED
+            elif 'submission' in dict_status['prescreening_status']:
+                dict_sidebar['prescreening']['instruction sent'] = SB_PROCEED
 
-        elif 'submitted' in dict_status['prescreening_status']:
-            dict_sidebar['prescreening']['instruction sent'] = SB_PROCEED
-            dict_sidebar['prescreening']['assessment submitted'] = SB_PROCEED
+            elif 'submitted' in dict_status['prescreening_status']:
+                dict_sidebar['prescreening']['instruction sent'] = SB_PROCEED
+                dict_sidebar['prescreening']['assessment submitted'] = SB_PROCEED
+
+
+    # configure url to return to view
+    # dict_sidebar[stage]['url'] = reverse(f"main:{format_initialscreening_url(stage)}.index",args=[stage_id])
+
+    for k,v in url_kwargs.items():
+        if dict_status[k] != None:
+            dict_sidebar[k.split('_')[0]]['url'] = reverse(
+                    f"main:{format_initialscreening_url(k.split('_')[0])}.index",
+                    args=[dict_status[k]],
+                )
 
 
     return {
-        'sidebar':dict_sidebar
+        'sidebar':dict_sidebar,
     }
 
+
+def format_initialscreening_url(stage:str):
+    return stage if stage != 'initialscreening' else 'initscreening'

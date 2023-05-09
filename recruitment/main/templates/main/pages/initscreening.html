@@ -5,6 +5,7 @@
 {% block page_title %}Initial Screening{% endblock page_title %}
 
 {% load custom_filters %}
+{% comment %} {% load custom_tags %} {% endcomment %}
 
 {% block stage_content %}
 
@@ -28,6 +29,7 @@
         <div class="accordion-body">
             <!-- initial screening content starts here-->
             <div class="row mb-4">
+
                 <!-- Pending decision -->
                 <div class="
                     {% if ds_leads|any_ds_leads:None %}
@@ -45,36 +47,48 @@
                     {% endif %}
                 "
                 >
-                    <div class="fw-medium mb-3" style="">Pending decision</div>
-                    <div class="mb-3">
-                        <!-- checkbox for list of leads -->
-                        <div class="d-flex flex-wrap gap-2">
-                            {% for lead in ds_leads %}
-                                {% if lead.eval_is_proceed == None %}
-                                    {% include 'main/components/initscreening/label_leads.html' with lead=lead %}
-                                {% endif %}
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <!-- Lead Evaluation buttons -->
-                    
-                    <div class="d-flex align-items-end flex-column">
-                        <div>
-                            <small class="d-block text-body-secondary mb-1" style="font-size: 0.75rem;">Applies to selected leads</small>
-                            <div class="d-flex gap-2">
-                                <button name="proceedIS" id="proceedIS" class="btn btn-success btn-theme btn-evaluation text-capitalize" type="submit" value="proceed">
-                                    <span class="me-1"><i class="fa-solid fa-check"></i></span>
-                                    proceed
-                                </button>
-                                <button name="rejectIS" id="rejectIS" class="btn btn-danger btn-evaluation text-capitalize" type="submit" value="reject">
-                                    <span class="me-1"><i class="fa-solid fa-xmark"></i></span>
-                                    reject
-                                </button>
+
+                    <form 
+                        id="initialscreening-eval-form" 
+                        method="POST"
+                        data-initial-screening-id={{initial_screening.pk}}
+                        action={% url 'main:initscreening.evaluation.create' %}
+                    >
+                        
+                        {% comment %} {% csrf_token %} {% endcomment %}
+                        <div class="fw-medium mb-3" style="">Pending decision</div>
+                        <div class="mb-3">
+                            <!-- checkbox for list of leads -->
+                            <div id="eval-leads-none-wrapper" class="d-flex flex-wrap gap-2">
+                                {% for lead in ds_leads %}
+                                    {% if lead.eval_is_proceed == None %}
+                                        {% show_pending_lead lead %}
+                                    {% endif %}
+                                {% endfor %}
                             </div>
                         </div>
-                    </div>
+                        
+                        <!-- proceed/reject buttons -->                    
+                        <div class="d-flex align-items-end flex-column">
+                            <div>
+                                <small class="d-block text-body-secondary mb-1" style="font-size: 0.75rem;">Applies to selected leads</small>
+                                <div class="d-flex gap-2">
+                                    <button name="eval-submit" id="eval-proceed" class="btn btn-success btn-theme btn-evaluation text-capitalize" type="submit" value="1">
+                                        <span class="me-1"><i class="fa-solid fa-check"></i></span>
+                                        proceed
+                                    </button>
+                                    <button name="eval-submit" id="eval-reject" class="btn btn-danger btn-evaluation text-capitalize" type="submit" value="0">
+                                        <span class="me-1"><i class="fa-solid fa-xmark"></i></span>
+                                        reject
+                                    </button>
+                                </div>
+                            </div>
+                        </div> <!-- end proceed/reject buttons -->
 
-                </div>
+                    </form>
+
+                </div> <!-- end pending decision -->
+
 
                 <!-- Evaluation Results -->
                 <div class="
@@ -93,29 +107,41 @@
                         
                     {% endif %}
                 ">
-                    <div class="fw-medium mb-3" style="">Evaluation Results</div>
-                    <div class="d-flex gap-3" style='font-size: 0.9rem;'>
-                        
-                        {% if ds_leads|any_ds_leads:True %}
-                            <div class="flex-fill">
-                                {% for lead in ds_leads %}
-                                    {% if lead.eval_is_proceed %}
-                                        {% include 'main/components/initscreening/eval_label_leads.html' with lead=lead %}
-                                    {% endif %}
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                        {% if ds_leads|any_ds_leads:False %}
-                            <div class="flex-fill">
-                                {% for lead in ds_leads %}
-                                    {% if lead.eval_is_proceed == False %}
-                                        {% include 'main/components/initscreening/eval_label_leads.html' with lead=lead %}
-                                    {% endif %}
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
+
+                    <form
+                        id="initialscreening-del-eval-form" 
+                        method="POST"
+                        data-initial-screening-id={{initial_screening.pk}}
+                        action={% url 'main:initscreening.evaluation.delete' %}
+                    >
+                
+                        <div class="fw-medium mb-3" style="">Evaluation Results</div>
+                        <div id="evaluation-wrapper" class="d-flex gap-3" style='font-size: 0.9rem;'>
+                            
+                            {% if ds_leads|any_ds_leads:True %}
+                                <div id="eval-leads-true-wrapper" class="flex-fill">
+                                    {% for lead in ds_leads %}
+                                        {% if lead.eval_is_proceed %}
+                                            {% show_eval_lead lead %}
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            {% if ds_leads|any_ds_leads:False %}
+                                <div id="eval-leads-false-wrapper" class="flex-fill">
+                                    {% for lead in ds_leads %}
+                                        {% if lead.eval_is_proceed == False %}
+                                            {% comment %} {% include 'main/components/initscreening/eval_label_leads.html' with lead=lead %} {% endcomment %}
+                                            {% show_eval_lead lead %}
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                    </form>
+
+                </div> <!-- end evaluation results -->
 
             </div>
 
@@ -164,6 +190,18 @@
 {% comment %} <pre>{{sidebar|pprint}}</pre> {% endcomment %}
 
 {% endblock stage_content %}
+
+{% load static %}
+
+{% block import_scripts %}
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script>
+    const eval_create_url = "{% url 'main:initscreening.evaluation.create' %}"
+    const initial_screening_id = "{{initial_screening.pk}}"
+    const csrf_token = "{{ csrf_token }}"
+</script>
+<script src="{% static 'main/js/initscreening.js' %}"></script>
+{% endblock import_scripts %}
 
 {% block next_stage_rej_title %}Reject{% endblock next_stage_rej_title %}
 {% block next_stage_proc_title %}Proceed <span class="text-lowercase">to</span> Prescreening{% endblock next_stage_proc_title %}

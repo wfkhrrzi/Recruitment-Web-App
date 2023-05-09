@@ -15,6 +15,73 @@ from datetime import datetime
 from django.core import serializers
 from django.db.models import Q, Case, When, Value, Count, OuterRef, Subquery, F, CharField, JSONField
 from django.db.models.functions import Concat, Cast
+from django.template.loader import render_to_string
+
+def get_lst_ds_leads(initial_screening:InitialScreening,is_evaluated:bool="none") -> list:
+
+    if is_evaluated == "none":
+        eval_is_proceed_filter_kwarg = {}
+    else:
+        eval_is_proceed_filter_kwarg = {'eval_is_proceed':is_evaluated}
+
+    ds_leads = Users.objects.filter(
+        user_category__category__iexact='ds lead',
+    ).annotate(
+        full_name=Concat(F('first_name'),Value(' '),F('last_name'),output_field=CharField()),
+        eval_id=Subquery(
+            InitialScreeningEvaluation.objects.filter(
+                initial_screening=initial_screening,
+                user=OuterRef('pk')
+            ).values('id')[:1]
+        ),
+        eval_is_proceed=Subquery(
+            InitialScreeningEvaluation.objects.filter(
+                initial_screening=initial_screening,
+                user=OuterRef('pk')
+            ).values('is_proceed')[:1]
+        ),
+        eval_status=Subquery(
+            InitialScreeningEvaluation.objects.filter(
+                initial_screening=initial_screening,
+                user=OuterRef('pk')
+            ).values('status__status')[:1]
+        ),
+    ).filter(
+        **eval_is_proceed_filter_kwarg
+    ).values(
+        'id',
+        'full_name',
+        'alias',
+        'eval_id',
+        'eval_is_proceed',
+        'eval_status',
+    )
+
+    return list(ds_leads)
+
+def output_json_ds_leads(initial_screening:InitialScreening) -> dict:
+    out = {
+        "none":list(),
+        "true":list(),
+        "false":list(),
+    }
+    
+    for lead in get_lst_ds_leads(initial_screening, None):
+        out['none'].append(
+            render_to_string('main/components/initscreening/label_leads.html', {'lead':lead})
+        )
+    
+    for lead in get_lst_ds_leads(initial_screening, True):
+        out['true'].append(
+            render_to_string('main/components/initscreening/eval_label_leads.html', {'lead':lead})
+        )
+    
+    for lead in get_lst_ds_leads(initial_screening, False):
+        out['false'].append(
+            render_to_string('main/components/initscreening/eval_label_leads.html', {'lead':lead})
+        )
+
+    return out
 
 
 class InitialScreeningIndex(CustomLoginRequired,View):
@@ -23,38 +90,7 @@ class InitialScreeningIndex(CustomLoginRequired,View):
         
         initial_screening = InitialScreening.objects.get(id=initial_screening_id)
         
-        ds_leads = Users.objects.filter(
-            user_category__category__iexact='ds lead',
-        ).annotate(
-            full_name=Concat(F('first_name'),Value(' '),F('last_name'),output_field=CharField()),
-            eval_id=Subquery(
-                InitialScreeningEvaluation.objects.filter(
-                    initial_screening=initial_screening,
-                    user=OuterRef('pk')
-                ).values('id')[:1]
-            ),
-            eval_is_proceed=Subquery(
-                InitialScreeningEvaluation.objects.filter(
-                    initial_screening=initial_screening,
-                    user=OuterRef('pk')
-                ).values('is_proceed')[:1]
-            ),
-            eval_status=Subquery(
-                InitialScreeningEvaluation.objects.filter(
-                    initial_screening=initial_screening,
-                    user=OuterRef('pk')
-                ).values('status__status')[:1]
-            ),
-        ).values(
-            'id',
-            'full_name',
-            'alias',
-            'eval_id',
-            'eval_is_proceed',
-            'eval_status',
-            # is_selected=F('initialscreeningevaluation__is_proceed'),
-            # selection_status=F('initialscreeningevaluation__status__status'),
-        )
+        ds_leads = get_lst_ds_leads(initial_screening)
 
         context = {
             'initial_screening':serializers.serialize('python',[initial_screening])[0],
@@ -100,11 +136,18 @@ class InitialScreeningEvaluationCreate(CustomLoginRequired,View): # create & upd
 
     def post(self,request: HttpRequest):
 
+        lst_users = request.POST.getlist('users') or request.POST.getlist('users[]') or None
+        
+        if lst_users == None:
+            response = JsonResponse({'users':'users are required'})
+            response.status_code = 400
+            return response
+
         if request.POST.get('proceed',None) == None:
             if return_json(request):
-                return JsonResponse({
-                    'proceed':'proceed is required'
-                })
+                response = JsonResponse({'proceed':'proceed is required'})
+                response.status_code = 400
+                return response
             
             return HttpResponseBadRequest('proceed is required')
 
@@ -112,44 +155,44 @@ class InitialScreeningEvaluationCreate(CustomLoginRequired,View): # create & upd
             initial_screening = InitialScreening.objects.get(id=request.POST['initial_screening'])
         except:
             if return_json(request):
-                return JsonResponse({
-                    'initial_screening':'initial_screening not found'
-                })
+                response = JsonResponse({'initial_screening':'initial_screening not found'})
+                response.status_code = 400
+                return response
             
             return HttpResponseBadRequest('initial_screening not found')
         
-        try:
-            user = Users.objects.get(id=request.POST['user'])
-        except:
-            if return_json(request):
-                return JsonResponse({
-                    'user':'user not found'
-                })
-            
-            return HttpResponseBadRequest('user not found')
+        
+        users = Users.objects.filter(id__in=lst_users) # no error handling
 
-        try:
-            initial_screening_eval = InitialScreeningEvaluation.objects.get(initial_screening=initial_screening,user=user)
-        except: 
-            initial_screening_eval = InitialScreeningEvaluation(initial_screening=initial_screening,user=user,created_by=request.user)
         
         if int(request.POST['proceed']) == 0: #do not proceed
-            initial_screening_eval.is_proceed = False
-            initial_screening_eval.status = Status.objects.get(codename='initscreening:not proceed')
+            final_is_proceed = False
+            final_status = Status.objects.get(codename='initscreening:not proceed')
 
         elif int(request.POST['proceed']) == 1: #proceed
             
-            initial_screening_eval.is_proceed = True
-            initial_screening_eval.status = Status.objects.get(codename='initscreening:proceed')
+            final_is_proceed = True
+            final_status = Status.objects.get(codename='initscreening:proceed')
 
-        initial_screening_eval.save()
+        for user in users:
+            InitialScreeningEvaluation.objects.update_or_create(
+                initial_screening=initial_screening,
+                user=user,
+                defaults={
+                    'status':final_status,
+                    'is_proceed':final_is_proceed,
+                }
+            )
 
-        if return_json(request):
-            return JsonResponse({
-                'initial_screening_eval':'success',
-            })
+        # return JsonResponse({
+        #     'ds_leads':get_lst_ds_leads(initial_screening),
+        # })
 
-        return redirect(request.META.get('HTTP_REFERER') or reverse('main:candidate.index'))
+        # return ajax response
+
+        out = output_json_ds_leads(initial_screening)
+
+        return JsonResponse(out)
 
 
 @method_decorator(csrf_exempt,name='dispatch')
@@ -173,12 +216,16 @@ class InitialScreeningEvaluationDelete(CustomLoginRequired,View): # create & upd
 
         initial_screening_eval.save()
 
-        if return_json(request):
-            return JsonResponse({
-                'initial_screening_eval':'success',
-            })
+        out = output_json_ds_leads(initial_screening_eval.initial_screening)
 
-        return redirect(request.META.get('HTTP_REFERER') or reverse('main:candidate.index'))
+        return JsonResponse(out)
+
+        # if return_json(request):
+        #     return JsonResponse({
+        #         'initial_screening_eval':'success',
+        #     })
+
+        # return redirect(request.META.get('HTTP_REFERER') or reverse('main:candidate.index'))
 
 
 class InitialScreeningEdit(CustomLoginRequired,View):

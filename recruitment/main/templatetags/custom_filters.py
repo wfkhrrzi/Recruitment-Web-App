@@ -21,3 +21,11 @@ def all_ds_leads(lst_lead, bool_val):
 @register.filter('split')
 def split_string(string:str,arg:str):
     return string.split(arg)
+
+@register.inclusion_tag("main/components/initscreening/eval_label_leads.html")
+def show_eval_lead(lead):    
+    return {"lead": lead,}
+
+@register.inclusion_tag("main/components/initscreening/label_leads.html")
+def show_pending_lead(lead):    
+    return {"lead": lead,}

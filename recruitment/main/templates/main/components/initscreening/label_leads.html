@@ -6,7 +6,7 @@ style="
 "
 >
     <label class="list-group-item d-flex gap-2">
-        <input class="form-check-input flex-shrink-0" type="checkbox" value="{{lead.id}}">
+        <input id="initialscreening_eval{{forloop.counter}}" name="initialscreening_eval" class="form-check-input flex-shrink-0" type="checkbox" value="{{lead.id}}">
         <span>
             {{lead.alias}}
             <small class="d-block text-body-secondary" style="font-size: 0.75rem;">{{lead.full_name}}</small>

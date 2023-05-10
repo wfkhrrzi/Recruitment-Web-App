@@ -4,7 +4,7 @@
 
 {% block page_title %}Initial Screening{% endblock page_title %}
 
-{% load custom_filters %}
+{% load custom_templatetags %}
 {% comment %} {% load custom_tags %} {% endcomment %}
 
 {% block stage_content %}
@@ -35,6 +35,7 @@
             <div class="d-flex align-items-center">
                 <div class="me-5">Status</div>
                 <div class="d-flex align-items-center gap-3">
+
                     <!-- status -->
                     <div class="fw-semibold text-success">
                         <span style="font-size: 0.93rem;" class="badge rounded-pill text-bg-success">
@@ -260,10 +261,6 @@
 
 {% block import_scripts %}
 <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
-<script>
-    const eval_create_url = "{% url 'main:initscreening.evaluation.create' %}"
-    const initial_screening_id = "{{initial_screening.pk}}"
-    const csrf_token = "{{ csrf_token }}"
-</script>
+
 <script src="{% static 'main/js/initscreening.js' %}"></script>
 {% endblock import_scripts %}

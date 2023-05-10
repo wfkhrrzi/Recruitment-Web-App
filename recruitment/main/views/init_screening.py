@@ -246,13 +246,21 @@ class InitialScreeningUpdate(CustomLoginRequired,View):
         '''
 
         # error handling
+        if not bool(request.POST):
+            response = JsonResponse({'error':'no data is passed!'})
+            response.status_code = 400
+            return response
+
         if request.POST.get('proceed',None) == None:
-            if return_json(request):
-                return JsonResponse({
-                    'proceed':'proceed is required'
-                })
+            is_proceed = None
+            # if return_json(request):
+            #     return JsonResponse({
+            #         'proceed':'proceed is required'
+            #     })
             
-            return HttpResponseBadRequest('proceed is required')
+            # return HttpResponseBadRequest('proceed is required')
+        else:
+            is_proceed = request.POST.get('proceed')
 
         try:
             initial_screening = InitialScreening.objects.get(id=request.POST['initial_screening'])
@@ -264,22 +272,26 @@ class InitialScreeningUpdate(CustomLoginRequired,View):
             
             return HttpResponseBadRequest('initial_screening not found')
         
-        if int(request.POST['proceed']) == 0: #do not proceed
-            initial_screening.is_proceed = False
-            initial_screening.status = Status.objects.get(codename='initscreening:not selected')
+        if is_proceed != None:
+            if int(is_proceed) == 0: #do not proceed
+                initial_screening.is_proceed = False
+                initial_screening.status = Status.objects.get(codename='initscreening:not selected')
 
-        elif int(request.POST['proceed']) == 1: #proceed
-            
-            initial_screening.is_proceed = True
-            initial_screening.status = Status.objects.get(codename='initscreening:selected')
-            initial_screening.date_selected = datetime.now()
+            elif int(is_proceed) == 1: #proceed
+                
+                initial_screening.is_proceed = True
+                initial_screening.status = Status.objects.get(codename='initscreening:selected')
+                initial_screening.date_selected = datetime.now()
         
+        # update remarks
+        if request.POST.get('remarks',None) != None:
+            initial_screening.remarks = request.POST.get('remarks')
+
         initial_screening.last_modified_by = request.user
         initial_screening.save()
 
-
+        # proceed to next stage OR return output
         if initial_screening.is_proceed:
-
             prescreening_request = request
             prescreening_request.POST = QueryDict(f'candidate={initial_screening.candidate.id}&initial_screening={True}')
 
@@ -298,5 +310,8 @@ class InitialScreeningUpdate(CustomLoginRequired,View):
                     }
                 })
             
-            return redirect(request.META.get('HTTP_REFERER') or reverse('main:candidate.index'))
+            return redirect(
+                # request.META.get('HTTP_REFERER') or 
+                reverse('main:initscreening.index',args=[initial_screening.id])
+            )
 

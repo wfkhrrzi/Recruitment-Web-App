@@ -15,23 +15,67 @@
             class="accordion-button accordion-btn-theme fw-semibold"
             type="button"
             data-bs-toggle="collapse"
-            data-bs-target="#initialscreening-section"
+            data-bs-target="#initialscreening-hiring-manager-section"
             aria-expanded="false"
-            aria-controls="initialscreening-section"
+            aria-controls="initialscreening-hiring-manager-section"
         >
-            Selection
+            Hiring Manager Screening
         </button>
     </h2>
     <div
-        id="initialscreening-section"
+        id="initialscreening-hiring-manager-section"
         class="accordion-collapse collapse show"
     >
         <div class="accordion-body">
-            <!-- initial screening content starts here-->
+            <!-- hiring manager screening content starts here-->
+            <div class="fw-medium mb-3">
+                Decision
+            </div>
+
+            <div class="d-flex align-items-center">
+                <div class="me-5">Status</div>
+                <div class="d-flex align-items-center gap-3">
+                    <!-- status -->
+                    <div class="fw-semibold text-success">
+                        <span style="font-size: 0.93rem;" class="badge rounded-pill text-bg-success">
+                            Selected
+                        </span>
+                    </div>
+                    <!-- edit final status button -->
+                    <button type="submit" name="result-edit" class="btn btn-sm text-secondary" style="font-size: 1.2rem;">
+                        <i class="fa-regular fa-pen-to-square"></i>
+                    </button>
+                </div>            
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+
+<div class="accordion-item">
+    <h2 class="accordion-header">
+        <button
+            class="accordion-button accordion-btn-theme fw-semibold"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#initialscreening-ds-leads-section"
+            aria-expanded="false"
+            aria-controls="initialscreening-ds-leads-section"
+        >
+            DS Lead Screening
+        </button>
+    </h2>
+    <div
+        id="initialscreening-ds-leads-section"
+        class="accordion-collapse collapse show"
+    >
+        <div class="accordion-body">
+            <!-- ds lead screening content starts here-->
             <div class="row mb-4">
 
                 <!-- Pending decision -->
-                <div class="
+                <div id="leads-pending-container" class="
                     {% if ds_leads|any_ds_leads:None %}
                         {% if ds_leads|any_ds_leads:True and ds_leads|any_ds_leads:False %}
                         col-5
@@ -91,7 +135,7 @@
 
 
                 <!-- Evaluation Results -->
-                <div class="
+                <div id="leads-evaluated-container" class="
                     {% if ds_leads|all_ds_leads:None %}
                     d-none
                     {% else %}
@@ -116,10 +160,10 @@
                     >
                 
                         <div class="fw-medium mb-3" style="">Evaluation Results</div>
-                        <div id="evaluation-wrapper" class="d-flex gap-3" style='font-size: 0.9rem;'>
+                        <div id="eval-leads-wrapper" class="d-flex" style='font-size: 0.9rem;'>
                             
                             {% if ds_leads|any_ds_leads:True %}
-                                <div id="eval-leads-true-wrapper" class="flex-fill">
+                                <div id="eval-leads-true-wrapper" class="flex-fill me-2">
                                     {% for lead in ds_leads %}
                                         {% if lead.eval_is_proceed %}
                                             {% show_eval_lead lead %}
@@ -137,6 +181,7 @@
                                     {% endfor %}
                                 </div>
                             {% endif %}
+                        
                         </div>
 
                     </form>
@@ -144,10 +189,12 @@
                 </div> <!-- end evaluation results -->
 
             </div>
-                        
+
+            <hr>
             
             <div class="row">
                 <!-- final selection -->
+                {% if initial_screening.fields.is_proceed != None %}
                 <div class="col-5">
                     <div class="fw-medium mb-3" style="">Final Decision</div>
                     <div class="d-flex align-items-center section-child-text">
@@ -156,12 +203,17 @@
                             <div class="fw-semibold text-success">
                                 <span style='font-size: 0.93rem;' class="
                                         badge rounded-pill
-                                        {% if lead.eval_is_proceed %}
+                                        {% if initial_screening.fields.is_proceed == True %}
                                             text-bg-success
                                         {% else %}
                                             text-bg-danger
                                         {% endif %} 
-                                    ">Not proceed
+                                    ">
+                                        {% if initial_screening.fields.is_proceed == True %}
+                                            Selected
+                                        {% else %}
+                                            Not Selected
+                                        {% endif %} 
                                 </span>
                             </div>
                             <!-- edit final status button -->
@@ -171,13 +223,23 @@
                         </div>
                     </div>
                 </div>
-
+                {% endif %}
+                
+                <!-- remarks -->
                 <div class="col-7">
-                    <div class="fw-medium mb-3" style="">Remarks</div>
-                    <div>
-                        <small class="d-block text-body-secondary mb-2" style="font-size: 0.75rem;">If any, please fill in the below field.</small>
-                        <textarea type="text" name="initialscreening-remark" id="initialscreening-remark" class="form-control remarks" rows="3" placeholder="Input remarks here"></textarea>
-                    </div>
+
+                    {% comment %} <form
+                        action="{% url 'main:initscreening.update' %}" 
+                        method="post"
+                        data-initial_screening-id={{initial_screening.pk}}
+                    > {% endcomment %}
+                        <div class="fw-medium mb-3" style="">Remarks</div>
+                        <div>
+                            <small class="d-block text-body-secondary mb-2" style="font-size: 0.75rem;">If any, please fill in the below field.</small>
+                            <textarea type="text" name="initialscreening-remark" id="initialscreening-remark" class="form-control remarks" rows="3" placeholder="Input remarks here"></textarea>
+                        </div>
+                    {% comment %} </form> {% endcomment %}
+
                 </div>
             </div>
             
@@ -185,9 +247,14 @@
     </div>
 </div>
 
-{% comment %} <pre>{{sidebar|pprint}}</pre> {% endcomment %}
-
 {% endblock stage_content %}
+
+{% if initial_screening.fields.is_proceed != None %}
+    {% block next_stage_btn_display %}d-none{% endblock next_stage_btn_display %}
+{% endif %}
+{% block next_stage_form_action %}{% url 'main:initscreening.update' %}{% endblock next_stage_form_action %}
+{% block next_stage_rej_title %}Reject{% endblock next_stage_rej_title %}
+{% block next_stage_proc_title %}Proceed <span class="text-lowercase">to</span> Prescreening{% endblock next_stage_proc_title %}
 
 {% load static %}
 
@@ -200,6 +267,3 @@
 </script>
 <script src="{% static 'main/js/initscreening.js' %}"></script>
 {% endblock import_scripts %}
-
-{% block next_stage_rej_title %}Reject{% endblock next_stage_rej_title %}
-{% block next_stage_proc_title %}Proceed <span class="text-lowercase">to</span> Prescreening{% endblock next_stage_proc_title %}

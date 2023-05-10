@@ -66,7 +66,10 @@ class PrescreeningCreate(CustomLoginRequired,View):
             
             return JsonResponse(response)
 
-        return redirect(request.META.get('HTTP_REFERER') or reverse('main:prescreening.index',args=[prescreening.id]))
+        return redirect(
+            # request.META.get('HTTP_REFERER') or 
+            reverse('main:prescreening.index',args=[prescreening.id])
+        )
 
 
 @method_decorator(csrf_exempt,name='dispatch')

@@ -11,7 +11,7 @@
 	<div class="d-flex justify-content-between align-items-center mb-3">
 		<div class="d-flex align-items-center">
 			<a
-				href="{{ request.META.HTTP_REFERER }}"
+				href="{% url 'main:browse.index' %}"
 				role="button"
 				class="btn btn-secondary btn-sm me-4"
 				style="
@@ -67,22 +67,24 @@
 
         {% block stage_content %}{% endblock stage_content %}
 
-        {% comment %} {{current_stage}} {% endcomment %}
-
 	</div>
 
-	<div class="d-flex justify-content-end gap-3 p-3 pe-0 align-items-center">
-		<div>
-			<button name="rejectIS" id="rejectIS" class="btn btn-danger btn-evaluation text-capitalize" type="submit" value="0">
-				{% block next_stage_rej_title %}Override this reject button{% endblock next_stage_rej_title %}
-			</button>
-		</div>
-		<div>
-			<button name="proceedIS" id="proceedIS" class="btn btn-success btn-theme btn-evaluation text-capitalize" type="submit" value="1">
-				{% block next_stage_proc_title %}Override this proceed button{% endblock next_stage_proc_title %}
-			</button>
-		</div>
-
+	<div class="">
+		<form action="{% block next_stage_form_action %}{% endblock next_stage_form_action %}" method="post">
+			<div class="d-flex justify-content-end gap-3 p-3 pe-0 align-items-center">
+				<input type="hidden" name="initial_screening" value={{initial_screening.pk}}>
+				<div>
+					<button name="proceed" id="rejectIS" class="btn btn-danger btn-evaluation text-capitalize" type="submit" value="0">
+						{% block next_stage_rej_title %}Override this reject button{% endblock next_stage_rej_title %}
+					</button>
+				</div>
+				<div>
+					<button name="proceed" id="proceedIS" class="btn btn-success btn-theme btn-evaluation text-capitalize" type="submit" value="1">
+						{% block next_stage_proc_title %}Override this proceed button{% endblock next_stage_proc_title %}
+					</button>
+				</div>
+			</div>
+		</form>
 	</div>
 
 

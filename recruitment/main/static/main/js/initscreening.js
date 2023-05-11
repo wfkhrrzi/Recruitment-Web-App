@@ -42,11 +42,7 @@ $(document).ready(function () {
 						var leads_none = res['none'];
 						var leads_true = res['true'];
 						var leads_false = res['false'];
-						// console.log("leads_none: "+leads_none.length);
-						// console.log("leads_true: "+leads_true.length);
-						// console.log("leads_false: "+leads_false.length);
 						var eval_lead_wrapper = $("#eval-leads-wrapper")
-						// console.log(document.getElementById('#eval-leads-true-wrapper'));
 						
 						if (leads_true.length>0) {
 							if (document.getElementById('eval-leads-true-wrapper') == null) {
@@ -83,14 +79,9 @@ $(document).ready(function () {
 						// reset wrapper class
 						var container_pending = document.getElementById("leads-pending-container");
 						var container_evaluated = document.getElementById("leads-evaluated-container");
-						// console.log(container_pending);
-						// console.log(container_evaluated);
 						container_pending.className="";
 						container_evaluated.className="";
 						
-						// console.log(container_pending);
-						// console.log(container_evaluated);
-
 							// pending container
 						if (leads_none.length > 0) {
 							if (leads_true.length > 0 && leads_false.length > 0) {
@@ -133,8 +124,6 @@ $(document).ready(function () {
 		});
 		
 	});
-
-	
 
 
 });

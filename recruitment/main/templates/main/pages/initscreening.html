@@ -5,10 +5,13 @@
 {% block page_title %}Initial Screening{% endblock page_title %}
 
 {% load custom_templatetags %}
-{% comment %} {% load custom_tags %} {% endcomment %}
+
 
 {% block stage_content %}
 
+{% with is_hm_proceed=None %} <!-- temporary variable for testing -->
+
+<!--  hiring manager screening section -->
 <div class="accordion-item">
     <h2 class="accordion-header">
         <button
@@ -31,29 +34,28 @@
             <div class="fw-medium mb-3">
                 Decision
             </div>
-
-            <div class="d-flex align-items-center">
+            {% if is_hm_proceed != None %}
+            {% show_status_editable_field show_submit_btn=True attr_name="hiring_manager_status" is_proceed=initial_screening.fields.is_proceed label="Status" proceed_label="Selected" reject_label="Not selected" %}
+            {% else %}
+            <div class="d-flex align-itemms-center" style="font-size:0.9rem;">
                 <div class="me-5">Status</div>
-                <div class="d-flex align-items-center gap-3">
-
-                    <!-- status -->
-                    <div class="fw-semibold text-success">
-                        <span style="font-size: 0.93rem;" class="badge rounded-pill text-bg-success">
-                            Selected
-                        </span>
-                    </div>
-                    <!-- edit final status button -->
-                    <button type="submit" name="result-edit" class="btn btn-sm text-secondary" style="font-size: 1.2rem;">
-                        <i class="fa-regular fa-pen-to-square"></i>
-                    </button>
-                </div>            
+                
+                <div class="text-muted" style="font-size:0.75rem">
+                    <span class="me-1"><i class="fa-sharp fa-solid fa-circle-info"></i></span>
+                    Make decision in the bottom right below
+                </div>
+                
             </div>
+            {% endif %}
             
         </div>
     </div>
 </div>
 
 
+{% if is_hm_proceed %} <!-- shows ds leads screening if the hiring manager screening pass -->
+
+<!--  ds lead screening section -->
 <div class="accordion-item">
     <h2 class="accordion-header">
         <button
@@ -191,76 +193,101 @@
 
             </div>
 
-            <hr>
-            
-            <div class="row">
-                <!-- final selection -->
-                {% if initial_screening.fields.is_proceed != None %}
-                <div class="col-5">
-                    <div class="fw-medium mb-3" style="">Final Decision</div>
-                    <div class="d-flex align-items-center section-child-text">
-                        <div class="me-5">Selection</div>
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="fw-semibold text-success">
-                                <span style='font-size: 0.93rem;' class="
-                                        badge rounded-pill
-                                        {% if initial_screening.fields.is_proceed == True %}
-                                            text-bg-success
-                                        {% else %}
-                                            text-bg-danger
-                                        {% endif %} 
-                                    ">
-                                        {% if initial_screening.fields.is_proceed == True %}
-                                            Selected
-                                        {% else %}
-                                            Not Selected
-                                        {% endif %} 
-                                </span>
-                            </div>
-                            <!-- edit final status button -->
-                            <button type="submit" name="result-edit" name="result-edit" class="btn btn-sm text-secondary"  style="font-size: 1.2rem;">
-                                <i class="fa-regular fa-pen-to-square"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-                
-                <!-- remarks -->
-                <div class="col-7">
-
-                    {% comment %} <form
-                        action="{% url 'main:initscreening.update' %}" 
-                        method="post"
-                        data-initial_screening-id={{initial_screening.pk}}
-                    > {% endcomment %}
-                        <div class="fw-medium mb-3" style="">Remarks</div>
-                        <div>
-                            <small class="d-block text-body-secondary mb-2" style="font-size: 0.75rem;">If any, please fill in the below field.</small>
-                            <textarea type="text" name="initialscreening-remark" id="initialscreening-remark" class="form-control remarks" rows="3" placeholder="Input remarks here"></textarea>
-                        </div>
-                    {% comment %} </form> {% endcomment %}
-
-                </div>
-            </div>
+            {% comment %} <hr> {% endcomment %}
             
         </div>
     </div>
 </div>
 
+<!--  final decision section -->
+<div class="accordion-item">
+    <h2 class="accordion-header">
+        <button
+            class="accordion-button accordion-btn-theme fw-semibold"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#final-decision-section"
+            aria-expanded="false"
+            aria-controls="final-decision-section"
+        >
+            Final Decision
+        </button>
+    </h2>
+    <div
+        id="final-decision-section"
+        class="accordion-collapse collapse show"
+    >
+        <div class="accordion-body">
+            <!-- final decision content starts here-->
+            <div class="d-flex">
+                <!-- final selection -->
+                {% if initial_screening.fields.is_proceed != None %}
+                <div class="col-7">
+                    <div class="fw-medium mb-3" style="">Final Decision</div>
+                    
+                    {% show_status_editable_field attr_name="final_status" is_proceed=initial_screening.fields.is_proceed label="Selection" proceed_label="Selected" reject_label="Not selected" %}
+
+                </div>
+                {% endif %}
+                
+                <!-- remarks -->
+                <div class="col-5">
+
+                    <div class="fw-medium mb-3" style="">Remarks</div>
+                    <div>
+                        <small class="d-block text-body-secondary mb-2" style="font-size: 0.75rem;">If any, please fill in the below field.</small>
+                        <textarea type="text" name="initialscreening-remark" id="initialscreening-remark" class="form-control remarks" rows="3" placeholder="Input remarks here"></textarea>
+                    </div>
+
+                </div>
+            </div>            
+        </div>
+    </div>
+</div>
+
+{% endif %}
+
+{% endwith %} <!-- end temporary variable -->
+
+
 {% endblock stage_content %}
 
-{% if initial_screening.fields.is_proceed != None %}
-    {% block next_stage_btn_display %}d-none{% endblock next_stage_btn_display %}
-{% endif %}
-{% block next_stage_form_action %}{% url 'main:initscreening.update' %}{% endblock next_stage_form_action %}
+
+<!-- next stage decision -->
+
+<!-- pass child variable 'next_stage_is_proceed' to parent template -->
+{% block next_stage %}
+    {% with next_stage_is_proceed=initial_screening.fields.is_proceed %}
+    {{block.super}}
+    {% endwith %}
+{% endblock next_stage %}
+
+
+{% comment %} {% block next_stage_form_action %}{% url 'main:initscreening.update' %}{% endblock next_stage_form_action %} {% endcomment %}
+
+{% block next_stage_submit_name %}initial_screening{% endblock next_stage_submit_name %} <!-- same as post query parameter name -->
+
+{% block next_stage_cur_id %}{{initial_screening.pk}}{% endblock next_stage_cur_id %}
+
 {% block next_stage_rej_title %}Reject{% endblock next_stage_rej_title %}
-{% block next_stage_proc_title %}Proceed <span class="text-lowercase">to</span> Prescreening{% endblock next_stage_proc_title %}
 
+{% block next_stage_proc_title %}
+    {% with is_hm_proceed=False %} <!-- temporary variable for testing -->
+    {% if is_hm_proceed %}
+    Proceed <span class="text-lowercase">to</span> Prescreening
+    {% else %}
+    Proceed <span class="text-lowercase">for</span> DS Leads Screening
+    {% endif %}
+    {% endwith %} <!-- end temporary variable -->
+{% endblock next_stage_proc_title %}
+
+{% block next_stage_url %}{{sidebar.prescreening.url}}{% endblock next_stage_url %}
+
+
+<!-- scripts -->
 {% load static %}
-
 {% block import_scripts %}
-<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
-
-<script src="{% static 'main/js/initscreening.js' %}"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    {{block.super}}
+    <script src="{% static 'main/js/initscreening.js' %}"></script>
 {% endblock import_scripts %}

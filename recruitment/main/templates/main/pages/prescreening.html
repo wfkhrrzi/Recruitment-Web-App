@@ -136,5 +136,14 @@
 
 {% endblock stage_content %}
 
+{% block next_stage_form_action %}{% url 'main:prescreening.update' %}{% endblock next_stage_form_action %}
+{% block next_stage_submit_name %}initial_screening{% endblock next_stage_submit_name %}
+{% block next_stage_cur_id %}{{initial_screening.pk}}{% endblock next_stage_cur_id %}
 {% block next_stage_rej_title %}Reject{% endblock next_stage_rej_title %}
 {% block next_stage_proc_title %}Proceed <span class="text-lowercase">to</span> <span class="text-uppercase">cbi</span>{% endblock next_stage_proc_title %}
+{% block next_stage_url %}{{sidebar.cbi.url}}{% endblock next_stage_url %}
+{% block next_stage %}
+    {% with next_stage_is_proceed=initial_screening.fields.is_proceed %}
+    {{block.super}}
+    {% endwith %}
+{% endblock next_stage %}

@@ -69,25 +69,42 @@
 
 	</div>
 
-	<div class="">
-		<form action="{% block next_stage_form_action %}{% endblock next_stage_form_action %}" method="post">
-			<div class="d-flex justify-content-end gap-3 p-3 pe-0 align-items-center">
-				<input type="hidden" name="initial_screening" value={{initial_screening.pk}}>
-				<div>
-					<button name="proceed" id="rejectIS" class="btn btn-danger btn-evaluation text-capitalize" type="submit" value="0">
-						{% block next_stage_rej_title %}Override this reject button{% endblock next_stage_rej_title %}
-					</button>
+	{% block next_stage %}
+		{% if next_stage_is_proceed != True and next_stage_is_proceed != False %}
+			<form action="{% block next_stage_form_action %}#{% endblock next_stage_form_action %}" method="post">
+				<div class="d-flex justify-content-end gap-3 p-3 pe-0 align-items-center">
+					<input type="hidden" name="{% block next_stage_submit_name %}initial_screening/prescreening/cbi{% endblock next_stage_submit_name %}" value={% block next_stage_cur_id %}{% endblock next_stage_cur_id %}>
+					
+					<div>
+						<!-- both name='proceed' to match with parameter name required by the server -->
+						<button name="proceed" id="rejectIS" class="btn btn-danger btn-evaluation text-capitalize" type="submit" value="0">
+							{% block next_stage_rej_title %}Override this reject button{% endblock next_stage_rej_title %}
+						</button>
+					</div>
+
+					<div>
+						<button name="proceed" id="proceedIS" class="btn btn-success btn-theme btn-evaluation text-capitalize" type="submit" value="1">
+							{% block next_stage_proc_title %}Override this proceed button{% endblock next_stage_proc_title %}
+						</button>
+					</div>
 				</div>
-				<div>
-					<button name="proceed" id="proceedIS" class="btn btn-success btn-theme btn-evaluation text-capitalize" type="submit" value="1">
-						{% block next_stage_proc_title %}Override this proceed button{% endblock next_stage_proc_title %}
-					</button>
-				</div>
-			</div>
-		</form>
-	</div>
+			</form>
+		{% else %}
+		<div class="d-flex justify-content-end p-3 pe-0 align-items-center"><!-- next -->
+			<a class="btn btn-success btn-theme btn-evaluation text-capitalize" href="{% block next_stage_url %}{% endblock next_stage_url %}">Next</a>
+		</div>
+		{% endif %}
+
+	{% endblock next_stage %}
 
 
 </div>
 
 {% endblock content %}
+
+{% load static %}
+
+{% block import_scripts %}
+{{block.super}}
+<script src="{% static 'main/js/components/status_editable_field.js' %}"></script>
+{% endblock import_scripts %}

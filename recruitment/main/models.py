@@ -125,10 +125,13 @@ class Candidate(CreatedMixin,LastModifiedMixin,models.Model):
 
 class InitialScreening(LastModifiedMixin,models.Model):
     candidate = models.OneToOneField(Candidate,on_delete=models.CASCADE)
-    status = models.ForeignKey(Status,on_delete=models.CASCADE,null=False)
-    remarks = models.TextField(null=True)
+    is_hm_proceed = models.BooleanField(null=True)
+    hm_date_selected = models.DateField(null=True)
+    hm_status = models.ForeignKey(Status,on_delete=models.CASCADE,null=True,related_name="initialscreening_hm_status")
     date_selected = models.DateField(null=True)
     is_proceed = models.BooleanField(null=True)
+    status = models.ForeignKey(Status,on_delete=models.CASCADE,null=True,related_name="initialscreening_final_status")
+    remarks = models.TextField(null=True)
     # revision for assessment results 
 
 

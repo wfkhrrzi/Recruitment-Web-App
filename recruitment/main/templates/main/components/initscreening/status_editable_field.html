@@ -24,39 +24,48 @@
         class="d-none status-field-editing align-items-center" 
         
     >
-        <div class="d-flex align-items-center gap-3">
-            
-            <!-- select field -->
-            <div class="input-group" style="width:11.4rem">
-                <select 
-                    placeholder="Status" 
-                    aria-label="Status" 
-                    aria-describedby="statusField"
-                    class="form-select form-select-sm status-field-select fw-medium text-white {% if is_proceed == None %}bg-white{% else %}{% if is_proceed %}bg-success{% else %}bg-danger{% endif %}{% endif %} " 
-                >
-                    <option value="" class="text-secondary bg-white fw-medium">On Hold</option>
-                    <option value="1" {% if is_proceed %}selected{% endif %} class="text-success bg-white fw-medium">{{proceed_label}}</option>
-                    <option value="0" {% if not is_proceed %}selected{% endif %} class="text-danger bg-white fw-medium">{{reject_label}}</option>
-        ]        </select>
-                <span class="input-group-text" id="statusField">
-                    <i class="fa-regular fa-pen-to-square"></i>
-                </span>
+        {% if form_action %}
+        <form action="{{form_action}}" method="post">
+        {% endif %}
+
+            <div class="d-flex align-items-center gap-3">
+                
+                <input type="hidden" name="{{stage_name}}" value="{{stage_id}}">
+
+                <!-- select field -->
+                <div class="input-group" style="width:11.4rem">
+                    <select 
+                        name={{submit_name}}
+                        placeholder="Status" 
+                        aria-label="Status" 
+                        aria-describedby="statusField"
+                        class="form-select form-select-sm status-field-select fw-medium text-white {% if is_proceed == None %}bg-white{% else %}{% if is_proceed %}bg-success{% else %}bg-danger{% endif %}{% endif %} " 
+                    >
+                        {% comment %} <option value="" class="text-secondary bg-white fw-medium">On Hold</option> {% endcomment %}
+                        <option value="1" {% if is_proceed %}selected{% endif %} class="text-success bg-white fw-medium">{{proceed_label}}</option>
+                        <option value="0" {% if not is_proceed %}selected{% endif %} class="text-danger bg-white fw-medium">{{reject_label}}</option>
+                    </select>
+                    <span class="input-group-text" id="statusField">
+                        <i class="fa-regular fa-pen-to-square"></i>
+                    </span>
+                </div>
+                
+                <!-- submit btn -->
+                {% if show_submit_btn or form_action %}
+                <div>
+                    <button type="submit" class="status-field-editing-submit btn btn-success btn-evaluation btn-theme me-2">
+                        <span><i class="fa-solid fa-pen" style="color: #f4f4f4;"></i></span>
+                        Apply status
+                    </button>
+                    <button class="status-field-editing-cancel btn btn-secondary btn-evaluation">Cancel</button>
+                </div>
+                {% endif %}
+    
             </div>
-            
-            <!-- submit btn -->
-            {% if show_submit_btn %}
-            <div>
-                <button name={{submit_name}} type="submit" class="status-field-editing-submit btn btn-success btn-evaluation btn-theme me-2">
-                    <span><i class="fa-solid fa-pen" style="color: #f4f4f4;"></i></span>
-                    Apply status
-                </button>
-                <button class="status-field-editing-cancel btn btn-secondary btn-evaluation">Cancel</button>
-            </div>
 
-            {% endif %}
-
-
-        </div>
+        {% if form_action %}
+        </form>
+        {% endif %}
 
     </div>
 </div>

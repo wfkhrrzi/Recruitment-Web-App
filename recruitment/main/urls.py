@@ -4,7 +4,7 @@ from . import view
 from . import auth
 from main.views.candidate import CandidateIndex,CandidateEdit
 from main.views.pre_screening import PrescreeningCreate, PrescreeningSubmissionCreate, PrescreeningSubmissionDelete, PrescreeningInstructionSent, PrescreeningIndex, PrescreeningUpdate
-from main.views.init_screening import InitialScreeningIndex, InitialScreeningCreate, InitialScreeningEdit, InitialScreeningUpdate,InitialScreeningEvaluationCreate, InitialScreeningEvaluationDelete
+from main.views.init_screening import InitialScreeningIndex, InitialScreeningCreate, InitialScreeningEdit, InitialScreeningUpdate,InitialScreeningEvaluationCreate, InitialScreeningEvaluationDelete, InitialScreeningHiringUpdate
 from main.views.cbi import CBICreate, CBIIndex, CBIScheduleCreate, CBIScheduleUpdate, CBISubmissionCreate, CBISubmissionDelete
 from main.view import BrowseIndex, BrowseView
 
@@ -23,6 +23,7 @@ urlpatterns = [
     path('initialscreening/', InitialScreeningIndex.as_view(), name='initscreening.index.default'),
     path('initialscreening/<int:initial_screening_id>', InitialScreeningIndex.as_view(), name='initscreening.index'),
     path('initialscreening/create', InitialScreeningCreate.as_view(), name='initscreening.create'),
+    path("initialscreening/hiring/update", InitialScreeningHiringUpdate.as_view(), name='initscreening.hiring.update'),
     path("initialscreening/update", InitialScreeningUpdate.as_view(), name='initscreening.update'),
     path("initialscreening/evaluation/create", InitialScreeningEvaluationCreate.as_view(), name='initscreening.evaluation.create'),
     path("initialscreening/evaluation/delete", InitialScreeningEvaluationDelete.as_view(), name='initscreening.evaluation.delete'),

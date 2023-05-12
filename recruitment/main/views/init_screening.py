@@ -7,7 +7,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from main.auth import CustomLoginRequired
 from main.models import InitialScreening,Status,Candidate,Users, InitialScreeningEvaluation
 from main.forms import InitialScreeningCreateForm, PrescreeningSubmissionForm
-from main.utils import return_json
+from main.utils import return_json, extract_candidate_info
 from main.views.pre_screening import PrescreeningCreate
 from django.forms.models import model_to_dict
 from django.urls import reverse
@@ -88,14 +88,29 @@ class InitialScreeningIndex(CustomLoginRequired,View):
     
     def get(self,request:HttpRequest,initial_screening_id=None):
         
-        initial_screening = InitialScreening.objects.get(id=initial_screening_id)
-        
-        ds_leads = get_lst_ds_leads(initial_screening)
+        initial_screening = InitialScreening.objects.filter(id=initial_screening_id).values(
+            'pk',
+            "last_modified_at",
+            "is_hm_proceed",
+            "hm_date_selected",
+            "date_selected",
+            "is_proceed",
+            "remarks",
+            hm_status_ = F("hm_status__status"),
+            status_ = F("status__status"),
+            last_modified_by_ = Concat(
+                F("last_modified_by__first_name"),Value(' '),F("last_modified_by__last_name"),
+                Value(' ('),F("last_modified_by__alias"),Value(')')
+            ),
+        )
+
+        candidate = extract_candidate_info(InitialScreening.objects.get(id=initial_screening_id))
+        ds_leads = get_lst_ds_leads(InitialScreening.objects.get(id=initial_screening_id))
 
         context = {
-            'initial_screening':serializers.serialize('python',[initial_screening])[0],
-            'candidate':serializers.serialize('python',[initial_screening.candidate])[0],
-            'ds_leads':list(ds_leads),
+            'initial_screening':list(initial_screening)[0],
+            'candidate':candidate,
+            'ds_leads':ds_leads,
         }
 
         if return_json(request):
@@ -130,6 +145,78 @@ class InitialScreeningCreate(CustomLoginRequired,View):
             })
 
         return redirect(request.META.get('HTTP_REFERER') or reverse('main:candidate.index'))
+
+
+@method_decorator(csrf_exempt,name='dispatch')
+class InitialScreeningHiringUpdate(CustomLoginRequired,View):
+    
+    def post(self,request: HttpRequest,):
+        ''' 
+        Update Initial Screening's is_proceed & status
+        
+        :return InitialScreening
+         
+        '''
+
+        # error handling
+        if not bool(request.POST):
+            response = JsonResponse({'error':'no data is passed!'})
+            response.status_code = 400
+            return response
+
+        if request.POST.get('proceed',None) == None:
+            is_proceed = None
+            if return_json(request):
+                response = JsonResponse({'proceed':'proceed is required'})
+                response.status_code = 400
+                return response
+            
+            return HttpResponseBadRequest('proceed is required')
+        else:
+            is_proceed = request.POST.get('proceed')
+
+        try:
+            initial_screening = InitialScreening.objects.get(id=request.POST['initial_screening'])
+        except:
+            if return_json(request):
+                return JsonResponse({
+                    'initial_screening':'initial_screening not found'
+                })
+            
+            return HttpResponseBadRequest('initial_screening not found')
+        
+        if is_proceed != None:
+            if int(is_proceed) == 0: #do not proceed
+                initial_screening.is_hm_proceed = False
+                initial_screening.hm_status = Status.objects.get(codename='initscreening:not selected')
+
+            elif int(is_proceed) == 1: #proceed
+                
+                initial_screening.is_hm_proceed = True
+                initial_screening.hm_status = Status.objects.get(codename='initscreening:selected')
+                initial_screening.hm_date_selected = datetime.now()
+
+        initial_screening.last_modified_by = request.user
+        initial_screening.save()
+
+        # proceed to ds leads screening OR return output
+        out = {
+            'update':'success',
+            'hm_screening':{
+                'is_hm_proceed':initial_screening.is_hm_proceed,
+                'hm_status':initial_screening.hm_status.status,
+                'hm_date_selected':initial_screening.hm_date_selected,
+            }
+        }
+
+        if return_json(request):
+            return JsonResponse(out)
+        
+        return redirect(
+            # request.META.get('HTTP_REFERER') or 
+            reverse('main:initscreening.index',args=[initial_screening.id])
+        )
+
 
 @method_decorator(csrf_exempt,name='dispatch')
 class InitialScreeningEvaluationCreate(CustomLoginRequired,View): # create & update

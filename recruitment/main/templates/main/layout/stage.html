@@ -70,7 +70,7 @@
 	</div>
 
 	{% block next_stage %}
-		{% if next_stage_is_proceed != True and next_stage_is_proceed != False %}
+		{% if next_stage_is_proceed == None %}
 			<form action="{% block next_stage_form_action %}#{% endblock next_stage_form_action %}" method="post">
 				<div class="d-flex justify-content-end gap-3 p-3 pe-0 align-items-center">
 					<input type="hidden" name="{% block next_stage_submit_name %}initial_screening/prescreening/cbi{% endblock next_stage_submit_name %}" value={% block next_stage_cur_id %}{% endblock next_stage_cur_id %}>
@@ -90,9 +90,11 @@
 				</div>
 			</form>
 		{% else %}
-		<div class="d-flex justify-content-end p-3 pe-0 align-items-center"><!-- next -->
-			<a class="btn btn-success btn-theme btn-evaluation text-capitalize" href="{% block next_stage_url %}{% endblock next_stage_url %}">Next</a>
-		</div>
+			{% if next_stage_is_proceed == True %}
+				<div class="d-flex justify-content-end p-3 pe-0 align-items-center"><!-- next -->
+					<a class="btn btn-success btn-theme btn-evaluation text-capitalize" href="{% block next_stage_url %}{% endblock next_stage_url %}">Next</a>
+				</div>
+			{% endif %}
 		{% endif %}
 
 	{% endblock next_stage %}

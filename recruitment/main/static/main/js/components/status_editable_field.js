@@ -15,8 +15,9 @@ $(document).ready(function () {
 	})
 	
 	$('.status-field-editing button.status-field-editing-cancel').on('click',function (e) {  
-		// console.log($(this).parent().parent().parent())
-        parent = $(this).parent().parent().parent()
+        e.preventDefault();
+
+        parent = $(this).parent().parent().parent().parent();
 		parent.addClass('d-none');
 		parent.prev().removeClass('d-none');
 	})
@@ -25,7 +26,7 @@ $(document).ready(function () {
     $(".status-field-select").on('change', function () {
         $(this).removeClass('bg-secondary bg-success bg-danger')
         
-        console.log(this)
+        // console.log(this)
         console.log($(this).val())
 
         let val = $(this).val()

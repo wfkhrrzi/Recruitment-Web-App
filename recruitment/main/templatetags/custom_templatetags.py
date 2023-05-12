@@ -33,12 +33,15 @@ def show_pending_lead(lead):
 @register.inclusion_tag("main/components/initscreening/status_editable_field.html")
 def show_status_editable_field(
     is_proceed:bool, 
-    label = None, 
+    label = "Status", 
     proceed_label = "proceed", 
     reject_label = "reject", 
     attr_name = "status-edit",
     show_submit_btn = False,
-    submit_name = "is_proceed",
+    submit_name = "proceed",
+    form_action = "#",
+    stage_id = None,
+    stage_name = None,
 ):
     
     return {
@@ -49,6 +52,9 @@ def show_status_editable_field(
         "attr_name": attr_name,
         "show_submit_btn": show_submit_btn,
         "submit_name": submit_name,
+        "form_action": form_action,
+        "stage_id": stage_id,
+        "stage_name": stage_name,
     }
 
 

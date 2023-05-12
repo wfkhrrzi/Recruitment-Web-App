@@ -143,7 +143,7 @@
 {% block next_stage_proc_title %}Proceed <span class="text-lowercase">to</span> <span class="text-uppercase">cbi</span>{% endblock next_stage_proc_title %}
 {% block next_stage_url %}{{sidebar.cbi.url}}{% endblock next_stage_url %}
 {% block next_stage %}
-    {% with next_stage_is_proceed=initial_screening.fields.is_proceed %}
+    {% with next_stage_is_proceed=initial_screening.is_proceed %}
     {{block.super}}
     {% endwith %}
 {% endblock next_stage %}

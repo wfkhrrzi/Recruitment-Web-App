@@ -9,7 +9,7 @@
 
 {% block stage_content %}
 
-{% with is_hm_proceed=False %} <!-- temporary variable for testing -->
+{% comment %} {% with initial_screening.is_hm_proceed=False %} <!-- temporary variable for testing --> {% endcomment %}
 
 <!--  hiring manager screening section -->
 <div class="accordion-item">
@@ -35,16 +35,17 @@
                 Decision
             </div>
 
-            {% if is_hm_proceed != None %}
-                {% show_status_editable_field show_submit_btn=True attr_name="hiring_manager_status" is_proceed=is_hm_proceed label="Status" proceed_label="Selected" reject_label="Not selected" %}
+            {% if initial_screening.is_hm_proceed != None %}
+                {% url 'main:initscreening.hiring.update' as hm_form_action %}
+                {% show_status_editable_field form_action=hm_form_action stage_id=initial_screening.pk stage_name="initial_screening" attr_name="hiring_manager_status" is_proceed=initial_screening.is_hm_proceed proceed_label="Selected" reject_label="Not selected" %}
             {% else %}
 
             <div class="d-flex align-itemms-center" style="font-size:0.9rem;">
                 <div class="me-5">Status</div>
                 
                 <div>
-                    <div style="font-size: 0.9rem;" class="badge rounded-pill fw-semibold text-capitalize mb-2 {% if is_hm_proceed %}text-bg-success{% else %}{% if is_hm_proceed == False %}text-bg-danger {% else %} text-bg-secondary {% endif %} {% endif %}">
-                        {% if is_hm_proceed %}Selected{% else %}{% if is_hm_proceed == False %}Not selected{% else %}Pending{% endif %} {% endif %}
+                    <div style="font-size: 0.9rem;" class="badge rounded-pill fw-semibold text-capitalize mb-2 {% if initial_screening.is_hm_proceed %}text-bg-success{% else %}{% if initial_screening.is_hm_proceed == False %}text-bg-danger {% else %} text-bg-secondary {% endif %} {% endif %}">
+                        {% if initial_screening.is_hm_proceed %}Selected{% else %}{% if initial_screening.is_hm_proceed == False %}Not selected{% else %}Pending{% endif %} {% endif %}
                     </div>
                     <div class="text-muted" style="font-size:0.75rem">
                         <span class="me-1"><i class="fa-sharp fa-solid fa-circle-info"></i></span>
@@ -60,7 +61,7 @@
 </div>
 
 
-{% if is_hm_proceed %} <!-- shows ds leads screening if the hiring manager screening pass -->
+{% if initial_screening.is_hm_proceed %} <!-- shows ds leads screening if the hiring manager screening pass -->
 
 <!--  ds lead screening section -->
 <div class="accordion-item">
@@ -228,11 +229,11 @@
             <!-- final decision content starts here-->
             <div class="d-flex">
                 <!-- final selection -->
-                {% if initial_screening.fields.is_proceed != None %}
+                {% if initial_screening.is_proceed != None %}
                 <div class="col-7">
                     <div class="fw-medium mb-3" style="">Final Decision</div>
                     
-                    {% show_status_editable_field attr_name="final_status" is_proceed=initial_screening.fields.is_proceed label="Selection" proceed_label="Selected" reject_label="Not selected" %}
+                    {% show_status_editable_field attr_name="final_status" is_proceed=initial_screening.is_proceed label="Selection" proceed_label="Selected" reject_label="Not selected" %}
 
                 </div>
                 {% endif %}
@@ -254,7 +255,7 @@
 
 {% endif %}
 
-{% endwith %} <!-- end temporary variable -->
+{% comment %} {% endwith %} <!-- end temporary variable --> {% endcomment %}
 
 
 {% endblock stage_content %}
@@ -264,7 +265,7 @@
 
 <!-- pass child variable 'next_stage_is_proceed' to parent template -->
 {% block next_stage %}
-    {% with next_stage_is_proceed=initial_screening.fields.is_proceed %}
+    {% with next_stage_is_proceed=initial_screening.is_proceed %}
     {{block.super}}
     {% endwith %}
 {% endblock next_stage %}
@@ -279,16 +280,20 @@
 {% block next_stage_rej_title %}Reject{% endblock next_stage_rej_title %}
 
 {% block next_stage_proc_title %}
-    {% with is_hm_proceed=False %} <!-- temporary variable for testing -->
-    {% if is_hm_proceed %}
+    {% comment %} {% with initial_screening.is_hm_proceed=False %} <!-- temporary variable for testing --> {% endcomment %}
+    {% if initial_screening.is_hm_proceed %}
     Proceed <span class="text-lowercase">to</span> Prescreening
     {% else %}
     Proceed <span class="text-lowercase">for</span> DS Leads Screening
     {% endif %}
-    {% endwith %} <!-- end temporary variable -->
+    {% comment %} {% endwith %} <!-- end temporary variable --> {% endcomment %}
 {% endblock next_stage_proc_title %}
 
 {% block next_stage_url %}{{sidebar.prescreening.url}}{% endblock next_stage_url %}
+
+{% block next_stage_form_action %}
+    {% if initial_screening.is_hm_proceed %}{% url 'main:initscreening.update' %}{% else %}{% url 'main:initscreening.hiring.update' %}{% endif %}
+{% endblock next_stage_form_action %}
 
 
 <!-- scripts -->

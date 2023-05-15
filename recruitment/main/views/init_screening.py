@@ -173,7 +173,7 @@ class InitialScreeningHiringUpdate(CustomLoginRequired,View):
             
             return HttpResponseBadRequest('proceed is required')
         else:
-            is_proceed = request.POST.get('proceed')
+            is_proceed = int(request.POST.get('proceed'))
 
         try:
             initial_screening = InitialScreening.objects.get(id=request.POST['initial_screening'])
@@ -186,15 +186,22 @@ class InitialScreeningHiringUpdate(CustomLoginRequired,View):
             return HttpResponseBadRequest('initial_screening not found')
         
         if is_proceed != None:
-            if int(is_proceed) == 0: #do not proceed
+            if is_proceed == 0: #do not proceed
                 initial_screening.is_hm_proceed = False
                 initial_screening.hm_status = Status.objects.get(codename='initscreening:not selected')
 
-            elif int(is_proceed) == 1: #proceed
-                
+                initial_screening.is_proceed = False
+                initial_screening.status = Status.objects.get(codename='initscreening:not selected')
+                initial_screening.date_selected = None
+
+            elif is_proceed == 1: #proceed
                 initial_screening.is_hm_proceed = True
                 initial_screening.hm_status = Status.objects.get(codename='initscreening:selected')
                 initial_screening.hm_date_selected = datetime.now()
+
+                initial_screening.is_proceed = None
+                initial_screening.status = Status.objects.get(codename='initscreening:pending')
+                initial_screening.date_selected = None
 
         initial_screening.last_modified_by = request.user
         initial_screening.save()
@@ -209,6 +216,20 @@ class InitialScreeningHiringUpdate(CustomLoginRequired,View):
             }
         }
 
+        # auto set all leads' evaluation to proceed
+        if is_proceed == 1:
+            users_param = ""
+            for lead in list(Users.objects.filter(user_category__category__iexact='ds lead',).values('id')):
+                for _,id in lead.items():
+                    users_param+=f"users={id}&"
+
+            hm_request = request
+            hm_request.POST = QueryDict(f'proceed=1&{users_param}&initial_screening={request.POST["initial_screening"]}')
+
+            response = InitialScreeningEvaluationCreate.post(hm_request)
+
+            out['ds_leads_eval_all_proceed'] = response
+
         if return_json(request):
             return JsonResponse(out)
         
@@ -221,6 +242,7 @@ class InitialScreeningHiringUpdate(CustomLoginRequired,View):
 @method_decorator(csrf_exempt,name='dispatch')
 class InitialScreeningEvaluationCreate(CustomLoginRequired,View): # create & update
 
+    @classmethod
     def post(self,request: HttpRequest):
 
         lst_users = request.POST.getlist('users') or request.POST.getlist('users[]') or None
@@ -271,11 +293,12 @@ class InitialScreeningEvaluationCreate(CustomLoginRequired,View): # create & upd
                 }
             )
 
-        # return JsonResponse({
-        #     'ds_leads':get_lst_ds_leads(initial_screening),
-        # })
-
-        # return ajax response
+        # return response to initialscreening hiring update view
+        if not return_json(request) and request.path == reverse('main:initscreening.hiring.update'):
+            return JsonResponse({ # this json response is just for debugging purpose
+                'initial_screening_hiring':'success',
+                'initial_screening_evaluation':'success',
+            })
 
         out = output_json_ds_leads(initial_screening)
 
@@ -359,12 +382,15 @@ class InitialScreeningUpdate(CustomLoginRequired,View):
             
             return HttpResponseBadRequest('initial_screening not found')
         
+        # store current is_proceed
+        cur_is_proceed = initial_screening.is_proceed
+
         if is_proceed != None:
             if int(is_proceed) == 0: #do not proceed
                 initial_screening.is_proceed = False
                 initial_screening.status = Status.objects.get(codename='initscreening:not selected')
 
-            elif int(is_proceed) == 1: #proceed
+            elif int(is_proceed) == 1 and not cur_is_proceed: #proceed
                 
                 initial_screening.is_proceed = True
                 initial_screening.status = Status.objects.get(codename='initscreening:selected')
@@ -378,7 +404,7 @@ class InitialScreeningUpdate(CustomLoginRequired,View):
         initial_screening.save()
 
         # proceed to next stage OR return output
-        if initial_screening.is_proceed:
+        if initial_screening.is_proceed and not cur_is_proceed:
             prescreening_request = request
             prescreening_request.POST = QueryDict(f'candidate={initial_screening.candidate.id}&initial_screening={True}')
 

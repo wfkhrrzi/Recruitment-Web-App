@@ -125,6 +125,59 @@ $(document).ready(function () {
 		
 	});
 
+	// update on remarks hidden input and selection status (Final Decision)
+	var remarks_el = $('#initialscreening-remark')
+	var selection_el = $('#final-status-editing select')
 	
+	var orig_selection_val = selection_el.val()
+	var orig_remarks_val = remarks_el.val()
+	// console.log(orig_selection_val)
+	// console.log(orig_remarks_val)
+	
+	function show_update_btn(show) {  
+		let btn_wrapper = $('#final-decision-update-wrapper')
+		btn_wrapper.removeClass('d-none')
+	
+		if (show == false){
+			btn_wrapper.addClass('d-none')
+		}
+	}	
+	
+	remarks_el.on('keyup', function () {
+		$('input[name="remarks"]').val(this.value)
+
+		// show update button if value changes
+		if (this.value != orig_remarks_val || selection_el.val() != orig_selection_val) {
+			show_update_btn(true)
+		}
+		else {
+			show_update_btn(false)
+		}
+	});
+
+	selection_el.on('change', function () {
+		// show update button if value changes
+		if (this.value != orig_selection_val || remarks_el.val() != orig_remarks_val) {
+			show_update_btn(true)
+		}
+		else {
+			show_update_btn(false)
+		}
+
+	});
+
+
+	// $('#final-decision-form').on('submit', function (e) {
+		
+	// 	e.preventDefault()
+
+	// 	var formData = new FormData(e.target)
+	// 	for (const [key, value] of formData.entries() ) {
+	// 		console.log(key+": "+value);
+	// 	}
+	
+	
+	// });
+
 
 });

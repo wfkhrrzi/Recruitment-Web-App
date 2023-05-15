@@ -1,7 +1,7 @@
 {% load custom_templatetags %}
 
 <div class="d-flex align-items-center" style="font-size: 0.9rem;">
-    <div class="me-5">{% if label %}{{label}}{% else %}Status{% endif %}</div>
+    <div class="me-5 align-self-start" style="padding: 0.35rem 0;">{% if label %}{{label}}{% else %}Status{% endif %}</div>
     
     <!-- edited field-->
     <div 
@@ -28,7 +28,7 @@
         <form action="{{form_action}}" method="post">
         {% endif %}
 
-            <div class="d-flex align-items-center gap-3">
+            <div class="d-flex flex-column align-items-center gap-3">
                 
                 <input type="hidden" name="{{stage_name}}" value="{{stage_id}}">
 
@@ -51,7 +51,7 @@
                 </div>
                 
                 <!-- submit btn -->
-                {% if show_submit_btn or form_action %}
+                {% if show_submit_btn and form_action %}
                 <div>
                     <button type="submit" class="status-field-editing-submit btn btn-success btn-evaluation btn-theme me-2">
                         <span><i class="fa-solid fa-pen" style="color: #f4f4f4;"></i></span>

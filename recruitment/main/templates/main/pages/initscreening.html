@@ -227,28 +227,49 @@
     >
         <div class="accordion-body">
             <!-- final decision content starts here-->
-            <div class="d-flex">
+            <form id="final-decision-form" action="{% url 'main:initscreening.update' %}" method="post">
+
+            <div class="d-flex gap-5">
                 <!-- final selection -->
                 {% if initial_screening.is_proceed != None %}
-                <div class="col-7">
+                <div class="">
                     <div class="fw-medium mb-3" style="">Final Decision</div>
                     
-                    {% show_status_editable_field attr_name="final_status" is_proceed=initial_screening.is_proceed label="Selection" proceed_label="Selected" reject_label="Not selected" %}
+                    {% show_status_editable_field show_submit_btn=False stage_name="initial_screening" stage_id=initial_screening.pk attr_name="final_status" is_proceed=initial_screening.is_proceed label="Selection" proceed_label="Selected" reject_label="Not selected" %}
 
                 </div>
                 {% endif %}
                 
                 <!-- remarks -->
-                <div class="col-5">
+                <div class="flex-fill" style="max-width: 40rem;">
 
                     <div class="fw-medium mb-3" style="">Remarks</div>
                     <div>
                         <small class="d-block text-body-secondary mb-2" style="font-size: 0.75rem;">If any, please fill in the below field.</small>
-                        <textarea type="text" name="initialscreening-remark" id="initialscreening-remark" class="form-control remarks" rows="3" placeholder="Input remarks here"></textarea>
+                        <textarea 
+                            type="text" 
+                            name="remarks" 
+                            id="initialscreening-remark" 
+                            class="form-control remarks"
+                            {% comment %} cols="10" {% endcomment %}
+                            rows="4" 
+                            placeholder="Input remarks here"
+                        >{{initial_screening.remarks}}</textarea>
+                    </div>
+
+                    <div id="final-decision-update-wrapper" class="d-flex justify-content-end mt-3 d-none">
+                        <button name="eval-submit" id="eval-proceed" class="btn btn-success btn-theme btn-evaluation text-capitalize" type="submit" value="1">
+                            Update
+                            <span class="ms-1"><i class="fa-solid fa-pen"></i></span>
+                        </button>
                     </div>
 
                 </div>
-            </div>            
+            </div>   
+            
+            </form>
+            
+            
         </div>
     </div>
 </div>
@@ -270,8 +291,9 @@
     {% endwith %}
 {% endblock next_stage %}
 
-
-{% comment %} {% block next_stage_form_action %}{% url 'main:initscreening.update' %}{% endblock next_stage_form_action %} {% endcomment %}
+{% block next_stage_extras %}
+<input type="hidden" name="remarks">
+{% endblock next_stage_extras %}
 
 {% block next_stage_submit_name %}initial_screening{% endblock next_stage_submit_name %} <!-- same as post query parameter name -->
 

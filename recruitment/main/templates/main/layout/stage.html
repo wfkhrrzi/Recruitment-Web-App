@@ -74,7 +74,7 @@
 			<form action="{% block next_stage_form_action %}#{% endblock next_stage_form_action %}" method="post">
 				<div class="d-flex justify-content-end gap-3 p-3 pe-0 align-items-center">
 					<input type="hidden" name="{% block next_stage_submit_name %}initial_screening/prescreening/cbi{% endblock next_stage_submit_name %}" value={% block next_stage_cur_id %}{% endblock next_stage_cur_id %}>
-					
+					{% block next_stage_extras %}{% endblock next_stage_extras %}
 					<div>
 						<!-- both name='proceed' to match with parameter name required by the server -->
 						<button name="proceed" id="rejectIS" class="btn btn-danger btn-evaluation text-capitalize" type="submit" value="0">

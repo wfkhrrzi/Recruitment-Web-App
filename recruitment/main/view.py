@@ -170,9 +170,9 @@ class BrowseIndex(CustomLoginRequired, View):
                 When(Q(cbi__status__isnull=False),then=F('cbi__id')),
                 default=Value(None)
             ),
-            overall_status_name=F('overall_status__status'),
-            source_name=F('source__source'),
-            gpt_status_name=F('gpt_status__status'),
+            overall_status_=F('overall_status__status'),
+            source_=F('source__source'),
+            gpt_status_=F('gpt_status__status'),
             initialscreening_status=Case(
                 When(Q(initialscreening__status__isnull=False),then=F('initialscreening__status__status')),
                 default=Value('-')

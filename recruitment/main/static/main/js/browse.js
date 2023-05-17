@@ -1,6 +1,8 @@
 $(document).ready(function () {
 	
-	console.log(statuses_initscreening)
+	// console.log(statuses_initscreening)
+	// console.log(statuses_prescreening)
+	// console.log(statuses_cbi)
 
 	function component_table_dropdown(param_obj,) {
 		/**
@@ -8,16 +10,17 @@ $(document).ready(function () {
 		 * 
 		 * @param {Object} param_obj
 		 * @param {Object} param_obj.options_param - {
-		 * 		<label_lowercase> : {
+		 * 		<status_codename> : {
 		 * 			value: <value>,
 		 * 			display: <value>,
+		 * 			etc.
 		 * 		},
 		 * }
 		 * 
 		 */
 		
 		let {
-			data = 'default_',
+			data = 'default',
 			statuses_obj = 'default',
 			options_param = 'default',
 			stage_update_url = 'default',
@@ -40,14 +43,16 @@ $(document).ready(function () {
 				let status = statuses_obj[key];
 				status.status = status.status.toLowerCase();
 
-				if (!options_param.hasOwnProperty(status.status)) {
-					options_param[status.status] = {}
+				op_key = status.codename
+
+				if (!options_param.hasOwnProperty(status.codename)) {
+					options_param[status.codename] = {}
 				}
 				
 				let out_status = status.status.charAt(0).toUpperCase() + status.status.slice(1)
-				let selected = data.toLowerCase() === status.status.toLowerCase() ? 'selected':'';
-				let value = options_param[status.status].hasOwnProperty('value') ? options_param[status.status].value : '';
-				let display = !options_param[status.status].hasOwnProperty('display') ? '' : options_param[status.status].display === true ? '' : 'd-none';
+				let selected = data.toLowerCase() === status.status ? 'selected':'';
+				let value = options_param[status.codename].hasOwnProperty('value') ? options_param[status.codename].value : '';
+				let display = !options_param[status.codename].hasOwnProperty('display') ? '' : options_param[status.codename].display === true ? '' : 'd-none';
 				
 				// let out_status = status.status.charAt(0).toUpperCase() + status.status.slice(1)
 				// let selected = data.toLowerCase() === status.status.toLowerCase() ? 'selected':'';
@@ -85,10 +90,10 @@ $(document).ready(function () {
 		columns: [
 			{ data: "name", width:"15%" ,},
 			{ data: "date", },
-			{ data: "source_name" ,width:"10%",},
+			{ data: "source_" ,width:"10%",},
 			// gpt status column
 			{ 
-				data: "gpt_status_name", 
+				data: "gpt_status_", 
 				width:"13%",
 				render:function (data,type) {  
 					let bg_color = data.toLowerCase() == 'recommended' ? 'text-bg-success' : 'text-bg-danger'
@@ -111,13 +116,13 @@ $(document).ready(function () {
 						data : data,
 						statuses_obj : statuses_initscreening,
 						options_param : {
-							'selected': {
+							'initscreening:selected': {
 								value: 1,
 							},
-							'not selected': {
+							'initscreening:not selected': {
 								value: 0,
 							},
-							'yet to select': {
+							'initscreening:pending': {
 								display: false
 							},
 						},
@@ -146,16 +151,26 @@ $(document).ready(function () {
 					
 					return component_table_dropdown({
 						data : data,
+						row : row,
 						statuses_obj : statuses_prescreening,
 						options_param : {
-							'proceed': {
-								value: 1,
+							'prescreening:pending': {
+								display: false,
 							},
-							'not proceed': {
+							'prescreening:not proceed': {
 								value: 0,
 							},
-							'pending': {
-								display: false
+							'prescreening:proceed': {
+								value: 1,
+							},
+							'prescreening:send instruction': {
+								value: 2,
+							},
+							'prescreening:pending submission': {
+								value: 3,
+							},
+							'prescreening:assessment submitted': {
+								value: 4,
 							},
 						},
 						stage_update_url : prescreening_update_url,
@@ -237,7 +252,7 @@ $(document).ready(function () {
 				},
 			},
 			{ 
-				data: "overall_status_name", 
+				data: "overall_status_", 
 				width:"15%",
 			},
 		],
@@ -311,8 +326,6 @@ $(document).ready(function () {
 						proceed:this.value,
 						[e.target.dataset.stageName]:e.target.dataset[e.target.dataset.stageName]
 					}
-
-					console.log(data)
 
 					$.ajax({
 						type: "POST",

@@ -151,6 +151,19 @@ class PrescreeningUpdate(CustomLoginRequired,View): # mail functionality coming 
             prescreening.is_proceed = True
             prescreening.status = Status.objects.get(codename='prescreening:proceed')
 
+        elif int(request.POST['proceed']) == 2: #send instruction
+            
+            prescreening.status = Status.objects.get(codename='prescreening:send instruction')
+
+        elif int(request.POST['proceed']) == 3: #pending submission
+            
+            prescreening.status = Status.objects.get(codename='prescreening:pending submission')
+
+        elif int(request.POST['proceed']) == 4: #assessment submitted
+            
+            prescreening.status = Status.objects.get(codename='prescreening:assessment submitted')
+
+
         prescreening.last_modified_by = request.user
         prescreening.save()
 
@@ -167,7 +180,7 @@ class PrescreeningUpdate(CustomLoginRequired,View): # mail functionality coming 
                     'prescreening:update':'success',
                     'instance':{
                         'is_proceed':prescreening.is_proceed,
-                        'status':prescreening.status,
+                        'status':prescreening.status.status,
                         'candidate':{
                             'name':prescreening.candidate.name
                         },

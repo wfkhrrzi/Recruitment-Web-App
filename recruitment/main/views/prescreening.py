@@ -146,10 +146,20 @@ class PrescreeningUpdate(CustomLoginRequired,View): # mail functionality coming 
             prescreening.is_proceed = False
             prescreening.status = Status.objects.get(codename='prescreening:not proceed')
 
+            try:
+                prescreening.candidate.cbi.reset_instance()
+            except:
+                pass
+
         elif int(request.POST['proceed']) == 1: #proceed
             
             prescreening.is_proceed = True
             prescreening.status = Status.objects.get(codename='prescreening:proceed')
+
+            try:
+                prescreening.candidate.cbi.activate_instance()
+            except:
+                pass
 
         elif int(request.POST['proceed']) == 2: #send instruction
             

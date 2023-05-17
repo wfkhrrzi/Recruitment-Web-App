@@ -389,12 +389,27 @@ class InitialScreeningUpdate(CustomLoginRequired,View):
             if int(is_proceed) == 0: #do not proceed
                 initial_screening.is_proceed = False
                 initial_screening.status = Status.objects.get(codename='initscreening:not selected')
+                
+                try:
+                    initial_screening.candidate.prescreening.reset_instance()
+                except:
+                    pass
+                
+                try:
+                    initial_screening.candidate.cbi.reset_instance()
+                except:
+                    pass
 
             elif int(is_proceed) == 1 and not cur_is_proceed: #proceed
                 
                 initial_screening.is_proceed = True
                 initial_screening.status = Status.objects.get(codename='initscreening:selected')
                 initial_screening.date_selected = datetime.now()
+
+                try:
+                    initial_screening.candidate.prescreening.activate_instance()
+                except:
+                    pass
         
         # update remarks
         if request.POST.get('remarks',None) != None:

@@ -48,6 +48,22 @@ class CBICreate(CustomLoginRequired,View):
                 })
             
             return HttpResponseBadRequest('candidate id not found')
+        
+        try:
+            if(CBI.objects.get(candidate_id=request.POST['candidate'])):
+                if return_json(request):
+                    response = {
+                        'CBI':f'already created for candidate_id = {request.POST["candidate"]}'
+                    }
+                    
+                    if request.POST.get('initial_screening',None):
+                        response['initial_screening:update'] = 'success'    
+                    
+                    return JsonResponse(response)
+            
+                return HttpResponse(response)
+        except:
+            pass
 
         cbi = CBI(candidate=candidate)
         cbi.status = Status.objects.get(codename='cbi:pending schedule') # change status to 'cbi:pending schedule'

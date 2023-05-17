@@ -180,7 +180,22 @@ class Prescreening(CreatedMixin,LastModifiedMixin,models.Model):
     is_proceed = models.BooleanField(null=True)
     is_sent_instruction = models.BooleanField(default=False)
     instruction_date = models.DateTimeField(null=True)
+    is_active = models.BooleanField(default=True)
 
+    def reset_instance(self):
+        self.status = Status.objects.get(codename='prescreening:send instruction')
+        self.assessment_status = Status.objects.get(codename='prescreening:send instruction')
+        self.is_proceed = None
+        self.is_sent_instruction = False
+        self.instruction_date = None
+        self.is_active = False
+
+        self.save()
+
+    def activate_instance(self):
+        self.is_active = True
+
+        self.save()
 
 class PrescreeningSubmission(Submission):
 
@@ -192,6 +207,20 @@ class CBI(CreatedMixin,LastModifiedMixin,models.Model):
     status = models.ForeignKey(Status,on_delete=models.CASCADE,null=False)
     candidate = models.OneToOneField(Candidate,on_delete=models.CASCADE,null=False)
     is_proceed = models.BooleanField(null=True)
+    is_active = models.BooleanField(default=True)
+
+    def reset_instance(self):
+        self.status = Status.objects.get(codename='cbi:pending schedule')
+        self.is_proceed = None
+        self.remarks = None
+        self.is_active = False
+
+        self.save()
+
+    def activate_instance(self):
+        self.is_active = True
+
+        self.save()
 
 
 class CBISchedule(CreatedMixin,LastModifiedMixin,models.Model):

@@ -229,7 +229,7 @@ $(document).ready(function () {
 								value: 4,
 							},
 						},
-						stage_update_url : '#',
+						stage_update_url : cbi_update_url,
 						stage_id : row.cbi_id,
 						stage_name : 'cbi',
 					})

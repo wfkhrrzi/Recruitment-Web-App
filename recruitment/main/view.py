@@ -178,11 +178,11 @@ class BrowseIndex(CustomLoginRequired, View):
                 default=Value('-')
             ),
             prescreening_status=Case(
-                When(Q(prescreening__status__isnull=False),then=F('prescreening__status__status')),
+                When(Q(prescreening__status__isnull=False) & Q(prescreening__is_active=True),then=F('prescreening__status__status')),
                 default=Value('-')
             ),
             cbi_status=Case(
-                When(Q(cbi__status__isnull=False),then=F('cbi__status__status')),
+                When(Q(cbi__status__isnull=False) & Q(cbi__is_active=True),then=F('cbi__status__status')),
                 default=Value('-')
             ),
             href=Case(

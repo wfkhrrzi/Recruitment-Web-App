@@ -66,6 +66,7 @@ $(document).ready(function () {
 			{ data: "name", width:"15%" ,},
 			{ data: "date", },
 			{ data: "source_name" ,width:"10%",},
+			// gpt status column
 			{ 
 				data: "gpt_status_name", 
 				width:"13%",
@@ -93,7 +94,7 @@ $(document).ready(function () {
 						reject_label : 'not selected',
 						none_label : 'yet to select',
 						stage_update_url : initscreening_update_url,
-						stage_id : row.id,
+						stage_id : row.initialscreening_id,
 						stage_name : 'initial_screening',
 					})
 						
@@ -122,7 +123,7 @@ $(document).ready(function () {
 						reject_label : 'not proceed',
 						none_label : 'pending',
 						stage_update_url : prescreening_update_url,
-						stage_id : row.id,
+						stage_id : row.prescreening_id,
 						stage_name : 'prescreening',
 					})
 
@@ -276,7 +277,9 @@ $(document).ready(function () {
 							api.draw();
 						},
 						error: function (a,b,c) {  
-							console.log(a.responseJSON)
+							console.log(a.responseJSON);
+							api.draw();
+
 						}
 					});
 

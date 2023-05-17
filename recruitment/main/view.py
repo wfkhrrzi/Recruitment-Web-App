@@ -153,33 +153,44 @@ class BrowseIndex(CustomLoginRequired, View):
                 InitialScreening.objects.filter(candidate=OuterRef('pk')).values('pk')[:1]
             ),
         ).values(
-            'id',
             'name',
             'date',
+            initialscreening_id=Case(
+                When(Q(initialscreening__status__isnull=False),then=F('initialscreening__id')),
+                default=Value(None)
+            ),
+            prescreening_id=Case(
+                When(Q(prescreening__status__isnull=False),then=F('prescreening__id')),
+                default=Value(None)
+            ),
+            cbi_id=Case(
+                When(Q(cbi__status__isnull=False),then=F('cbi__id')),
+                default=Value(None)
+            ),
             overall_status_name=F('overall_status__status'),
             source_name=F('source__source'),
             gpt_status_name=F('gpt_status__status'),
             initialscreening_status=Case(
-                When(Q(initialscreening__status__status__isnull=False),then=F('initialscreening__status__status')),
+                When(Q(initialscreening__status__isnull=False),then=F('initialscreening__status__status')),
                 default=Value('-')
             ),
             prescreening_status=Case(
-                When(Q(prescreening__status__status__isnull=False),then=F('prescreening__status__status')),
+                When(Q(prescreening__status__isnull=False),then=F('prescreening__status__status')),
                 default=Value('-')
             ),
             cbi_status=Case(
-                When(Q(cbi__status__status__isnull=False),then=F('cbi__status__status')),
+                When(Q(cbi__status__isnull=False),then=F('cbi__status__status')),
                 default=Value('-')
             ),
             href=Case(
                 When(
-                    Q(cbi__status__status__isnull=False),
+                    Q(cbi__status__isnull=False),
                     then=Concat(
                         Value(reverse('main:cbi.index.default',)), F('cbi_id'), output_field=CharField(),
                     )
                 ),
                 When(
-                    Q(prescreening__status__status__isnull=False),
+                    Q(prescreening__status__isnull=False),
                     then=Concat(
                         Value(reverse('main:prescreening.index.default',)), F('prescreening_id'), output_field=CharField(),
                     )

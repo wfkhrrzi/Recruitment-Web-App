@@ -125,9 +125,9 @@ class PrescreeningUpdate(CustomLoginRequired,View): # mail functionality coming 
 
         if request.POST.get('proceed',None) == None:
             if return_json(request):
-                return JsonResponse({
-                    'proceed':'proceed is required'
-                })
+                response = JsonResponse({'proceed':'proceed is required'})
+                response.status_code = 400
+                return response
             
             return HttpResponseBadRequest('proceed is required')
 
@@ -135,9 +135,9 @@ class PrescreeningUpdate(CustomLoginRequired,View): # mail functionality coming 
             prescreening = Prescreening.objects.get(id=request.POST['prescreening'])
         except:
             if return_json(request):
-                return JsonResponse({
-                    'prescreening':'prescreening id not found'
-                })
+                response = JsonResponse({'prescreening':'prescreening id not found'})
+                response.status_code = 400
+                return response
             
             return HttpResponseBadRequest('prescreening id not found')
 

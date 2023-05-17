@@ -210,19 +210,23 @@ $(document).ready(function () {
 						data : data,
 						statuses_obj : statuses_cbi,
 						options_param : {
-							'proceed': {
-								value: 1,
-							},
-							'not proceed': {
+							'cbi:not proceed': {
 								value: 0,
 							},
-							'pending interview': {
+							'cbi:proceed': {
+								value: 1,
+							},
+							'cbi:pending schedule': {
 								// display: false
 								value: 2,
 							},
-							'pending result': {
+							'cbi:pending interview': {
 								// display: false
 								value: 3,
+							},
+							'cbi:pending result': {
+								// display: false
+								value: 4,
 							},
 						},
 						stage_update_url : '#',

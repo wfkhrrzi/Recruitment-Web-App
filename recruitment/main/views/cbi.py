@@ -264,12 +264,35 @@ class CBIUpdate(CustomLoginRequired,View): # mail functionality coming soon
             cbi.is_proceed = True
             cbi.status = Status.objects.get(codename='cbi:proceed')
 
+        elif int(request.POST['proceed']) == 2: #pending schedule
+            
+            cbi.is_proceed = True
+            cbi.status = Status.objects.get(codename='cbi:pending schedule')
+
+        elif int(request.POST['proceed']) == 3: #pending interview
+            
+            cbi.is_proceed = True
+            cbi.status = Status.objects.get(codename='cbi:pending interview')
+
+        elif int(request.POST['proceed']) == 4: #pending result
+            
+            cbi.is_proceed = True
+            cbi.status = Status.objects.get(codename='cbi:pending result')
+
+
         cbi.last_modified_by = request.user
         cbi.save()
             
         if return_json(request):
             return JsonResponse({
                 'cbi:update':'success',
+                'instance':{
+                    'is_proceed':cbi.is_proceed,
+                    'status':cbi.status.status,
+                    'candidate':{
+                        'name':cbi.candidate.name
+                    },
+                }
             })
 
         return redirect(request.META.get('HTTP_REFERER') or reverse('main:candidate.index'))

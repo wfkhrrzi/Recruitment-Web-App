@@ -29,7 +29,7 @@ class BrowseIndex(CustomLoginRequired, View):
 
             #fetch statuses
             lst_sources = list(Source.objects.all().values())
-            lst_statuses = Status.objects.all().values('codename','status')
+            lst_statuses = Status.objects.all().values('pk','codename','status')
             statuses = dict(
                 initscreening=[],
                 prescreening=[],
@@ -40,12 +40,16 @@ class BrowseIndex(CustomLoginRequired, View):
             for status_obj in lst_statuses:
                 codename:str = status_obj['codename']
                 status:str = status_obj['status']
-                out_status = {'codename':codename,'status':status}
+                id:int = status_obj['pk']
+                out_status = {'id':id,'codename':codename,'status':status}
 
                 stage,phase = tuple(codename.split(':'))
                 if phase == 'ongoing': # overall_status
                     statuses['overall_status'].append(out_status)
-                elif stage in ('initscreening','prescreening') :
+                elif stage == 'initscreening' :
+                    if phase in ('pending','selected','not selected'):
+                        statuses[stage].append(out_status)
+                elif stage == 'prescreening':
                     if phase in ('pending','proceed','not proceed'):
                         statuses[stage].append(out_status)
                 elif stage == 'cbi':
@@ -92,6 +96,8 @@ class BrowseIndex(CustomLoginRequired, View):
                         Q(date__range=(start_of_week,end_of_week))
                 )
             )
+
+            # return JsonResponse(data={"metrics":metrics, 'statuses':statuses, 'source':lst_sources})
 
             return render(request,template_name,{"metrics":metrics, 'statuses':statuses, 'source':lst_sources})
 
@@ -147,6 +153,7 @@ class BrowseIndex(CustomLoginRequired, View):
                 InitialScreening.objects.filter(candidate=OuterRef('pk')).values('pk')[:1]
             ),
         ).values(
+            'id',
             'name',
             'date',
             overall_status_name=F('overall_status__status'),

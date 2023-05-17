@@ -5,9 +5,13 @@
 {% load custom_templatetags %}
 
 {% block content %}
-    <div class="mb-3">
+    <div class="mt-3 px-3">
+        <h1 class="">Hello, 
+            <span style="color:#00a19c">
+                {{request.user.first_name}} {{request.user.last_name}}
+            </span>
+        </h1>
     </div>
-    <h1 class="">Browse page</h1>
     
     {% comment %} Action metrics {% endcomment %}
     <div class="my-4 d-flex flex-row">
@@ -126,6 +130,15 @@
 
     {% load static %}
     <script src="{% static 'main/js/browse.js' %}"></script>
+    <script>
+        const statuses_initscreening = {{statuses.initscreening|safe}}
+        const statuses_prescreening = {{statuses.prescreening|safe}}
+        const statuses_cbi = {{statuses.cbi|safe}}
+
+        const initscreening_update_url = "{% url 'main:initscreening.update' %}"
+        const prescreening_update_url = "{% url 'main:prescreening.update' %}"
+        {% comment %} const cbi_update_url = "{% url 'main:cbi.update' %}" {% endcomment %}
+    </script>
 
 
 {% endblock import_scripts %}

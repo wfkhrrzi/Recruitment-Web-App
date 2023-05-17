@@ -8,7 +8,7 @@ from main.auth import CustomLoginRequired
 from main.models import InitialScreening,Status,Candidate,Users, InitialScreeningEvaluation
 from main.forms import InitialScreeningCreateForm, PrescreeningSubmissionForm
 from main.utils import return_json, extract_candidate_info
-from main.views.pre_screening import PrescreeningCreate
+from main.views.prescreening import PrescreeningCreate
 from django.forms.models import model_to_dict
 from django.urls import reverse
 from datetime import datetime

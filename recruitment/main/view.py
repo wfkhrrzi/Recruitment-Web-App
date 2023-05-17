@@ -34,7 +34,7 @@ class BrowseIndex(CustomLoginRequired, View):
                 initscreening=[],
                 prescreening=[],
                 cbi=[],
-                gpt=[],
+                gpt_status=[],
                 overall_status=[],
             )
             for status_obj in lst_statuses:
@@ -49,14 +49,17 @@ class BrowseIndex(CustomLoginRequired, View):
                 elif stage == 'initscreening' :
                     if phase in ('pending','selected','not selected'):
                         statuses[stage].append(out_status)
-                elif stage == 'prescreening':
-                    if phase in ('pending','proceed','not proceed'):
-                        statuses[stage].append(out_status)
-                elif stage == 'cbi':
-                    if phase in ('pending interview','pending result','proceed','not proceed'):
-                        statuses[stage].append(out_status)
-                elif stage == 'gpt_status':
-                    statuses['gpt'].append(out_status)
+                elif stage in ('prescreening','cbi','gpt_status',):
+                    statuses[stage].append(out_status)
+
+                # elif stage == 'prescreening':
+                #     if phase in ('pending','proceed','not proceed'):
+                #         statuses[stage].append(out_status)
+                # elif stage == 'cbi':
+                #     if phase in ('pending interview','pending result','proceed','not proceed'):
+                #         statuses[stage].append(out_status)
+                # elif stage == 'gpt_status':
+                #     statuses['gpt'].append(out_status)
 
             
             # Get the start and end of the current week

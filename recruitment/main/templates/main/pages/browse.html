@@ -54,7 +54,7 @@
                     </th>
                     <th class="filter">
                         <select name="source" id="" class="form-select">
-                            <option value="">None</option>
+                            <option class="table-filter-none" value="">Filter</option>
                             {% for source in source %}
                                 <option value="{{source.id}}">{{source.source|title}}</option>
                             {% endfor %}
@@ -62,15 +62,15 @@
                     </th>
                     <th class="filter">
                         <select name="gpt_status" id="" class="form-select">
-                            <option value="">None</option>
-                            {% for status in statuses.gpt %}
+                            <option class="table-filter-none" value="">Filter</option>
+                            {% for status in statuses.gpt_status %}
                                 <option value="{{status.codename}}">{{status.status|title}}</option>
                             {% endfor %}
                         </select>
                     </th>
                     <th class="filter">
                         <select name="initscreening_status" id="" class="form-select">
-                            <option value="">None</option>
+                            <option class="table-filter-none" value="">Filter</option>
                             {% for status in statuses.initscreening %}
                                 <option value="{{status.codename}}">{{status.status|title}}</option>
                             {% endfor %}
@@ -78,7 +78,7 @@
                     </th>
                     <th class="filter">
                         <select name="prescreening_status" id="" class="form-select">
-                            <option value="">None</option>
+                            <option class="table-filter-none" value="">Filter</option>
                             {% for status in statuses.prescreening %}
                                 <option value="{{status.codename}}">{{status.status|title}}</option>
                             {% endfor %}
@@ -86,7 +86,7 @@
                     </th>
                     <th class="filter">
                         <select name="cbi_status" id="" class="form-select">
-                            <option value="">None</option>
+                            <option class="table-filter-none" value="">Filter</option>
                             {% for status in statuses.cbi %}
                                 <option value="{{status.codename}}">{{status.status|title}}</option>
                             {% endfor %}
@@ -94,7 +94,7 @@
                     </th>
                     <th class="filter">
                         <select name="overall_status" id="" class="form-select">
-                            <option value="">None</option>
+                            <option class="table-filter-none" value="">Filter</option>
                             {% for status in statuses.overall_status %}
                                 <option value="{{status.codename}}">{{status.status|title}}</option>
                             {% endfor %}

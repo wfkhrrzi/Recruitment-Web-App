@@ -2,14 +2,24 @@ $(document).ready(function () {
 	
 	console.log(statuses_initscreening)
 
-	function component_table_dropdown(param_obj) {
+	function component_table_dropdown(param_obj,) {
+		/**
+		 * generate status dropdown for the specified column
+		 * 
+		 * @param {Object} param_obj
+		 * @param {Object} param_obj.options_param - {
+		 * 		<label_lowercase> : {
+		 * 			value: <value>,
+		 * 			display: <value>,
+		 * 		},
+		 * }
+		 * 
+		 */
 		
-		const {
+		let {
 			data = 'default_',
 			statuses_obj = 'default',
-			proceed_label = 'default',
-			reject_label = 'default',
-			none_label = 'default',
+			options_param = 'default',
 			stage_update_url = 'default',
 			stage_id = 'default',
 			stage_name = 'default',
@@ -27,12 +37,22 @@ $(document).ready(function () {
 		let options_dropdown = ''
 		for (const key in statuses_obj) {
 			if (Object.hasOwnProperty.call(statuses_obj, key)) {
-				const status = statuses_obj[key];
+				let status = statuses_obj[key];
+				status.status = status.status.toLowerCase();
+
+				if (!options_param.hasOwnProperty(status.status)) {
+					options_param[status.status] = {}
+				}
 				
 				let out_status = status.status.charAt(0).toUpperCase() + status.status.slice(1)
 				let selected = data.toLowerCase() === status.status.toLowerCase() ? 'selected':'';
-				let value = status.status.toLowerCase() == proceed_label.toLowerCase() ? 1 : status.status.toLowerCase() == reject_label.toLowerCase() ? 0 : '';
-				let display = status.status.toLowerCase() == none_label.toLowerCase() ? 'd-none' : '';
+				let value = options_param[status.status].hasOwnProperty('value') ? options_param[status.status].value : '';
+				let display = !options_param[status.status].hasOwnProperty('display') ? '' : options_param[status.status].display === true ? '' : 'd-none';
+				
+				// let out_status = status.status.charAt(0).toUpperCase() + status.status.slice(1)
+				// let selected = data.toLowerCase() === status.status.toLowerCase() ? 'selected':'';
+				// let value = status.status.toLowerCase() == proceed_label.toLowerCase() ? 1 : status.status.toLowerCase() == reject_label.toLowerCase() ? 0 : '';
+				// let display = status.status.toLowerCase() == none_label.toLowerCase() ? 'd-none' : '';
 
 				option = `<option ${selected} class="${display}" value="${value}">${out_status}</option>`;
 				
@@ -90,9 +110,17 @@ $(document).ready(function () {
 					return component_table_dropdown({
 						data : data,
 						statuses_obj : statuses_initscreening,
-						proceed_label : 'selected',
-						reject_label : 'not selected',
-						none_label : 'yet to select',
+						options_param : {
+							'selected': {
+								value: 1,
+							},
+							'not selected': {
+								value: 0,
+							},
+							'yet to select': {
+								display: false
+							},
+						},
 						stage_update_url : initscreening_update_url,
 						stage_id : row.initialscreening_id,
 						stage_name : 'initial_screening',
@@ -119,9 +147,17 @@ $(document).ready(function () {
 					return component_table_dropdown({
 						data : data,
 						statuses_obj : statuses_prescreening,
-						proceed_label : 'proceed',
-						reject_label : 'not proceed',
-						none_label : 'pending',
+						options_param : {
+							'proceed': {
+								value: 1,
+							},
+							'not proceed': {
+								value: 0,
+							},
+							'pending': {
+								display: false
+							},
+						},
 						stage_update_url : prescreening_update_url,
 						stage_id : row.prescreening_id,
 						stage_name : 'prescreening',
@@ -155,16 +191,29 @@ $(document).ready(function () {
 				width:"13%",
 				render:function (data,type,row) {
 					
-					// return component_table_dropdown({
-					// 	data : data,
-					// 	statuses_obj : statuses_cbi,
-					// 	proceed_label : 'proceed',
-					// 	reject_label : 'not proceed',
-					// 	none_label : 'pending',
-					// 	stage_update_url : cbi_update_url,
-					// 	stage_id : row.id,
-					// 	stage_name : 'cbi',
-					// })
+					return component_table_dropdown({
+						data : data,
+						statuses_obj : statuses_cbi,
+						options_param : {
+							'proceed': {
+								value: 1,
+							},
+							'not proceed': {
+								value: 0,
+							},
+							'pending interview': {
+								// display: false
+								value: 2,
+							},
+							'pending result': {
+								// display: false
+								value: 3,
+							},
+						},
+						stage_update_url : '#',
+						stage_id : row.cbi_id,
+						stage_name : 'cbi',
+					})
 					
 					// return data in badge design
 					let bg_color = data.toLowerCase() == 'pending interview' || data.toLowerCase() == 'pending result'  ? 'text-bg-warning' : '-' ? null : 'proceed' ? 'text-bg-success' : 'text-bg-danger'

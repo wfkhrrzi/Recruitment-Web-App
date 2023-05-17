@@ -65,7 +65,7 @@ class PrescreeningCreate(CustomLoginRequired,View):
             pass
 
         prescreening = Prescreening(candidate=candidate)
-        prescreening.status = Status.objects.get(codename='prescreening:pending')
+        prescreening.status = Status.objects.get(codename='prescreening:send instruction')
         prescreening.assessment_status = Status.objects.get(codename='prescreening:send instruction')
         prescreening.created_by = request.user
         

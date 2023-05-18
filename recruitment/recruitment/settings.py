@@ -86,18 +86,18 @@ WSGI_APPLICATION = 'recruitment.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
     # 'default': {
-    #     'ENGINE': 'django.db.backends.postgresql',
-    #     'NAME': "dsats_db",
-    #     'USER': "dsats_user@ptsg-5dsppsql01",
-    #     'PASSWORD': "ds_dsats@2023",
-    #     'HOST': "ptsg-5dsppsql01.postgres.database.azure.com",
-    #     'PORT': "5432",  # 5432 by default
-    # }
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': BASE_DIR / 'db.sqlite3',
+    # },
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': "dsats_db",
+        'USER': "dsats_user@ptsg-5dsppsql01",
+        'PASSWORD': "ds_dsats@2023",
+        'HOST': "ptsg-5dsppsql01.postgres.database.azure.com",
+        'PORT': "5432",  # 5432 by default
+    }
 }
 
 

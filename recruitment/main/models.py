@@ -31,7 +31,7 @@ class UsersManager(BaseUserManager):
 class Users(PermissionsMixin,AbstractBaseUser):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
-    alias = models.CharField(max_length=10,null=True)
+    alias = models.CharField(max_length=100,null=True)
     user_name = models.CharField(max_length=50)
     email = models.EmailField(max_length=100,unique=True)
     password = models.CharField(max_length=200)
@@ -99,19 +99,19 @@ class CreatedMixin(models.Model):
 
 
 class Candidate(CreatedMixin,LastModifiedMixin,models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=255)
     date = models.DateField()
-    referral_name = models.CharField(max_length=100)
-    phone_number = models.CharField(max_length=100)
-    email = models.EmailField(max_length=100)
-    highest_education = models.CharField(max_length=100) # need revision on this
+    referral_name = models.CharField(max_length=255)
+    phone_number = models.CharField(max_length=255)
+    email = models.EmailField(max_length=255)
+    highest_education = models.CharField(max_length=255) # need revision on this
     years_exp = models.IntegerField()
     CGPA = models.FloatField()
-    recent_role = models.CharField(max_length=100)
-    recent_emp = models.CharField(max_length=100)
-    main_skills = models.CharField(max_length=100)
-    ds_skills = models.CharField(max_length=100)
-    ds_background = models.CharField(max_length=100)
+    recent_role = models.CharField(max_length=255)
+    recent_emp = models.CharField(max_length=255)
+    main_skills = models.CharField(max_length=255)
+    ds_skills = models.CharField(max_length=255)
+    ds_background = models.CharField(max_length=255)
     hr_remarks = models.TextField(null=True)
     gpt_status = models.ForeignKey(Status,on_delete=models.SET_NULL,null=True,related_name="candidates_gpt_status")
     cv_link = models.CharField(max_length=255)

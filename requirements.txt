@@ -3,3 +3,4 @@ djangorestframework==3.12.0
 factory_boy
 querystring-parser
 psycopg2==2.8.6
+django-seed

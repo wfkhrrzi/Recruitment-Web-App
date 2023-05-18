@@ -45,14 +45,14 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING(f'All instances from table "main_{model_name}" are deleted.'))
 
             #reset sequences
-            cursor.execute(f'UPDATE sqlite_sequence SET seq = 0 WHERE sqlite_sequence.name = "main_{model_name}"')
-            row = cursor.execute(f'SELECT seq FROM sqlite_sequence WHERE sqlite_sequence.name = "main_{model_name}"').fetchone()
+            # cursor.execute(f'UPDATE sqlite_sequence SET seq = 0 WHERE sqlite_sequence.name = "main_{model_name}"')
+            # row = cursor.execute(f'SELECT seq FROM sqlite_sequence WHERE sqlite_sequence.name = "main_{model_name}"').fetchone()
 
-            if row:
-                if row[0] == 0:
-                    self.stdout.write(self.style.SUCCESS(f'Sequence for table "main_{model_name}" reset to {str(row[0])}'))
-                else:
-                    self.stdout.write(self.style.ERROR(f'Sequence for table "main_{model_name}" failed to reset. Remains to {str(row[0])}'))
+            # if row:
+            #     if row[0] == 0:
+            #         self.stdout.write(self.style.SUCCESS(f'Sequence for table "main_{model_name}" reset to {str(row[0])}'))
+            #     else:
+            #         self.stdout.write(self.style.ERROR(f'Sequence for table "main_{model_name}" failed to reset. Remains to {str(row[0])}'))
         
         
     def run_seed(self, mode):

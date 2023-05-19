@@ -39,7 +39,7 @@
                     <th scope="col">Source</th>
                     <th scope="col">GPT Recommendation</th>
                     <th scope="col">Initial Screening</th>
-                    <th scope="col">Preassessment</th>
+                    <th scope="col">Pre-assessment</th>
                     <th scope="col">CBI Assessment</th>
                     <th scope="col">Overall Status</th>
                 </tr>
@@ -104,6 +104,55 @@
             </thead>
         </table>
 
+    </div>
+    
+    <!-- Modal -->
+    <div class="modal modal-lg fade" id="uploadResumeModal" tabindex="-1" aria-labelledby="uploadResumeModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5 text-capitalize" id="uploadResumeModalLabel">upload & parse resume</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="card text-center p-3">
+                        <div class="card-title fw-semibold" style="font-size: 0.95rem;">Upload Resumes</div>
+                        <!-- upload resumes container -->
+                        <div class="card-body">
+                            <div id="upload-resumes-content text-center" class="mb-3" style="font-size:0.85rem;">
+                                <!-- no files (template) -->
+                                <div id="upload-resumes-alert" class="text-secondary">Drag and drop files here <span class="fst-italic">OR</span></div>
+                                
+                                <!-- files available (template) -->
+                                <div id="upload-resumes-item-wrapper" class="mb-3 d-flex flex-wrap gap-4">
+                                    {% comment %} <div class="upload-resumes-item d-flex align-items-center gap-1" style="width:calc(600px/4)">
+                                        <div class="file-name-ellipsis">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Harum quas perspiciatis rerum cum, quo inventore libero deserunt a modi ex quia illo est, aspernatur omnis enim ullam dolorum debitis nobis?</div>
+                                        <button class="btn btn-sm"><i class="fa-solid fa-trash"></i></button>
+                                    </div> {% endcomment %}
+                                </div>                                
+                            </div>
+                            <!-- upload resumes buttons -->
+                            <div class="d-flex justify-content-center gap-3">
+                                <div>
+                                    <input id="upload-resumes-input" name="resumes" class="invisible position-absolute" type="file" multiple accept="pdf" />
+                                    <label class="btn btn-sm btn-success btn-theme" for="upload-resumes-input">Choose file(s)</label>
+                                </div>
+                                <div class="">
+                                    <button type="button" class="btn btn-primary btn-sm">Upload</button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-sm btn-primary">Save changes</button>
+                </div>
+
+            </div>
+        </div>
     </div>
 
 {% endblock content %} 

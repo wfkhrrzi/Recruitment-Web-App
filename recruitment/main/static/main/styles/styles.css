@@ -78,3 +78,9 @@ html body {
 #table-candidates, .table-dropdown, .table-filter, th.sorting{
     font-size: 0.8rem;
 }
+
+.file-name-ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }

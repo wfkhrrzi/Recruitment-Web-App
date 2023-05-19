@@ -69,6 +69,9 @@ $(document).ready(function () {
 		`;
 	}
 
+	const uploadResumeModal = new bootstrap.Modal('#uploadResumeModal');
+
+	// uploadResumeModal.toggle()
 
 	var table = $("#table-candidates").DataTable({
 		orderCellsTop: true,
@@ -81,11 +84,11 @@ $(document).ready(function () {
         	"<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
 		buttons: {
 			buttons: [
-				// upload resume button
+				// upload and parse resume button
 				{
 					text: 'Upload resume',
 					action: function ( e, dt, node, config ) {
-						alert( 'Button activated' );
+						uploadResumeModal.toggle()
 					},
 					className: 'btn-sm btn-success btn-theme me-2',
 				},
@@ -384,5 +387,45 @@ $(document).ready(function () {
 
 
 	});
+	
+
+	const uploadResumeFileInput = $('#upload-resumes-input');
+
+	const displayFiles = () => {  
+		// console.log(uploadResumeFileInput.prop('files'))
+
+		var file_list = uploadResumeFileInput.prop('files')
+		let default_view = $('#upload-resumes-alert')
+		console.log(default_view.hasClass('d-none'))
+
+		if (file_list.length > 0){
+
+			if (!default_view.hasClass('d-none')) {
+				default_view.addClass('d-none');
+			}
+
+			$.each(file_list, (index, file) => {
+				console.log(file.name)
+				$('#upload-resumes-item-wrapper').append(
+					`
+					<div class="upload-resumes-item d-flex align-items-center gap-1" style="width:calc(600px/4)">
+						<div class="file-name-ellipsis">${file.name}</div>
+						<button class="btn btn-sm"><i class="fa-solid fa-trash"></i></button>
+					</div>
+					`
+				);
+				
+			})
+		} else {
+			
+			
+			if (default_view.hasClass('d-none')) {
+				default_view.removeClass('d-none');
+			}
+		}
+
+	}
+
+	uploadResumeFileInput.on('change',displayFiles)
 
 });

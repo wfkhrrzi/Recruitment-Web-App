@@ -1,8 +1,4 @@
 $(document).ready(function () {
-	
-	// console.log(statuses_initscreening)
-	// console.log(statuses_prescreening)
-	// console.log(statuses_cbi)
 
 	function component_table_dropdown(param_obj,) {
 		/**
@@ -74,11 +70,42 @@ $(document).ready(function () {
 	}
 
 
-	$("#table-candidates").DataTable({
+	var table = $("#table-candidates").DataTable({
 		orderCellsTop: true,
 		fixedHeader: true,
 		responsive: true,
 		autoWidth: true,
+		dom: 
+			"<'row mb-2'<'col-sm-12 col-md-4'l><'col-sm-12 col-md-8'<'d-flex justify-content-end'<'me-4'B>f>>>" +
+        	"<'row'<'col-sm-12'tr>>" +
+        	"<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+		buttons: {
+			buttons: [
+				// upload resume button
+				{
+					text: 'Upload resume',
+					action: function ( e, dt, node, config ) {
+						alert( 'Button activated' );
+					},
+					className: 'btn-sm btn-success btn-theme me-2',
+				},
+				// parse resume button
+				{
+					text: 'Parse new resume',
+					action: function ( e, dt, node, config ) {
+						alert( 'Button activated' );
+					},
+					className: 'btn-sm btn-success btn-theme',
+				},
+			],
+
+			dom: {
+				container: {
+					className: ''
+				}
+			}
+			
+		},
 		serverSide: true,
 		processing: true,
 		ajax: {
@@ -269,7 +296,7 @@ $(document).ready(function () {
 			const api = this.api();
 
 			// Filtering column
-			$(".filter", api.table().header()).each(function (i) {
+			$(".table-filter-wrapper", api.table().header()).each(function (i) {
 
 				var column = api.column(i);
 				var input = $(this).find("input[type='text']");

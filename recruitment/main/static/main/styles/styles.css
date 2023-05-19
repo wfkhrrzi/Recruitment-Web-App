@@ -74,3 +74,7 @@ html body {
 #cbi-schedule-table th{
     font-weight: 600!important;
 }
+
+#table-candidates, .table-dropdown, .table-filter, th.sorting{
+    font-size: 0.8rem;
+}

@@ -39,61 +39,61 @@
                     <th scope="col">Source</th>
                     <th scope="col">GPT Recommendation</th>
                     <th scope="col">Initial Screening</th>
-                    <th scope="col">Prescreening</th>
-                    <th scope="col">CBI</th>
+                    <th scope="col">Preassessment</th>
+                    <th scope="col">CBI Assessment</th>
                     <th scope="col">Overall Status</th>
                 </tr>
 
                 <tr>
-                    {% comment %} <th class="filter"></th> {% endcomment %}
-                    <th class="filter">
-                        <input type="text" class="form-control" placeholder="Filter Name">
+                    {% comment %} <th class="table-filter-wrapper"></th> {% endcomment %}
+                    <th class="table-filter-wrapper">
+                        <input type="text" class="form-control table-filter" placeholder="Filter Name">
                     </th>
-                    <th class="filter">
-                        <input type="date" class="form-control" placeholder="Filter Date">
+                    <th class="table-filter-wrapper">
+                        <input type="date" class="form-control table-filter" placeholder="Filter Date">
                     </th>
-                    <th class="filter">
-                        <select name="source" id="" class="form-select">
+                    <th class="table-filter-wrapper">
+                        <select name="source" id="" class="form-select table-filter">
                             <option class="table-filter-none" value="">Filter</option>
                             {% for source in source %}
                                 <option value="{{source.id}}">{{source.source|title}}</option>
                             {% endfor %}
                         </select>
                     </th>
-                    <th class="filter">
-                        <select name="gpt_status" id="" class="form-select">
+                    <th class="table-filter-wrapper">
+                        <select name="gpt_status" id="" class="form-select table-filter">
                             <option class="table-filter-none" value="">Filter</option>
                             {% for status in statuses.gpt_status %}
                                 <option value="{{status.codename}}">{{status.status|title}}</option>
                             {% endfor %}
                         </select>
                     </th>
-                    <th class="filter">
-                        <select name="initscreening_status" id="" class="form-select">
+                    <th class="table-filter-wrapper">
+                        <select name="initscreening_status" id="" class="form-select table-filter">
                             <option class="table-filter-none" value="">Filter</option>
                             {% for status in statuses.initscreening %}
                                 <option value="{{status.codename}}">{{status.status|title}}</option>
                             {% endfor %}
                         </select>
                     </th>
-                    <th class="filter">
-                        <select name="prescreening_status" id="" class="form-select">
+                    <th class="table-filter-wrapper">
+                        <select name="prescreening_status" id="" class="form-select table-filter">
                             <option class="table-filter-none" value="">Filter</option>
                             {% for status in statuses.prescreening %}
                                 <option value="{{status.codename}}">{{status.status|title}}</option>
                             {% endfor %}
                         </select>
                     </th>
-                    <th class="filter">
-                        <select name="cbi_status" id="" class="form-select">
+                    <th class="table-filter-wrapper">
+                        <select name="cbi_status" id="" class="form-select table-filter">
                             <option class="table-filter-none" value="">Filter</option>
                             {% for status in statuses.cbi %}
                                 <option value="{{status.codename}}">{{status.status|title}}</option>
                             {% endfor %}
                         </select>
                     </th>
-                    <th class="filter">
-                        <select name="overall_status" id="" class="form-select">
+                    <th class="table-filter-wrapper">
+                        <select name="overall_status" id="" class="form-select table-filter">
                             <option class="table-filter-none" value="">Filter</option>
                             {% for status in statuses.overall_status %}
                                 <option value="{{status.codename}}">{{status.status|title}}</option>
@@ -115,6 +115,7 @@
     <link href="https://cdn.datatables.net/fixedheader/3.3.2/css/fixedHeader.bootstrap5.min.css" rel="stylesheet" />
     <link href="https://cdn.datatables.net/responsive/2.4.1/css/responsive.bootstrap5.min.css" rel="stylesheet" />
     <link href="https://cdn.datatables.net/select/1.6.2/css/select.dataTables.min.css" rel="stylesheet" />
+    <link href="https://cdn.datatables.net/buttons/2.3.6/css/buttons.bootstrap5.min.css" rel="stylesheet" />
 
 {% endblock import_css %} 
 
@@ -127,6 +128,8 @@
     <script src="https://cdn.datatables.net/responsive/2.4.1/js/dataTables.responsive.min.js"></script>
     <script src="https://cdn.datatables.net/responsive/2.4.1/js/responsive.bootstrap5.min.js"></script>
     <script src="https://cdn.datatables.net/select/1.6.2/js/dataTables.select.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.6/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.bootstrap5.min.js"></script>
 
     {% load static %}
     <script src="{% static 'main/js/browse.js' %}"></script>

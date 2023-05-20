@@ -71,7 +71,7 @@ $(document).ready(function () {
 
 	const uploadResumeModal = new bootstrap.Modal('#uploadResumeModal');
 
-	// uploadResumeModal.toggle()
+	uploadResumeModal.toggle()
 
 	var table = $("#table-candidates").DataTable({
 		orderCellsTop: true,
@@ -390,34 +390,75 @@ $(document).ready(function () {
 	
 
 	const uploadResumeFileInput = $('#upload-resumes-input');
+	const uploadResumeFileWrapper = $('#upload-resumes-wrapper');
 
-	const displayFiles = () => {  
-		// console.log(uploadResumeFileInput.prop('files'))
+	const uploadResumeFileInputObj = {
+		fileInputObj: uploadResumeFileInput,
+		add_files: function (fileList) {
+			var files = Array.from(this.fileInputObj.prop('files'))
+			var new_files = Array.from(fileList)
+			files = files.concat(new_files)
+			return this.assign_files(files)
+		},
+		remove_files: function (fileIndex) {
+			var files = Array.from(this.fileInputObj.prop('files'))
+			files.splice(fileIndex, 1)
+			return this.assign_files(files)
+		},
+		assign_files: function (files) {  
+			dt = new DataTransfer()
+			
+			files.forEach(file => {
+				dt.items.add(file)
+			});
 
-		var file_list = uploadResumeFileInput.prop('files')
+			this.fileInputObj.prop('files',dt.files)
+
+			return dt.files
+		},
+		get_files_array: function () {  
+			return Array.from(this.fileInputObj.prop('files'))
+		}
+
+	}
+
+	const displayFiles = (files) => {  
+
 		let default_view = $('#upload-resumes-alert')
-		console.log(default_view.hasClass('d-none'))
+		// console.log(default_view.hasClass('d-none'))
+		const fileItemWrapper = $('#upload-resumes-item-wrapper')
 
-		if (file_list.length > 0){
+		// reset wrapper
+		fileItemWrapper.empty()
+
+		if (files.length > 0){
 
 			if (!default_view.hasClass('d-none')) {
 				default_view.addClass('d-none');
 			}
 
-			$.each(file_list, (index, file) => {
-				console.log(file.name)
-				$('#upload-resumes-item-wrapper').append(
+			$.each(files, (index, file) => {
+				fileItemWrapper.append(
 					`
 					<div class="upload-resumes-item d-flex align-items-center gap-1" style="width:calc(600px/4)">
 						<div class="file-name-ellipsis">${file.name}</div>
-						<button class="btn btn-sm"><i class="fa-solid fa-trash"></i></button>
+						<button class="upload-resumes-item-delete btn btn-sm" data-file-index="${index}"><i class="fa-solid fa-trash"></i></button>
 					</div>
 					`
 				);
-				
 			})
+
+			// initialize delete file button 
+			$('.upload-resumes-item button.upload-resumes-item-delete').each(function (index, element) {
+				$(element).on('click',(event) => {
+					console.log('delete file '+this.dataset.fileIndex)
+					
+					displayFiles(uploadResumeFileInputObj.remove_files(this.dataset.fileIndex))
+
+				})
+			});
+
 		} else {
-			
 			
 			if (default_view.hasClass('d-none')) {
 				default_view.removeClass('d-none');
@@ -426,6 +467,33 @@ $(document).ready(function () {
 
 	}
 
-	uploadResumeFileInput.on('change',displayFiles)
+	var tempFiles = null
+	uploadResumeFileInput.on('click', function () {  
+		tempFiles = Array.from(uploadResumeFileInput.prop('files'))
+		console.log(tempFiles)
+	})
+
+	uploadResumeFileInput.on('change',function (event) {
+		// console.log($(this).prop('files'))
+		let files = Array.from($(this).prop('files'))
+		if (tempFiles) {
+			files = tempFiles.concat(files)
+			tempFiles=null
+		}
+		displayFiles(uploadResumeFileInputObj.assign_files(files))
+	})
+
+	uploadResumeFileWrapper.on('dragenter dragover dragleave drop', function (event) {
+		event.preventDefault()
+	});
+
+	uploadResumeFileWrapper.on('drop', function (event){
+		// console.log(event.originalEvent.dataTransfer.files)
+		const files = event.originalEvent.dataTransfer.files
+		
+		displayFiles(uploadResumeFileInputObj.add_files(files))
+		
+	})
+
 
 });

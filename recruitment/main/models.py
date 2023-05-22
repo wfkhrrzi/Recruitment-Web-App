@@ -153,6 +153,8 @@ class Submission(CreatedMixin,models.Model):
         elif model_name == CBISubmission._meta.model_name:
             cs_obj:CBISubmission = self
             return f"CBI/{cs_obj.cbi.candidate.name}/{filename}"            
+        elif model_name == CandidateResume._meta.model_name:
+            return f"Resume/{filename}"            
 
     submission = models.FileField(upload_to=upload_directory)
     is_active = models.BooleanField(default=True,null=False)
@@ -250,3 +252,11 @@ class Hiring(models.Model):
     remark = models.TextField(null=True)
     status = models.ForeignKey(Status,on_delete=models.CASCADE,null=False)
     candidate = models.OneToOneField(Candidate,on_delete=models.CASCADE,null=False)
+
+class CandidateResume(Submission):
+    
+    # candidate = models.ForeignKey(Candidate, null=True, on_delete=models.SET_NULL)
+    candidate_name = models.CharField(max_length=200,null=True)
+    source = models.ForeignKey(Source, null=True, on_delete=models.SET_NULL)
+    referral_name = models.CharField(max_length=200,null=True,)
+    

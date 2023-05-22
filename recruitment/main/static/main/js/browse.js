@@ -71,7 +71,7 @@ $(document).ready(function () {
 
 	const uploadResumeModal = new bootstrap.Modal('#uploadResumeModal');
 
-	uploadResumeModal.toggle()
+	// uploadResumeModal.toggle()
 
 	var table = $("#table-candidates").DataTable({
 		orderCellsTop: true,
@@ -388,10 +388,15 @@ $(document).ready(function () {
 
 	});
 	
+	const uploadResumeForm = $('#upload-resume-form')
+	const uploadResumeFileInput = $('input[type="file"]',uploadResumeForm);
+	const uploadResumeContent = $('#upload-resumes-content');
+	const uploadResumeWrapper = $('#upload-resumes-wrapper');
+	const uploadResumeFileItemWrapper = $('#upload-resumes-item-wrapper');
+	const uploadResumeClear = $('button:eq(1)',uploadResumeForm);
+	const uploadResumeSubmit = $('button:eq(0)',uploadResumeForm);
 
-	const uploadResumeFileInput = $('#upload-resumes-input');
-	const uploadResumeFileWrapper = $('#upload-resumes-wrapper');
-
+	// object to manipulate input[type='file']
 	const uploadResumeFileInputObj = {
 		fileInputObj: uploadResumeFileInput,
 		add_files: function (fileList) {
@@ -403,6 +408,10 @@ $(document).ready(function () {
 		remove_files: function (fileIndex) {
 			var files = Array.from(this.fileInputObj.prop('files'))
 			files.splice(fileIndex, 1)
+			return this.assign_files(files)
+		},
+		remove_all: function () {
+			var files = Array()
 			return this.assign_files(files)
 		},
 		assign_files: function (files) {  
@@ -422,27 +431,41 @@ $(document).ready(function () {
 
 	}
 
-	const displayFiles = (files) => {  
+	// re-render upload-resumes-item-wrapper on every func call
+	const displayFiles = (dt_files) => {  
 
 		let default_view = $('#upload-resumes-alert')
-		// console.log(default_view.hasClass('d-none'))
-		const fileItemWrapper = $('#upload-resumes-item-wrapper')
 
 		// reset wrapper
-		fileItemWrapper.empty()
+		uploadResumeFileItemWrapper.empty()
 
-		if (files.length > 0){
+		if (dt_files.length > 0){
 
 			if (!default_view.hasClass('d-none')) {
 				default_view.addClass('d-none');
 			}
 
-			$.each(files, (index, file) => {
-				fileItemWrapper.append(
+			if (uploadResumeClear.hasClass('d-none')) {
+				uploadResumeClear.removeClass('d-none');
+			}
+
+			uploadResumeSubmit.prop('disabled',false)
+
+
+			$.each(dt_files, (index, file) => {
+				uploadResumeFileItemWrapper.append(
 					`
-					<div class="upload-resumes-item d-flex align-items-center gap-1" style="width:calc(600px/4)">
+					<div class="upload-resumes-item py-1 px-2 d-flex align-items-center gap-1 rounded" style="max-width:500px;">
 						<div class="file-name-ellipsis">${file.name}</div>
-						<button class="upload-resumes-item-delete btn btn-sm" data-file-index="${index}"><i class="fa-solid fa-trash"></i></button>
+						<button class="upload-resumes-item-delete btn btn-sm" data-file-index="${index}"
+						style="
+							--bs-btn-hover-color: var(--bs-danger);
+							--bs-btn-active-color: var(--bs-white);
+  							--bs-btn-active-bg: var(--bs-btn-hover-color);
+						"
+						>
+							<i class="fa-solid fa-trash"></i>
+						</button>
 					</div>
 					`
 				);
@@ -463,18 +486,22 @@ $(document).ready(function () {
 			if (default_view.hasClass('d-none')) {
 				default_view.removeClass('d-none');
 			}
+			
+			if (!uploadResumeClear.hasClass('d-none')) {
+				uploadResumeClear.addClass('d-none');
+			}
+
+			uploadResumeSubmit.prop('disabled',true)
 		}
 
 	}
 
 	var tempFiles = null
-	uploadResumeFileInput.on('click', function () {  
+	uploadResumeFileInput.on('click', function () {  // temporarily store current selected files in tempFiles, then unload them in "change" event
 		tempFiles = Array.from(uploadResumeFileInput.prop('files'))
-		console.log(tempFiles)
 	})
 
 	uploadResumeFileInput.on('change',function (event) {
-		// console.log($(this).prop('files'))
 		let files = Array.from($(this).prop('files'))
 		if (tempFiles) {
 			files = tempFiles.concat(files)
@@ -483,17 +510,163 @@ $(document).ready(function () {
 		displayFiles(uploadResumeFileInputObj.assign_files(files))
 	})
 
-	uploadResumeFileWrapper.on('dragenter dragover dragleave drop', function (event) {
+	uploadResumeWrapper.on('dragenter dragover dragleave drop', function (event) {
 		event.preventDefault()
 	});
 
-	uploadResumeFileWrapper.on('drop', function (event){
-		// console.log(event.originalEvent.dataTransfer.files)
+	uploadResumeWrapper.on('drop', function (event){
 		const files = event.originalEvent.dataTransfer.files
 		
 		displayFiles(uploadResumeFileInputObj.add_files(files))
 		
 	})
 
+	// constructor func for progress bar (implementation)
+	function ProgressBar (progress_value=null,progress_text=null) {
+
+		progress_value = progress_value ? progress_value : 0
+		
+		let progressBar = $('<div>', {
+			class: 'progress',
+			role: 'progressbar',
+			style: 'height: 20px'
+		});
+		
+		let progressBarInner = $('<div>', {
+			class: 'progress-bar progress-bar-striped bg-success progress-bar-animated',
+			style: `width: ${progress_value}%`,
+			text: `${progress_text ? progress_text : progress_value}%`
+		});
+
+		progressBar.append(progressBarInner)
+
+		this.component= progressBar;
+
+		this.set_value= function (value) {  
+			this.component.find('.progress-bar').css('width',`${value}%`);
+			this.component.find('.progress-bar').text(`${value}%`);
+		}
+		
+		this.set_text= function (value) {  
+			this.component.find('.progress-bar').text(`${value}`);
+		}
+		
+		this.get_component= function () {  
+			return this.component
+		}
+
+		this.get_component_html= function () {  
+			return this.component.prop('outerHTML');
+		}
+
+		this.reset = function () {  
+			this.set_value(0)
+		}
+
+		this.hide = function () {  
+			this.component.remove()
+		}
+
+		this.reset_hide = function () {  
+			this.reset()
+			this.hide()
+		}
+	}
+
+	var progress_bar = new ProgressBar() // progress bar obj instance --> actual element
+
+	// when clicked "upload" button
+	uploadResumeForm.on('submit',function (e) {  
+		e.preventDefault()
+		
+		const formData = new FormData(e.target)
+		
+		var files_count = 0
+
+		for (const [key, file] of formData.entries()) {
+			if (file.name) { // workaround for an element appearing with empty name
+				files_count++;
+			}
+		}
+
+		if (files_count > 0) {
+
+			$.ajax({
+				type: "post",
+				url: e.target.action,
+				data: formData,
+				headers:{
+					'Accept':'application/json'
+				},
+				contentType: false,
+				processData: false,
+				// actions before ajax start
+				beforeSend: function () {  
+					uploadResumeFileItemWrapper.empty()
+					uploadResumeContent.append(progress_bar.get_component())
+					uploadResumeSubmit.prop('disabled',true)
+					uploadResumeClear.prop('disabled',true)
+				},
+				// actions after ajax completes
+				success: function (response) {
+					uploadResumeFileItemWrapper.empty()
+					uploadResumeFileItemWrapper.html(`
+					<div class="text-success">
+						<div class="fa-stack fa-xl mb-3">
+							<i class="fa-regular fa-circle fa-stack-2x" style=" margin:0;"></i>
+							<i class="fa-solid fa-check fa-stack-1x fa-lg" style=" margin:0;"></i>
+						</div>
+						<div class="fw-medium">Files are successfully uploaded</div>
+					</div>
+					`)
+					uploadResumeSubmit.prop('disabled',true)
+					uploadResumeClear.prop('disabled',false).addClass('d-none')
+					uploadResumeFileInputObj.remove_all()
+					progress_bar.reset_hide()
+
+				},
+				error: function (a,b,c) {  
+					console.log(a.responseJSON)
+				},
+				// actions during ajax execution
+				xhr: function () {  
+					var xhr = new window.XMLHttpRequest();
+
+					xhr.upload.addEventListener("progress", function(evt) {
+						if (evt.lengthComputable) {
+							var percentComplete = evt.loaded / evt.total;
+							percentComplete = parseInt(percentComplete * 100);
+							console.log(percentComplete);
+							
+							progress_bar.set_value(percentComplete)
+
+						}
+					}, false);
+
+					xhr.upload.onload = function () {
+						setTimeout(() => {progress_bar.set_text('Uploading the files into the database')},2000)
+					}
+
+					return xhr;
+				}
+			});
+
+		} else {
+			console.log(Error('no files are selected'))
+		}
+
+	})
+
+	// when clicked "clear all" button
+	uploadResumeClear.on('click',function (e) {  
+		e.preventDefault()
+		// console.log('clear all clicked')
+		displayFiles(uploadResumeFileInputObj.remove_all())
+
+		console.log(uploadResumeFileInput.prop('files'))
+		
+		uploadResumeSubmit.prop('disabled',true)
+
+	})
 
 });

@@ -4,9 +4,15 @@ from django.views import View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from main.auth import CustomLoginRequired
 from main.utils import return_json
-from main.models import Candidate
+from main.models import Candidate, CandidateResume
 from django.core.paginator import Paginator, EmptyPage
 from django.core import serializers
+from main.forms import ResumeSubmissionForm
+from django.shortcuts import redirect
+from django.urls import reverse
+from django.http import HttpResponseBadRequest
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 
 
 class CandidateIndex(CustomLoginRequired,View):
@@ -47,8 +53,49 @@ class CandidateEdit(CustomLoginRequired,UserPassesTestMixin,View):
         return HttpResponse('candidate edit page')
 
 
-class CandidateUpdate(View,UserPassesTestMixin):
+class CandidateUpdate(UserPassesTestMixin,View):
     
     def post(self,request):
         pass
 
+@method_decorator(csrf_exempt,name='dispatch')
+class CandidateResumeCreate(CustomLoginRequired,View):
+
+    def post(self,request:HttpRequest):
+
+        files = request.FILES.getlist('submission') or request.FILES.getlist('submission[]') or None
+
+        # return JsonResponse({'POST':request.POST,'FILES':request.FILES.get('submission').name})
+        
+        # handle missing submission
+        if files == None:
+            response = JsonResponse({'submission':'submission are required'})
+            response.status_code = 400
+            return response
+        
+        form_errors = dict()
+
+        for file in files:
+
+            ps_obj:CandidateResume = CandidateResume(submission=file)
+            ps_obj.created_by = request.user
+            ps_obj.save()
+
+            # form = ResumeSubmissionForm(request.POST,dict(submission=file))
+            
+            # if form.is_valid():                
+            #     ps_obj:CandidateResume = form.save(commit=False)
+            #     ps_obj.created_by = request.user
+            #     ps_obj.save()
+            
+            # else:
+            #     form_errors[file] = form.errors.as_data()
+
+
+        if return_json(request):
+            return JsonResponse({
+                'prescreening_submission':'success',
+                'errors':form_errors,
+            })
+
+        return redirect(request.META.get('HTTP_REFERER') or reverse('main:candidate.index'))

@@ -1,5 +1,5 @@
 from django.forms import ModelForm 
-from .models import InitialScreening, Prescreening, PrescreeningSubmission, Users, Candidate, CBISchedule, CBISubmission
+from .models import InitialScreening, Prescreening, PrescreeningSubmission, Users, Candidate, CBISchedule, CBISubmission, CandidateResume
 from django.http import HttpRequest
 
 class InitialScreeningCreateForm(ModelForm):
@@ -41,6 +41,13 @@ class PrescreeningSubmissionForm(ModelForm):
     class Meta:
         model = PrescreeningSubmission
         fields = ['submission','prescreening']
+
+
+class ResumeSubmissionForm(ModelForm):
+    
+    class Meta:
+        model = CandidateResume
+        fields = ['submission',]
 
 
 class CBISubmissionForm(ModelForm):

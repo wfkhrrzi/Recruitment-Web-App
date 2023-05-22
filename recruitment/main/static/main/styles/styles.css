@@ -83,4 +83,8 @@ html body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-  }
+}
+
+.upload-resumes-item:hover {
+    background-color: #f5f5f5;
+}

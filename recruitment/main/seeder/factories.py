@@ -121,7 +121,7 @@ class CandidateFactory(DjangoModelFactory):
         model = Candidate
     
     name = Faker('name')
-    date = Faker('date_between',start_date="-15d",end_date="today")
+    date = Faker('date_between',start_date="-30d",end_date="today")
     referral_name = Faker('name')
     phone_number = Faker('phone_number')
     email = LazyAttribute(lambda m: f"{''.join(m.name.lower().split())}@example.com")

@@ -80,7 +80,7 @@ class BrowseIndex(CustomLoginRequired, View):
                         Q(prescreening__status__isnull=True) &
                         Q(cbi__status__isnull=True)
                 ),
-                pending_prescreening=Count(
+                pending_preassessment=Count(
                     'id',
                     filter=
                         ~Q(prescreening__status__codename="prescreening:proceed") & 

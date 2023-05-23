@@ -252,49 +252,59 @@ class CBIUpdate(CustomLoginRequired,View): # mail functionality coming soon
 
     def post(self,request:HttpRequest,):
 
+        # error handling
+        if not bool(request.POST):
+            response = JsonResponse({'error':'no data is passed!'})
+            response.status_code = 400
+            return response
+
         if request.POST.get('proceed',None) == None:
-            if return_json(request):
-                return JsonResponse({
-                    'proceed':'proceed is required'
-                })
+            is_proceed = None
+            # if return_json(request):
+            #     response = JsonResponse({'proceed':'proceed is required'})
+            #     response.status_code = 400
+            #     return response
             
-            return HttpResponseBadRequest('proceed is required')
+            # return HttpResponseBadRequest('proceed is required')
+        else:
+            is_proceed = request.POST.get('proceed')
 
         try:
             cbi = CBI.objects.get(id=request.POST['cbi'])
         except:
             if return_json(request):
-                return JsonResponse({
-                    'cbi':'cbi id not found'
-                })
+                response = JsonResponse({'cbi':'cbi id not found'})
+                response.status_code = 400
+                return response
             
             return HttpResponseBadRequest('cbi id not found')
 
-        if int(request.POST['proceed']) == 0: #do not proceed
+        if is_proceed != None:
+            if int(request.POST['proceed']) == 0: #do not proceed
 
-            cbi.is_proceed = False
-            cbi.status = Status.objects.get(codename='cbi:not proceed')
+                cbi.is_proceed = False
+                cbi.status = Status.objects.get(codename='cbi:not proceed')
 
-        elif int(request.POST['proceed']) == 1: #proceed
-            
-            cbi.is_proceed = True
-            cbi.status = Status.objects.get(codename='cbi:proceed')
+            elif int(request.POST['proceed']) == 1: #proceed
+                
+                cbi.is_proceed = True
+                cbi.status = Status.objects.get(codename='cbi:proceed')
 
-        elif int(request.POST['proceed']) == 2: #pending schedule
-            
-            cbi.is_proceed = True
-            cbi.status = Status.objects.get(codename='cbi:pending schedule')
+            elif int(request.POST['proceed']) == 2: #pending schedule
+                
+                cbi.status = Status.objects.get(codename='cbi:pending schedule')
 
-        elif int(request.POST['proceed']) == 3: #pending interview
-            
-            cbi.is_proceed = True
-            cbi.status = Status.objects.get(codename='cbi:pending interview')
+            elif int(request.POST['proceed']) == 3: #pending interview
+                
+                cbi.status = Status.objects.get(codename='cbi:pending interview')
 
-        elif int(request.POST['proceed']) == 4: #pending result
-            
-            cbi.is_proceed = True
-            cbi.status = Status.objects.get(codename='cbi:pending result')
+            elif int(request.POST['proceed']) == 4: #pending result
+                
+                cbi.status = Status.objects.get(codename='cbi:pending result')
 
+        # update remarks
+        if request.POST.get('remarks',None) != None:
+            cbi.remarks = request.POST.get('remarks')
 
         cbi.last_modified_by = request.user
         cbi.save()
@@ -305,6 +315,7 @@ class CBIUpdate(CustomLoginRequired,View): # mail functionality coming soon
                 'instance':{
                     'is_proceed':cbi.is_proceed,
                     'status':cbi.status.status,
+                    'remarks':cbi.remarks,
                     'candidate':{
                         'name':cbi.candidate.name
                     },

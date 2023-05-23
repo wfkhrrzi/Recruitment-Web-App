@@ -168,7 +168,8 @@ $(document).ready(function () {
 				{
 					text: 'Parse new resume',
 					action: function ( e, dt, node, config ) {
-						alert( 'Button activated' );
+						// alert( 'Button activated' );
+						window.open("https://ptsg-5edhnebulaap02-generic-resume-parser.azurewebsites.net/", "_blank")
 					},
 					className: 'btn-sm btn-success btn-theme',
 				},

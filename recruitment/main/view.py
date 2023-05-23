@@ -92,7 +92,7 @@ class BrowseIndex(CustomLoginRequired, View):
                     'id',
                     filter=
                         Q(cbi__status__isnull=False) &
-                        Q(latest_cbischedule_status=True)
+                        Q(latest_cbischedule_status=True) # cbischedule.is_proceed == True
                 ),
                 new_application=Count(
                     'id',

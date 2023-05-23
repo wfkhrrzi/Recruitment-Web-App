@@ -74,3 +74,22 @@ html body {
 #cbi-schedule-table th{
     font-weight: 600!important;
 }
+
+#table-candidates, .table-dropdown, .table-filter, th.sorting{
+    font-size: 0.8rem;
+}
+
+.file-name-ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.upload-resumes-item:hover {
+    background-color: #f5f5f5;
+}
+
+.upload-file-card-highlight {
+    --bs-card-border-color:#00a19c;
+    --bs-card-bg:#c8dadf;
+}

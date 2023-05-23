@@ -123,13 +123,22 @@ class PrescreeningUpdate(CustomLoginRequired,View): # mail functionality coming 
 
     def post(self,request:HttpRequest,):
 
+        # error handling
+        if not bool(request.POST):
+            response = JsonResponse({'error':'no data is passed!'})
+            response.status_code = 400
+            return response
+        
         if request.POST.get('proceed',None) == None:
-            if return_json(request):
-                response = JsonResponse({'proceed':'proceed is required'})
-                response.status_code = 400
-                return response
+            is_proceed = None
+            # if return_json(request):
+            #     response = JsonResponse({'proceed':'proceed is required'})
+            #     response.status_code = 400
+            #     return response
             
-            return HttpResponseBadRequest('proceed is required')
+            # return HttpResponseBadRequest('proceed is required')
+        else:
+            is_proceed = request.POST.get('proceed')
 
         try:
             prescreening = Prescreening.objects.get(id=request.POST['prescreening'])
@@ -141,37 +150,38 @@ class PrescreeningUpdate(CustomLoginRequired,View): # mail functionality coming 
             
             return HttpResponseBadRequest('prescreening id not found')
 
-        if int(request.POST['proceed']) == 0: #do not proceed
+        if is_proceed != None:
+            if int(is_proceed) == 0: #do not proceed
 
-            prescreening.is_proceed = False
-            prescreening.status = Status.objects.get(codename='prescreening:not proceed')
+                prescreening.is_proceed = False
+                prescreening.status = Status.objects.get(codename='prescreening:not proceed')
 
-            try:
-                prescreening.candidate.cbi.reset_instance()
-            except:
-                pass
+                try:
+                    prescreening.candidate.cbi.reset_instance()
+                except:
+                    pass
 
-        elif int(request.POST['proceed']) == 1: #proceed
-            
-            prescreening.is_proceed = True
-            prescreening.status = Status.objects.get(codename='prescreening:proceed')
+            elif int(is_proceed) == 1: #proceed
+                
+                prescreening.is_proceed = True
+                prescreening.status = Status.objects.get(codename='prescreening:proceed')
 
-            try:
-                prescreening.candidate.cbi.activate_instance()
-            except:
-                pass
+                try:
+                    prescreening.candidate.cbi.activate_instance()
+                except:
+                    pass
 
-        elif int(request.POST['proceed']) == 2: #send instruction
-            
-            prescreening.status = Status.objects.get(codename='prescreening:send instruction')
+            elif int(is_proceed) == 2: #send instruction
+                
+                prescreening.status = Status.objects.get(codename='prescreening:send instruction')
 
-        elif int(request.POST['proceed']) == 3: #pending submission
-            
-            prescreening.status = Status.objects.get(codename='prescreening:pending submission')
+            elif int(is_proceed) == 3: #pending submission
+                
+                prescreening.status = Status.objects.get(codename='prescreening:pending submission')
 
-        elif int(request.POST['proceed']) == 4: #assessment submitted
-            
-            prescreening.status = Status.objects.get(codename='prescreening:assessment submitted')
+            elif int(is_proceed) == 4: #assessment submitted
+                
+                prescreening.status = Status.objects.get(codename='prescreening:assessment submitted')
 
 
         prescreening.last_modified_by = request.user

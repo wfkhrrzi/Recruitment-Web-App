@@ -429,9 +429,10 @@ class InitialScreeningUpdate(CustomLoginRequired,View):
             if return_json(request):
                 return JsonResponse({
                     'initial_screening:update':'success',
-                    'instance':{
+                    'update':{
                         'is_proceed':initial_screening.is_proceed,
                         'status':initial_screening.status.status,
+                        'remarks':initial_screening.remarks,
                         'candidate':{
                             'name':initial_screening.candidate.name
                         },

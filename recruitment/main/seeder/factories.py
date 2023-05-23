@@ -19,8 +19,8 @@ dict_status = {
     'prescreening:proceed':'proceed',
     'prescreening:not proceed':'not proceed',
 
-    'cbi:proceed':'proceed',
-    'cbi:not proceed':'not proceed',
+    'cbi:proceed':'recommended',
+    'cbi:not proceed':'not recommended',
     'cbi:pending interview':'pending interview',
     'cbi:pending result':'pending result',
     'cbi:pending schedule':'pending schedule', # add cbi:pending schedule
@@ -121,7 +121,7 @@ class CandidateFactory(DjangoModelFactory):
         model = Candidate
     
     name = Faker('name')
-    date = Faker('date_between',start_date="-15d",end_date="today")
+    date = Faker('date_between',start_date="-30d",end_date="today")
     referral_name = Faker('name')
     phone_number = Faker('phone_number')
     email = LazyAttribute(lambda m: f"{''.join(m.name.lower().split())}@example.com")

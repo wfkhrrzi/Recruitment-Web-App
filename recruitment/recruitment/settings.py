@@ -44,7 +44,10 @@ INSTALLED_APPS = [
 ]
 
 MEDIA_ROOT=os.path.join(BASE_DIR,'submission_files')
+
 MEDIA_URL='/submission_files/'
+
+DATA_UPLOAD_MAX_NUMBER_FILES=None
 
 AUTH_USER_MODEL = 'main.Users'
 

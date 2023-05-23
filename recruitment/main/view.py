@@ -7,7 +7,7 @@ from django.core.paginator import Paginator, EmptyPage
 from django.core import serializers
 from main.auth import CustomLoginRequired
 from main.utils import return_json
-from django.db.models import Q, Case, When, Value, Count, OuterRef, Subquery, F, CharField
+from django.db.models import Q, Case, When, Value, Count, OuterRef, Subquery, F, CharField, TextField
 from django.db.models.functions import Concat, Cast
 from django.utils import timezone
 from querystring_parser import parser
@@ -64,7 +64,8 @@ class BrowseIndex(CustomLoginRequired, View):
             
             # Get the start and end of the current week
             today = timezone.now().date()
-            start_of_week = today - timezone.timedelta(days=today.weekday())
+            # start_of_week = today - timezone.timedelta(days=today.weekday())
+            start_of_week = today - timezone.timedelta(days=6)
             end_of_week = start_of_week + timezone.timedelta(days=6)
 
             # fetch action metrics
@@ -80,7 +81,7 @@ class BrowseIndex(CustomLoginRequired, View):
                         Q(prescreening__status__isnull=True) &
                         Q(cbi__status__isnull=True)
                 ),
-                pending_prescreening=Count(
+                pending_preassessment=Count(
                     'id',
                     filter=
                         ~Q(prescreening__status__codename="prescreening:proceed") & 
@@ -91,18 +92,21 @@ class BrowseIndex(CustomLoginRequired, View):
                     'id',
                     filter=
                         Q(cbi__status__isnull=False) &
-                        Q(latest_cbischedule_status=True)
+                        Q(cbi__status__codename="cbi:pending interview")
+                        # Q(latest_cbischedule_status=True) # cbischedule.is_proceed == True
                 ),
                 new_application=Count(
                     'id',
                     filter=
-                        Q(date__range=(start_of_week,end_of_week))
+                        Q(date__range=(start_of_week,today))
                 )
             )
 
-            # return JsonResponse(data={"metrics":metrics, 'statuses':statuses, 'source':lst_sources})
+            out = {"metrics":metrics, 'statuses':statuses, 'source':lst_sources, 'today':today, 'start_of_week':start_of_week, 'end_of_week':end_of_week,}
 
-            return render(request,template_name,{"metrics":metrics, 'statuses':statuses, 'source':lst_sources})
+            # return JsonResponse(out)
+
+            return render(request,template_name,out)
 
         candidates = Candidate.objects
         
@@ -156,6 +160,7 @@ class BrowseIndex(CustomLoginRequired, View):
                 InitialScreening.objects.filter(candidate=OuterRef('pk')).values('pk')[:1]
             ),
         ).values(
+            'id',
             'name',
             'date',
             initialscreening_id=Case(
@@ -244,3 +249,27 @@ class BrowseView(CustomLoginRequired, View):
     def get(self,request:HttpRequest,candidate_id):
         
         return JsonResponse(list(Candidate.objects.filter(id=candidate_id).values()),safe=False)
+
+class BrowseRemarksView(CustomLoginRequired,View):
+
+    def get(self,request:HttpRequest):
+
+        out = Candidate.objects.filter(id=request.GET['candidate_id']).values(
+            initialscreening_remarks=Case(
+                When(Q(initialscreening__remarks__isnull=False),then=F('initialscreening__remarks')),
+                default=Value('-'),
+                output_field=TextField(),
+            ),
+            # prescreening_remarks=Case(
+            #     When(Q(prescreening__remarks__isnull=False),then=F('prescreening__remarks')),
+            #     default=Value('-')
+            # ),
+            cbi_remarks=Case(
+                When(Q(cbi__remarks__isnull=False),then=F('cbi__remarks')),
+                default=Value('-'),
+                output_field=TextField(),
+            ),
+        )[0]
+
+        return JsonResponse(out)
+

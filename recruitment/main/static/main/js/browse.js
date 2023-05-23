@@ -151,7 +151,8 @@ $(document).ready(function () {
 		responsive: true,
 		autoWidth: true,
 		dom: 
-			"<'row mb-2'<'col-sm-12 col-md-4'l><'col-sm-12 col-md-8'<'d-flex justify-content-end'<'me-4'B>f>>>" +
+			// "<'row mb-2'<'col-sm-12 col-md-4'l><'col-sm-12 col-md-8'<'d-flex justify-content-end'<B><'ms-4'f>>>>" + // search bar is 'f'
+			"<'row mb-2'<'col-sm-12 col-md-4'l><'col-sm-12 col-md-8'<'d-flex justify-content-end'<B>>>>" + 
         	"<'row'<'col-sm-12'tr>>" +
         	"<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
 		buttons: {

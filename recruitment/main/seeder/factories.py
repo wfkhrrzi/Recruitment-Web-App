@@ -19,8 +19,8 @@ dict_status = {
     'prescreening:proceed':'proceed',
     'prescreening:not proceed':'not proceed',
 
-    'cbi:proceed':'proceed',
-    'cbi:not proceed':'not proceed',
+    'cbi:proceed':'recommended',
+    'cbi:not proceed':'not recommended',
     'cbi:pending interview':'pending interview',
     'cbi:pending result':'pending result',
     'cbi:pending schedule':'pending schedule', # add cbi:pending schedule

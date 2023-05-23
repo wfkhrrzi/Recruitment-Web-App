@@ -73,6 +73,78 @@ $(document).ready(function () {
 
 	// uploadResumeModal.toggle()
 
+	function table_child_row(data) {
+
+		let remarks = null
+		$.ajax({
+			type: "get",
+			url: get_remarks_url+`?candidate_id=${data.id}`,
+			async:false,
+			success: function (response) {
+				// console.log(response)
+				remarks = response
+			}
+		});
+		
+		output_obj={
+			initial_screening:{
+				form_action:initscreening_update_url,
+				id:data.initialscreening_id,
+				label:'Initial Screening',
+				cur_remarks:remarks.initialscreening_remarks,
+			},
+			// prescreening:{
+			// 	form_action:prescreening_update_url,
+			// 	id:data.prescreening_id,
+			// 	label:'Pre-assessment',
+			// },
+			cbi:{
+				form_action:cbi_update_url,
+				id:data.cbi_id,
+				label:'CBI Assessment',
+				cur_remarks:remarks.cbi_remarks,
+			},
+			// overall:{
+			// 	form_action:'#',
+			// 	id:null,
+			// 	label:'Overall',
+			// },
+		}
+
+		const rootWrapper = $('<div>').addClass('d-flex justify-content-start gap-2');
+		$(rootWrapper).append('<div class="ps-3 pe-4 align-self-center fw-medium">Remarks</div>');
+
+		for (const key in output_obj) {
+			if (Object.hasOwnProperty.call(output_obj, key)) {
+				const stage = output_obj[key];
+				
+				// if (stage.id) {
+					$(`
+						<div class="flex-fill" >
+							<label for="${key}-remarks" class="form-label">${stage.label}</label>
+							<textarea ${stage.id ? '' : 'disabled'} data-form-action="${stage.form_action}" data-stage="${key}" data-stage-id=${stage.id} class="form-control table-remarks" rows="3" style="font-size:inherit;" placeholder="Optional. Make sure to save the remarks">${stage.cur_remarks === '-' ? '': stage.cur_remarks}</textarea>
+						</div>
+					`)
+						.appendTo(rootWrapper)
+				// }
+			}
+		}
+		
+		return rootWrapper.prop('outerHTML')
+		
+	}
+
+	const gpt_status_badge = (data) => {
+		let bg_color = data.toLowerCase() == 'recommended' ? 'text-bg-success' : 'text-bg-danger'
+		return `
+		<div class="text-center">
+			<span class="badge rounded-pill fw-semibold text-capitalize ${bg_color}">
+				${data}
+			</span>
+		</div>
+		`;
+	}
+
 	var table = $("#table-candidates").DataTable({
 		orderCellsTop: true,
 		fixedHeader: true,
@@ -117,7 +189,14 @@ $(document).ready(function () {
 				Accept: "application/json",
 			},
 		},
+		order: [[1, 'asc']],
 		columns: [
+			{
+				className: 'dt-control',
+                orderable: false,
+                data: null,
+                defaultContent: '',
+			},
 			{ data: "name", width:"15%" ,},
 			{ data: "date", },
 			{ data: "source_" ,width:"10%",},
@@ -126,14 +205,7 @@ $(document).ready(function () {
 				data: "gpt_status_", 
 				width:"13%",
 				render:function (data,type) {  
-					let bg_color = data.toLowerCase() == 'recommended' ? 'text-bg-success' : 'text-bg-danger'
-					return `
-					<div class="text-center">
-						<span class="badge rounded-pill fw-semibold text-capitalize ${bg_color}">
-							${data}
-						</span>
-					</div>
-					`;
+					return gpt_status_badge(data)
 				},
 			},
 			// initialscreening status column
@@ -286,8 +358,11 @@ $(document).ready(function () {
 				},
 			},
 			{ 
-				data: "overall_status_", 
+				data: "gpt_status_", 
 				width:"15%",
+				render: function (data) {  
+					return gpt_status_badge(data);
+				}
 			},
 		],
 
@@ -300,8 +375,9 @@ $(document).ready(function () {
 
 			// Filtering column
 			$(".table-filter-wrapper", api.table().header()).each(function (i) {
-
-				var column = api.column(i);
+				// console.log(api.column(i));
+				// console.log(api.column($(this).index()));
+				var column = api.column($(this).index());
 				var input = $(this).find("input[type='text']");
 				input
 					.on("keypress", function (e) {
@@ -334,7 +410,7 @@ $(document).ready(function () {
 			});
 
 			// Linkable row
-			$('tr',api.table().body()).each(function (row_i,element) { 
+			$('tr',api.table().body()).each(function (row_i,element) {
 
 				$(this)
 				.on('click', function() {
@@ -383,11 +459,78 @@ $(document).ready(function () {
 	
 			});
 
+
+			// Add event listener for opening and closing child rows (remarks)
+			$('td.dt-control',api.table().body()).on('click', function (e) {
+				e.stopPropagation()
+
+				// current row
+				const tr = $(this).closest('tr');
+				const tr_index = $(tr).index()
+				const row = api.table().row(tr);
+		 
+				if (row.child.isShown()) {
+					// This row is already open - close it
+					row.child.hide();
+					tr.removeClass('shown');
+				} else {
+					// Open this row
+					row.child(table_child_row(row.data())).show();
+					tr.addClass('shown');
+
+					// change event to save edited remarks
+					$('.table-remarks',row.child()).each(function (index,element) {  
+						// console.log(this)
+						$(this).on('change',function (e) { 
+
+							let dataset = e.target.dataset
+							data = {
+								remarks: $(this).val(),
+								[dataset.stage] : dataset.stageId
+							}
+
+							$.ajax({
+								type: "post",
+								url: dataset.formAction,
+								data: data,
+								headers: {
+									Accept: "application/json",
+								},
+								success: function (response) {
+									console.log(response)
+								},
+								error: function(a,b,c) {
+									console.log(Error(a))
+								}
+							});
+							
+						})
+					})
+				}
+				
+				// close other opened rows
+				const tbody = $(this).closest('tbody')
+				
+				$(tbody).children().each(function (index,element) {  
+					const row = api.table().row(this)
+					if (index !== tr_index & row.child.isShown()) {
+						console.log(`row ${index} has dt-hasChild`)
+						row.child.hide();
+						$(this).removeClass('shown');
+					}
+				})
+
+
+			});			
+
 		}
 
 
 	});
-	
+
+
+		
+	/* ------------------- UPLOAD FILE ------------------------- */
 	const uploadResumeForm = $('#upload-resume-form')
 	const uploadResumeFileInput = $('input[type="file"]',uploadResumeForm);
 	const uploadResumeContent = $('#upload-resumes-content');
@@ -514,9 +657,22 @@ $(document).ready(function () {
 		event.preventDefault()
 	});
 
+	uploadResumeWrapper.on('dragenter dragover', function (event) {
+		$(this).addClass('upload-file-card-highlight')
+	});
+
+	uploadResumeWrapper.on('dragleave', function (event) {
+		// Check if the related target is not a child element of the drop target
+		if (!$(this).is(event.relatedTarget) && !$(this).has(event.relatedTarget).length) {
+			// Remove the class
+			$(this).removeClass('upload-file-card-highlight');
+		}
+
+	});
+
 	uploadResumeWrapper.on('drop', function (event){
+		$(this).removeClass('upload-file-card-highlight')
 		const files = event.originalEvent.dataTransfer.files
-		
 		displayFiles(uploadResumeFileInputObj.add_files(files))
 		
 	})

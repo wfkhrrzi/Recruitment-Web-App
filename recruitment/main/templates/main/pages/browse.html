@@ -34,6 +34,7 @@
             <thead>
                 <tr>
                     {% comment %} <th scope="col">Id</th> {% endcomment %}
+                    <th></th>
                     <th scope="col">Name</th>
                     <th scope="col">Date</th>
                     <th scope="col">Source</th>
@@ -46,6 +47,7 @@
 
                 <tr>
                     {% comment %} <th class="table-filter-wrapper"></th> {% endcomment %}
+                    <th></th>
                     <th class="table-filter-wrapper">
                         <input type="text" class="form-control table-filter" placeholder="Filter Name">
                     </th>
@@ -115,7 +117,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div id="upload-resumes-wrapper" class="card text-center p-3">
+                    <div id="upload-resumes-wrapper" class="card shadow text-center p-3">
                         <div class="card-title fw-semibold" style="font-size: 0.95rem;">Upload Resumes</div>
                         <!-- upload resumes container -->
                         <div class="card-body">
@@ -205,6 +207,7 @@
         const initscreening_update_url = "{% url 'main:initscreening.update' %}"
         const prescreening_update_url = "{% url 'main:prescreening.update' %}"
         const cbi_update_url = "{% url 'main:cbi.update' %}"
+        const get_remarks_url = "{% url 'main:browse.remarks' %}"
     </script>
 
 

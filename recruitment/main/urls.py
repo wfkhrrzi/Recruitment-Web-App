@@ -6,7 +6,7 @@ from main.views.candidate import CandidateIndex,CandidateEdit,CandidateResumeCre
 from main.views.prescreening import PrescreeningCreate, PrescreeningSubmissionCreate, PrescreeningSubmissionDelete, PrescreeningInstructionSent, PrescreeningIndex, PrescreeningUpdate
 from main.views.initscreening import InitialScreeningIndex, InitialScreeningCreate, InitialScreeningEdit, InitialScreeningUpdate,InitialScreeningEvaluationCreate, InitialScreeningEvaluationDelete, InitialScreeningHiringUpdate
 from main.views.cbi import CBICreate, CBIIndex, CBIScheduleCreate, CBIScheduleUpdate, CBISubmissionCreate, CBISubmissionDelete, CBIUpdate
-from main.view import BrowseIndex, BrowseView
+from main.view import BrowseIndex, BrowseView, BrowseRemarksView
 
 app_name = 'main'
 
@@ -16,6 +16,7 @@ urlpatterns = [
     path('', view.index, name='index'),
     path('browse', BrowseIndex.as_view(), name='browse.index'),
     path('browse/<int:candidate_id>', BrowseView.as_view(), name='browse.view'),
+    path('browse/remarks', BrowseRemarksView.as_view(), name='browse.remarks'),
 
     path('candidate', CandidateIndex.as_view(), name='candidate.index'),
     path('candidate/resume/create', CandidateResumeCreate.as_view(), name='candidate.resume.create'),

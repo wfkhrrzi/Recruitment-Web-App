@@ -92,7 +92,8 @@ class BrowseIndex(CustomLoginRequired, View):
                     'id',
                     filter=
                         Q(cbi__status__isnull=False) &
-                        Q(latest_cbischedule_status=True) # cbischedule.is_proceed == True
+                        Q(cbi__status__codename="cbi:pending interview")
+                        # Q(latest_cbischedule_status=True) # cbischedule.is_proceed == True
                 ),
                 new_application=Count(
                     'id',

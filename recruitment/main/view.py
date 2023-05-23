@@ -64,7 +64,8 @@ class BrowseIndex(CustomLoginRequired, View):
             
             # Get the start and end of the current week
             today = timezone.now().date()
-            start_of_week = today - timezone.timedelta(days=today.weekday())
+            # start_of_week = today - timezone.timedelta(days=today.weekday())
+            start_of_week = today - timezone.timedelta(days=6)
             end_of_week = start_of_week + timezone.timedelta(days=6)
 
             # fetch action metrics
@@ -96,13 +97,15 @@ class BrowseIndex(CustomLoginRequired, View):
                 new_application=Count(
                     'id',
                     filter=
-                        Q(date__range=(start_of_week,end_of_week))
+                        Q(date__range=(start_of_week,today))
                 )
             )
 
-            # return JsonResponse(data={"metrics":metrics, 'statuses':statuses, 'source':lst_sources})
+            out = {"metrics":metrics, 'statuses':statuses, 'source':lst_sources, 'today':today, 'start_of_week':start_of_week, 'end_of_week':end_of_week,}
 
-            return render(request,template_name,{"metrics":metrics, 'statuses':statuses, 'source':lst_sources})
+            # return JsonResponse(out)
+
+            return render(request,template_name,out)
 
         candidates = Candidate.objects
         

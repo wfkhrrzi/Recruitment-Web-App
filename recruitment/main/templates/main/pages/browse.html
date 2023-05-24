@@ -33,7 +33,6 @@
         <table id="table-candidates" class="table table-hover bg-white rounded" width="100%">
             <thead>
                 <tr>
-                    {% comment %} <th scope="col">Id</th> {% endcomment %}
                     <th></th>
                     <th scope="col">Name</th>
                     <th scope="col">Received Date</th>
@@ -46,7 +45,6 @@
                 </tr>
 
                 <tr>
-                    {% comment %} <th class="table-filter-wrapper"></th> {% endcomment %}
                     <th></th>
                     <th class="table-filter-wrapper">
                         <input type="text" class="form-control table-filter" placeholder="Filter Name">
@@ -108,7 +106,7 @@
 
     </div>
     
-    <!-- Modal -->
+    <!-- Upload Resume Modal -->
     <div class="modal fade" id="uploadResumeModal" tabindex="-1" aria-labelledby="uploadResumeModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -196,6 +194,7 @@
     <script src="https://cdn.datatables.net/select/1.6.2/js/dataTables.select.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.3.6/js/dataTables.buttons.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     {% load static %}
     <script src="{% static 'main/js/browse.js' %}"></script>

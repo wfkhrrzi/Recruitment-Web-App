@@ -426,36 +426,92 @@ $(document).ready(function () {
 
 			// table dropdown
 			$('.table-dropdown',api.table().body()).each(function (row_i,element) {
+				let cur_dropdown_value  = element.value // to store current value of the dropdown for reverting purpose
 
 				$(element).on('click', function (e) {  
 					e.stopPropagation();
-				});
+					cur_dropdown_value = this.value
+					console.log('cur_dropdown_value: '+cur_dropdown_value)
+				});				
 
 				$(element).on('change', function (e) {
-					update_url = e.target.dataset.updateUrl
+					let current_dropdown = e.target
+
+					const update_url = e.target.dataset.updateUrl
 
 					const data = {
 						proceed:this.value,
 						[e.target.dataset.stageName]:e.target.dataset[e.target.dataset.stageName]
 					}
 
-					$.ajax({
-						type: "POST",
-						url: update_url,
-						data: data,
-						headers: {
-							'Accept': 'application/json'
-						},
-						success: function (response) {
-							console.log(response)
-							api.draw();
-						},
-						error: function (a,b,c) {  
-							console.log(a.responseJSON);
-							api.draw();
+					// initialize ajax update
+					const update_ajax = function () {
+						$.ajax({
+							type: "POST",
+							url: update_url,
+							data: data,
+							headers: {
+								'Accept': 'application/json'
+							},
+							success: function (response) {
+								console.log(response)
+								api.draw();
+							},
+							error: function (a,b,c) {  
+								console.log(a.responseJSON);
+								api.draw();
+			
+							}
+						});	
+					}
 
+					let subsequent_stage_exist = false
+
+					// check if subsequent stages exist
+					$('.table-dropdown',$(this).parent().parent()).each(function (index, element) {
+						
+						let next_dropdown_index = $(element).parent().index()
+						let current_dropdown_index = $(e.target).parent().index()
+
+						// current dropdown contains subsequent stages
+						if (next_dropdown_index > current_dropdown_index) {	
+							subsequent_stage_exist = true
 						}
+						
 					});
+
+					// executes update
+					if (subsequent_stage_exist) {
+						// prompt user to confirm selection
+						Swal.fire({
+							title: 'Are you sure?',
+							text: "Rejecting the candidate on ealier stages will terminate the subsequent stages",
+							icon: 'warning',
+							showCancelButton: true,
+							confirmButtonColor: '#3085d6',
+							cancelButtonColor: '#d33',
+							confirmButtonText: 'Yes, I proceed',
+							cancelButtonText: 'CANCEL',
+						}).then((result) => {
+							console.log(result)
+							if (result.isConfirmed) {
+								// update executed
+								update_ajax();
+							} else {
+								// revert current dropdown change
+								console.log('revert value: '+cur_dropdown_value);
+
+								current_dropdown.value = cur_dropdown_value
+								cur_dropdown_value = null
+							}
+						});
+					} else {
+						// executes update regardless
+						update_ajax();
+					}
+
+					
+					
 
 				})
 	
@@ -826,5 +882,6 @@ $(document).ready(function () {
 		uploadResumeSubmit.prop('disabled',true)
 
 	})
+
 
 });

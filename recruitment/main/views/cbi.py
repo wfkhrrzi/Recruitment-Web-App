@@ -292,14 +292,17 @@ class CBIUpdate(CustomLoginRequired,View): # mail functionality coming soon
 
             elif int(request.POST['proceed']) == 2: #pending schedule
                 
+                cbi.is_proceed = False
                 cbi.status = Status.objects.get(codename='cbi:pending schedule')
 
             elif int(request.POST['proceed']) == 3: #pending interview
                 
+                cbi.is_proceed = False
                 cbi.status = Status.objects.get(codename='cbi:pending interview')
 
             elif int(request.POST['proceed']) == 4: #pending result
                 
+                cbi.is_proceed = False
                 cbi.status = Status.objects.get(codename='cbi:pending result')
 
         # update remarks

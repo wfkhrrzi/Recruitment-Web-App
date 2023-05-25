@@ -73,6 +73,11 @@ class BrowseIndex(CustomLoginRequired, View):
             metrics = Candidate.objects.annotate(
                 latest_cbischedule_status = Subquery(latest_cbischedule_status),
             ).aggregate(
+                new_application=Count(
+                    'id',
+                    filter=
+                        Q(date__range=(start_of_week,today))
+                ),
                 pending_initial_screening=Count(
                     'id',
                     filter=
@@ -95,11 +100,6 @@ class BrowseIndex(CustomLoginRequired, View):
                         Q(cbi__status__codename="cbi:pending interview")
                         # Q(latest_cbischedule_status=True) # cbischedule.is_proceed == True
                 ),
-                new_application=Count(
-                    'id',
-                    filter=
-                        Q(date__range=(start_of_week,today))
-                )
             )
 
             out = {"metrics":metrics, 'statuses':statuses, 'source':lst_sources, 'today':today, 'start_of_week':start_of_week, 'end_of_week':end_of_week,}

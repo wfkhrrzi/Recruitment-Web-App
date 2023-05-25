@@ -426,16 +426,12 @@ $(document).ready(function () {
 
 			// table dropdown
 			$('.table-dropdown',api.table().body()).each(function (row_i,element) {
-				let cur_dropdown_value  = element.value // to store current value of the dropdown for reverting purpose
 
 				$(element).on('click', function (e) {  
 					e.stopPropagation();
-					cur_dropdown_value = this.value
-					console.log('cur_dropdown_value: '+cur_dropdown_value)
 				});				
 
 				$(element).on('change', function (e) {
-					let current_dropdown = e.target
 
 					const update_url = e.target.dataset.updateUrl
 
@@ -499,18 +495,13 @@ $(document).ready(function () {
 								update_ajax();
 							} else {
 								// revert current dropdown change
-								console.log('revert value: '+cur_dropdown_value);
-
-								current_dropdown.value = cur_dropdown_value
-								cur_dropdown_value = null
+								api.draw()
 							}
 						});
 					} else {
 						// executes update regardless
 						update_ajax();
 					}
-
-					
 					
 
 				})

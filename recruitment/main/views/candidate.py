@@ -13,6 +13,8 @@ from django.urls import reverse
 from django.http import HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+from django.db.models import Count, Q
+import requests
 
 
 class CandidateIndex(CustomLoginRequired,View):
@@ -99,3 +101,50 @@ class CandidateResumeCreate(CustomLoginRequired,View):
             })
 
         return redirect(request.META.get('HTTP_REFERER') or reverse('main:candidate.index'))
+
+
+class CandidateResumeRead(CustomLoginRequired,View):
+
+    def get(self,request:HttpRequest):
+
+        rawResumes = CandidateResume.objects.filter(is_parsed=False)
+        candidateResumes = rawResumes.all()
+        countResumes = rawResumes.aggregate(
+            count=Count(
+                'id',
+                filter=Q(is_parsed=False),
+            )
+        ) 
+
+        return JsonResponse({
+            'data':serializers.serialize('python',candidateResumes),
+            'count':countResumes['count'],
+        })
+
+
+class CandidateResumeParse(CustomLoginRequired,View):
+
+    def post(self,request:HttpRequest):
+        
+        for i in ('job_title','job-description',):
+            if request.POST.get(i, None) == None:
+                response = JsonResponse({'job_title':'job_title are required'})
+                response.status_code = 400
+                return response
+            
+        response = requests.post(
+            'http://127.0.0.1:8080/upload',
+            data={
+                'job_title':request.POST['job_title'],
+                'job-description':request.POST['job-description'],
+            },
+        )
+
+        return JsonResponse({
+            'response':response.json(),
+            'status_code': response.status_code,
+        })
+            
+        
+            
+        

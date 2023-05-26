@@ -70,8 +70,8 @@ $(document).ready(function () {
 	}
 
 	const uploadResumeModal = new bootstrap.Modal('#uploadResumeModal');
+	const parseNewResumeModal = new bootstrap.Modal('#parseNewResumeModal');
 
-	// uploadResumeModal.toggle()
 
 	function table_child_row(data) {
 
@@ -170,7 +170,8 @@ $(document).ready(function () {
 					text: 'Parse new resume',
 					action: function ( e, dt, node, config ) {
 						// alert( 'Button activated' );
-						window.open("https://ptsg-5edhnebulaap02-generic-resume-parser.azurewebsites.net/", "_blank")
+						// window.open("https://ptsg-5edhnebulaap02-generic-resume-parser.azurewebsites.net/", "_blank")
+						parseNewResumeModal.toggle()
 					},
 					className: 'btn-sm btn-success btn-theme',
 				},
@@ -874,5 +875,163 @@ $(document).ready(function () {
 
 	})
 
+
+	// ---------------------------- PARSE NEW RESUME ---------------------------------------
+	const parseNewResumesInputs = $('.parse-resumes-input');
+	const parseNewResumesForm = $('#parse-resumes-config-form');
+	const parseNewResumesList = $('#parse-resumes-list');
+	const jobRoleInput = $('#parse-resumes-jobRole');
+	const jobDescInput = $('#parse-resumes-jobDesc');
+	const skillsInput = $('#parse-resumes-skills');
+	const jobRole = 'data scientist'
+	const jobDesc = `This is for example is our JD for experienced data scientist:\n
+Responsible for design, planning, and coordinating the implementation of Data Science work activities in the Group Digital with established structured processes and procedures to support PETRONAS's digital agenda.\n
+1) Technical & Professional Excellence
+
+Responsible for ensuring data required for analytic models is of required quality and models are constructed to standards and deployed effectively.
+Implement data science industry best practices, relevant cutting-edge technology, and innovation in projects to ensure the right solutions fulfill the business requirements.
+
+2) Technical/Skill Leadership & Solutioning
+
+Responsible for developing appropriate technical solutions to address business pain points with insights and recommendations.
+Implement an established analytics strategy by adopting the right technologies and technical requirements when executing projects to ensure business value generation.
+Execute operational excellence through continuous technical and process improvement initiatives within projects to improve operations efficiency and effectiveness within own activity & projects.
+
+3) Technical Expertise
+
+Track and follow up with relevant parties to ensure Technical Excellence Programmes are successfully deployed and integrated into work processes, documents, policies, and guidelines.
+Participate in a community of practices and network with internal and external technical experts by identifying solutions to common problems and capturing and sharing existing data science knowledge for continuous excellence.
+
+
+Be part of our DS team in at least one of the following areas:
+
+Machine Learning
+
+Roles: Design analytics solutions for business problems; develop, evaluate, optimize, deploy and maintain models.
+
+Tech stack: ML Algorithms, Python, SQL, Spark, Git, Cloud Services, Deep Learning frameworks, MLOps, etc
+
+
+Natural Language Processing
+
+Roles: Design text analytics solutions for business problems; develop, evaluate, optimize, deploy and maintain text processing and analytics solutions.
+
+Tech stack: Python, SQL, Git, NLTK, Deep Learning frameworks, MLOps, Text analytics, NLP, NLU, NLG, Language Models, etc
+
+
+Computer Vision
+
+Roles: Design Image and video analytics solutions for business problems; develop, evaluate, optimize, deploy and maintain solutions
+
+Tech stack: Tensorflow, OpenCV, Fastai, Pytorch, MLFlow, Spark, MLlib Python, SQL, Git, Deep Learning frameworks, MLOps, etc
+
+
+Optimization / Simulation
+
+Roles: Design optimization/simulation analytics solutions for business problems; develop, evaluate, optimize, deploy and maintain solutions
+
+Tech stack: mathematical/process models, Simulation modeling, AnyLogic, Simio, mixed-integer programming (linear and nonlinear), Python, Pyomo, Gurobi solver, MLOps, etc.
+
+What are the requirements?
+
+Bachelor's or Master's degree in Data Science, Mathematics, Engineering, Computer Science, or in any other discipline
+At least 2 years of relevant experience covering advanced statistical analysis and machine learning.
+Good in statistical and scripting programming languages (such as R, Python, and MATLAB)`
+
+	// parseNewResumeModal.toggle()
+
+
+	$(parseNewResumeModal._element).on('show.bs.modal', event => {
+		// display raw resumes
+		$.ajax({
+			type: "get",
+			url: get_raw_resumes_url,
+			success: function (response) {
+				// generate resume items
+				data = response.data
+				// data = []
+				
+				if (data.length > 0) {
+
+					parseNewResumesList.append(`<div class="alert alert-success mb-0">There are a total of <strong>${response.count}</strong> resumes to be parsed</div>`)
+
+					// // Create the outer div element with classes
+					// var outerDiv = $('<div>').addClass('d-flex flex-wrap');
+					
+					// data.forEach(resume_obj => {
+					// 	filename = resume_obj.fields.submission.replace(/^Resume\//, "");
+				
+					// 	// Create the inner div element with classes and text content
+					// 	var innerDiv = $('<div>')
+					// 		.addClass('flex-fill py-2 me-4')
+					// 		.text(filename);
+				
+					// 	// Append the inner div to the outer div
+					// 	outerDiv.append(innerDiv);
+
+					// });					
+
+					// parseNewResumesList.append(outerDiv);
+
+				} else {
+					
+					parseNewResumesList.append('<div class="alert alert-danger mb-0">No resumes are to be parsed</div>');
+
+				}
+			}
+		});
+	})
+
+	$(parseNewResumeModal._element).on('hide.bs.modal', event => {
+		// clear all resumes
+		parseNewResumesList.children().remove()
+	})
+	
+	function disable_parse_inputs(bool=true) {
+		parseNewResumesInputs.each(function (index, element) {
+			// element == this
+			$(this).prop('disabled',bool)
+	
+			jobRoleInput.val(jobRole);
+			jobDescInput.val(jobDesc);
+	
+		});		
+	}
+
+	disable_parse_inputs();
+
+	$('#parse-resumes-default-checkbox').on('change', function () {
+		if (this.checked) {
+			parseNewResumesInputs.prop('disabled',true)
+			// parseNewResumesForm.addClass('d-none')
+			jobRoleInput.val(jobRole);
+			jobDescInput.val(jobDesc);
+
+		} else {
+			parseNewResumesInputs.prop('disabled',false)
+			// parseNewResumesForm.removeClass('d-none')
+
+		}
+
+	});
+
+	$('#parse-resumes-submit').on('click', function () {
+		disable_parse_inputs(false);
+
+		const formData = new FormData(parseNewResumesForm[0])
+
+		let data = {}
+
+
+		for (const [key,value] of formData.entries()) {
+			data[key] = value
+			console.log(`${key}: ${value}`)
+		}
+
+		console.log(data)
+
+		disable_parse_inputs();
+
+	});
 
 });

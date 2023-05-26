@@ -259,4 +259,5 @@ class CandidateResume(Submission):
     candidate_name = models.CharField(max_length=200,null=True)
     source = models.ForeignKey(Source, null=True, on_delete=models.SET_NULL)
     referral_name = models.CharField(max_length=200,null=True,)
+    is_parsed = models.BooleanField(default=False)
     

@@ -93,3 +93,7 @@ html body {
     --bs-card-border-color:#00a19c;
     --bs-card-bg:#c8dadf;
 }
+
+.parse-resumes-input {
+    font-size: 0.8rem;
+}

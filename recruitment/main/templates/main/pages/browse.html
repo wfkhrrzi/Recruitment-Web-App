@@ -5,6 +5,7 @@
 {% load custom_templatetags %}
 
 {% block content %}
+    <!-- Greetings -->
     <div class="mt-3 px-3">
         <h1 class="">Hello, 
             <span style="color:#00a19c">
@@ -13,7 +14,7 @@
         </h1>
     </div>
     
-    {% comment %} Action metrics {% endcomment %}
+    <!-- Action metrics -->
     <div class="my-4 d-flex flex-row">
         {% for key,value in metrics.items %}
             <div class="shadow rounded py-4 px-5 me-4 text-center bg-white">
@@ -169,6 +170,67 @@
             </div>
         </div>
     </div>
+    
+    <!-- Parse new resume Modal -->
+    <div class="modal fade" id="parseNewResumeModal" tabindex="-1" aria-labelledby="parseNewResumeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5 text-capitalize" id="parseNewResumeModalLabel">parse resumes</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <!-- body -->
+                <div class="modal-body" style="font-size: 0.85rem;">
+                    <!-- display new resumes -->
+                    <div id="parse-resumes-list-wrapper" class="py-3" >
+                        <div class="fw-medium mb-3" style="font-size:0.9rem">Resumes to parse</div>
+                        <div id="parse-resumes-list" style="max-height:30vh;overflow-y:auto"></div>
+                        {% comment %} <div class="d-flex flex-wrap">
+                            <div class="flex-fill py-2 me-4">filename-{{i}}.pdf</div>
+                        </div> {% endcomment %}
+                    </div>
+                    
+                    <!-- config wrapper -->
+                    <div id="parse-resumes-config-wrapper" class="py-3">
+                        <div class="fw-medium mb-3" style="font-size:0.9rem">Parser Configuration</div>
+
+                        <!-- default config checkbox -->
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="parse-resumes-default-checkbox" checked>
+                            <label class="form-check-label" for="parse-resumes-default-checkbox">
+                                Use default configuration
+                            </label>
+                        </div>
+    
+                        <!-- config form -->
+                        <form id="parse-resumes-config-form" action="#" method="post" class="">
+                            <div class="mt-3">
+                                <label for="parse-resumes-jobRole" class="form-label">Job Role</label>
+                                <input name="job_title" type="text" class="form-control parse-resumes-input" id="parse-resumes-jobRole" placeholder="Input Job Role">
+                            </div>
+                            <div class="mt-3">
+                                <label for="parse-resumes-jobDesc" class="form-label">Job Description</label>
+                                <textarea name="job-description" class="form-control parse-resumes-input" id="parse-resumes-jobDesc" rows="10" placeholder="Input Job Role"></textarea>
+                            </div>
+                            {% comment %} <div class="mt-3">
+                                <label for="parse-resumes-skills" class="form-label">Skills Keywords</label>
+                                <div id="skillsHelpBlock" class="form-text mt-0 mb-1">
+                                    If no skill set is provided, a generic recommendation from the AI based on the job title will be used for matching skills.
+                                </div>
+                                <input name="skills" class="form-control parse-resumes-input" type="file" id="parse-resumes-skills" aria-labelledby="skillsHelpBlock">
+                            </div> {% endcomment %}
+                        </form>
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-danger" data-bs-dismiss="modal">Cancel</button>
+                    <button id="parse-resumes-submit" type="button" class="btn btn-sm btn-success btn-theme">Parse Resumes</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
 
 {% endblock content %} 
 
@@ -207,6 +269,8 @@
         const prescreening_update_url = "{% url 'main:prescreening.update' %}"
         const cbi_update_url = "{% url 'main:cbi.update' %}"
         const get_remarks_url = "{% url 'main:browse.remarks' %}"
+        const get_raw_resumes_url = "{% url 'main:candidate.resume.read' %}"
+
     </script>
 
 

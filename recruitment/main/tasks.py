@@ -1,0 +1,102 @@
+from celery import shared_task
+from main.models import CandidateResume, Candidate, Status, Users, InitialScreening
+from django.core.serializers import deserialize
+import requests
+import os
+from typing import List
+
+@shared_task()
+def parse_resumes(job_title,job_description,resumes_json,user_id):
+
+    # deserialize candidateresumes back to queryset
+    deserialized_objects = list(deserialize('json', resumes_json))
+    resumes_obj:List[CandidateResume] = [deserialized_object.object for deserialized_object in deserialized_objects]
+    # resumes_obj = CandidateResume.objects.filter(is_parsed=False)
+
+    data = {
+        'file_meta':[],
+        'file_list':[],
+    }
+
+    # fetch filename and file from db
+    for resume in resumes_obj:
+        file_meta = dict(
+            instance = resume,
+            created_at = resume.created_at,
+            name = resume.submission.name,
+            source = resume.source,
+            referral_name = resume.referral_name,
+        )
+        data['file_meta'].append(file_meta) 
+        data['file_list'].append( ('file',resume.submission.open(mode='rb')) )
+
+    # execute parsing process
+    response = requests.post(
+        'http://127.0.0.1:8080/upload',
+        data={
+            'job_title':job_title,
+            'job-description':job_description,
+        },
+        files=data['file_list'],
+        # files=[('file',resume.submission.open(mode='rb')) for resume in resumes_obj],
+    )
+
+    # store parsing output into db
+    parsed_resumes = dict(response.json())['parsed resumes']
+    new_candidates_list = []
+    new_initialscreening_list = []
+
+    for parsed_file in parsed_resumes:
+        for file_meta in data['file_meta']:
+            print(parsed_file['pdf_filename'] + ' | ' + os.path.splitext(os.path.basename(file_meta['name']))[0])
+            if parsed_file['pdf_filename'] == os.path.splitext(os.path.basename(file_meta['name']))[0]:
+                new_candidate = Candidate(
+                    name=parsed_file['Name'],
+                    date=file_meta['created_at'],
+                    referral_name=file_meta['referral_name'],
+                    phone_number=parsed_file['StandardizedPhoneNumber'],
+                    email=parsed_file['Email Address'],
+                    highest_education=parsed_file['Education'],
+                    years_exp=int(parsed_file['Total Years of Work Experience']),
+                    CGPA=float( parsed_file['CGPA'].split('/')[0].rstrip() ),
+                    recent_role=parsed_file['Last Role'],
+                    # recent_emp=None,
+                    # recent_role=parsed_file['Last Role'],
+                    main_skills=parsed_file['CandidateSkills'],
+                    ds_skills=parsed_file['Relevant_data scientistskills'],
+                    ds_background=parsed_file['Relevant_data scientistexperience'],
+                    source=file_meta['source'],
+                    created_by=Users.objects.get(id=user_id),
+                    gpt_status= (
+                        Status.objects.get(codename="gpt_status:not recommended") 
+                        if parsed_file['Recommendation as data scientist (Yes/No)'].lower() == 'no'
+                        else Status.objects.get(codename="gpt_status:recommended") 
+                    ),
+                    overall_status=Status.objects.get(codename='initscreening:ongoing'),
+                    candidate_resume=file_meta['instance']
+                    
+                )
+
+                new_candidates_list.append(new_candidate)
+
+                new_initialscreening_list.append(
+                    InitialScreening(
+                        candidate=new_candidate,
+                        status=Status.objects.get(codename='initscreening:pending'),
+                    )
+                )
+
+                data['file_meta'].remove(file_meta)
+
+                break
+    
+    print(new_candidates_list)
+
+    Candidate.objects.bulk_create(new_candidates_list)
+    InitialScreening.objects.bulk_create(new_initialscreening_list)
+
+    # Update is_parsed to parsed resumes
+    for resume in resumes_obj:
+        resume.is_parsed = True
+    
+    CandidateResume.objects.bulk_update(resumes_obj,['is_parsed'])

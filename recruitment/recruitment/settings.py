@@ -103,6 +103,9 @@ DATABASES = {
     # }
 }
 
+# Celery settings
+CELERY_BROKER_URL = 'sqla+sqlite:///' + str(DATABASES['default']['NAME'])
+CELERY_RESULT_BACKEND = 'db+sqlite:///' + str(DATABASES['default']['NAME'])
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

@@ -98,50 +98,6 @@ class CreatedMixin(models.Model):
         abstract = True
 
 
-class Candidate(CreatedMixin,LastModifiedMixin,models.Model):
-    name = models.CharField(max_length=100)
-    date = models.DateField()
-    referral_name = models.CharField(max_length=100)
-    phone_number = models.CharField(max_length=100)
-    email = models.EmailField(max_length=100)
-    highest_education = models.CharField(max_length=100) # need revision on this
-    years_exp = models.IntegerField()
-    CGPA = models.FloatField()
-    recent_role = models.CharField(max_length=100)
-    recent_emp = models.CharField(max_length=100)
-    main_skills = models.CharField(max_length=100)
-    ds_skills = models.CharField(max_length=100)
-    ds_background = models.CharField(max_length=100)
-    hr_remarks = models.TextField(null=True)
-    gpt_status = models.ForeignKey(Status,on_delete=models.SET_NULL,null=True,related_name="candidates_gpt_status")
-    cv_link = models.CharField(max_length=255)
-    source = models.ForeignKey(Source,on_delete=models.SET_NULL,null=True)
-    category = models.ForeignKey(EmpCategory,on_delete=models.SET_NULL,null=True)
-    overall_status = models.ForeignKey(Status,on_delete=models.SET_NULL,null=True,related_name="candidates_overall_status")
-
-    def __str__(self) -> str:
-        return self.name
-
-
-class InitialScreening(LastModifiedMixin,models.Model):
-    candidate = models.OneToOneField(Candidate,on_delete=models.CASCADE)
-    is_hm_proceed = models.BooleanField(null=True)
-    hm_date_selected = models.DateField(null=True)
-    hm_status = models.ForeignKey(Status,on_delete=models.CASCADE,null=True,related_name="initialscreening_hm_status")
-    date_selected = models.DateField(null=True)
-    is_proceed = models.BooleanField(null=True)
-    status = models.ForeignKey(Status,on_delete=models.CASCADE,null=True,related_name="initialscreening_final_status")
-    remarks = models.TextField(null=True)
-    # revision for assessment results 
-
-
-class InitialScreeningEvaluation(CreatedMixin,LastModifiedMixin,models.Model):
-    status = models.ForeignKey(Status,on_delete=models.CASCADE,null=True)
-    user = models.ForeignKey(Users,on_delete=models.SET_NULL,null=True,related_name='initialscreeningevaluation_user')
-    initial_screening = models.ForeignKey(InitialScreening,on_delete=models.CASCADE)
-    is_proceed = models.BooleanField(null=True)
-
-
 class Submission(CreatedMixin,models.Model):
 
     def upload_directory(self,filename):
@@ -173,6 +129,60 @@ class Submission(CreatedMixin,models.Model):
 
     class Meta:
         abstract = True
+
+
+class CandidateResume(Submission):
+    
+    # candidate = models.ForeignKey(Candidate, null=True, on_delete=models.SET_NULL)
+    candidate_name = models.CharField(max_length=200,null=True)
+    source = models.ForeignKey(Source, null=True, on_delete=models.SET_NULL)
+    referral_name = models.CharField(max_length=200,null=True,)
+    is_parsed = models.BooleanField(default=False)
+    
+
+class Candidate(CreatedMixin,LastModifiedMixin,models.Model):
+    name = models.CharField(max_length=100)
+    date = models.DateField()
+    referral_name = models.CharField(max_length=100,null=True)
+    phone_number = models.CharField(max_length=100)
+    email = models.EmailField(max_length=100)
+    highest_education = models.CharField(max_length=100,null=True) # need revision on this
+    years_exp = models.IntegerField(null=True)
+    CGPA = models.FloatField(null=True)
+    recent_role = models.CharField(max_length=100,null=True)
+    recent_emp = models.CharField(max_length=100,null=True)
+    main_skills = models.CharField(max_length=100,null=True)
+    ds_skills = models.CharField(max_length=100,null=True)
+    ds_background = models.CharField(max_length=100,null=True)
+    hr_remarks = models.TextField(null=True)
+    gpt_status = models.ForeignKey(Status,on_delete=models.SET_NULL,null=True,related_name="candidates_gpt_status")
+    cv_link = models.CharField(max_length=255,null=True)
+    source = models.ForeignKey(Source,on_delete=models.SET_NULL,null=True)
+    category = models.ForeignKey(EmpCategory,on_delete=models.SET_NULL,null=True)
+    overall_status = models.ForeignKey(Status,on_delete=models.SET_NULL,null=True,related_name="candidates_overall_status")
+    candidate_resume = models.ForeignKey(CandidateResume, on_delete=models.SET_NULL, null=True)
+
+    def __str__(self) -> str:
+        return self.name
+
+
+class InitialScreening(LastModifiedMixin,models.Model):
+    candidate = models.OneToOneField(Candidate,on_delete=models.CASCADE)
+    is_hm_proceed = models.BooleanField(null=True)
+    hm_date_selected = models.DateField(null=True)
+    hm_status = models.ForeignKey(Status,on_delete=models.CASCADE,null=True,related_name="initialscreening_hm_status")
+    date_selected = models.DateField(null=True)
+    is_proceed = models.BooleanField(null=True)
+    status = models.ForeignKey(Status,on_delete=models.CASCADE,null=True,related_name="initialscreening_final_status")
+    remarks = models.TextField(null=True)
+    # revision for assessment results 
+
+
+class InitialScreeningEvaluation(CreatedMixin,LastModifiedMixin,models.Model):
+    status = models.ForeignKey(Status,on_delete=models.CASCADE,null=True)
+    user = models.ForeignKey(Users,on_delete=models.SET_NULL,null=True,related_name='initialscreeningevaluation_user')
+    initial_screening = models.ForeignKey(InitialScreening,on_delete=models.CASCADE)
+    is_proceed = models.BooleanField(null=True)
 
 
 class Prescreening(CreatedMixin,LastModifiedMixin,models.Model):
@@ -252,12 +262,3 @@ class Hiring(models.Model):
     remark = models.TextField(null=True)
     status = models.ForeignKey(Status,on_delete=models.CASCADE,null=False)
     candidate = models.OneToOneField(Candidate,on_delete=models.CASCADE,null=False)
-
-class CandidateResume(Submission):
-    
-    # candidate = models.ForeignKey(Candidate, null=True, on_delete=models.SET_NULL)
-    candidate_name = models.CharField(max_length=200,null=True)
-    source = models.ForeignKey(Source, null=True, on_delete=models.SET_NULL)
-    referral_name = models.CharField(max_length=200,null=True,)
-    is_parsed = models.BooleanField(default=False)
-    

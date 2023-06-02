@@ -13,7 +13,7 @@ def parse_resumes(self,job_title,job_description,resumes_json,user_id):
 
     print({'job-title':job_title,'job-description':job_description,'resumes':resumes_json})
 
-    user:Users = Users.objects.get(id=1)
+    user:Users = Users.objects.get(id=user_id)
 
     result_state = {
         'resumes_info':[],

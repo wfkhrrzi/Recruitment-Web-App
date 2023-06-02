@@ -954,12 +954,22 @@ Good in statistical and scripting programming languages (such as R, Python, and 
 				
 				if (data.length > 0) {
 
-					parseNewResumesList.append(`<div class="alert alert-success mb-0">There are a total of <strong>${response.count}</strong> resumes to be parsed</div>`)
+					parseNewResumesList.append(
+						`<div class="alert alert-success mb-0">
+							<i class="fa-sharp fa-solid fa-circle-check fa-lg me-2"></i>
+							There are a total of <strong>${response.count}</strong> resumes to be parsed
+						</div>`
+					);
 					parseNewResumesSubmit.prop('disabled',false);
 
 				} else {
 					
-					parseNewResumesList.append('<div class="alert alert-danger mb-0">No resumes are to be parsed</div>');
+					parseNewResumesList.append(
+						`<div class="alert alert-danger mb-0">
+							<i class="fa-solid fa-triangle-exclamation fa-lg me-2"></i>
+							No resumes are to be parsed
+						</div>`
+					);
 					parseNewResumesSubmit.prop('disabled',true);
 
 				}
@@ -1078,9 +1088,18 @@ Good in statistical and scripting programming languages (such as R, Python, and 
 			const tasks = res['lst_task']
 			console.log(tasks)
 
-			alert_string += `User ${tasks.user.alias} is currently parsing ${tasks.resumes_info.length} resumes\n`
+			alert_string += `<strong>${tasks.user.alias}</strong>  is currently parsing  <strong>${tasks.resumes_info.length} resumes</strong>\n`
 
-			bgTasksAlert.append(`<div class="alert alert-warning mb-0">${alert_string}</div>`);
+			bgTasksAlert.append(
+				`<div class="alert alert-warning mb-0">
+					<div class="d-flex align-items-center">
+						<div class="me-3 spinner-border spinner-border-sm" role="status" style="">
+							<span class="visually-hidden">Loading...</span>
+						</div>
+						${alert_string}
+					</div>
+				</div>`
+			);
 		}
 		else {
 			bgTasksAlert.addClass('d-none')

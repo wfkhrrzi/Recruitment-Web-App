@@ -880,6 +880,7 @@ $(document).ready(function () {
 	const parseNewResumesInputs = $('.parse-resumes-input');
 	const parseNewResumesForm = $('#parse-resumes-config-form');
 	const parseNewResumesList = $('#parse-resumes-list');
+	const parseNewResumesSubmit = $('#parse-resumes-submit');
 	const jobRoleInput = $('#parse-resumes-jobRole');
 	const jobDescInput = $('#parse-resumes-jobDesc');
 	const skillsInput = $('#parse-resumes-skills');
@@ -954,32 +955,22 @@ Good in statistical and scripting programming languages (such as R, Python, and 
 				if (data.length > 0) {
 
 					parseNewResumesList.append(`<div class="alert alert-success mb-0">There are a total of <strong>${response.count}</strong> resumes to be parsed</div>`)
-
-					// // Create the outer div element with classes
-					// var outerDiv = $('<div>').addClass('d-flex flex-wrap');
-					
-					// data.forEach(resume_obj => {
-					// 	filename = resume_obj.fields.submission.replace(/^Resume\//, "");
-				
-					// 	// Create the inner div element with classes and text content
-					// 	var innerDiv = $('<div>')
-					// 		.addClass('flex-fill py-2 me-4')
-					// 		.text(filename);
-				
-					// 	// Append the inner div to the outer div
-					// 	outerDiv.append(innerDiv);
-
-					// });					
-
-					// parseNewResumesList.append(outerDiv);
+					parseNewResumesSubmit.prop('disabled',false);
 
 				} else {
 					
 					parseNewResumesList.append('<div class="alert alert-danger mb-0">No resumes are to be parsed</div>');
+					parseNewResumesSubmit.prop('disabled',true);
 
 				}
+			},
+			error: function (a,b,c) {  
+				console.log(a)
 			}
 		});
+
+		// display active parsing tasks
+
 	})
 
 	$(parseNewResumeModal._element).on('hide.bs.modal', event => {
@@ -1015,7 +1006,8 @@ Good in statistical and scripting programming languages (such as R, Python, and 
 
 	});
 
-	$('#parse-resumes-submit').on('click', function () {
+	// submimt parse resume
+	parseNewResumesSubmit.on('click', function () {
 		disable_parse_inputs(false);
 
 		const formData = new FormData(parseNewResumesForm[0])
@@ -1025,13 +1017,86 @@ Good in statistical and scripting programming languages (such as R, Python, and 
 
 		for (const [key,value] of formData.entries()) {
 			data[key] = value
-			console.log(`${key}: ${value}`)
+			// console.log(`${key}: ${value}`)
 		}
 
 		console.log(data)
 
 		disable_parse_inputs();
 
+		$.ajax({
+			type: "post",
+			url: get_parse_resumes_url,
+			data: data,
+			headers: {
+				Accept: "application/json",
+			},
+			success: function (response) {
+				console.log(response)
+			},
+			error: function(a,b,c) {
+				console.log(Error(a))
+			}
+		});
+
+		parseNewResumeModal.toggle()
+
 	});
 
+	// ---------------------- PARSE RESUMES NOTIFICATION ----------------------------------
+
+	const bgTasksAlert = $('.background-tasks-alert');
+
+	// initialize event source for parse resume 
+	// var es = new ReconnectingEventSource('/notification/parser');
+
+	// es.addEventListener('message', function (e) {
+	// 	res = JSON.parse(e.data);
+	// 	console.log(res);
+
+	// 	active_task.add_task(res['task'])
+		
+	// }, false);
+
+	// es.addEventListener('stream-reset', function (e) {
+	// }, false);
+
+	// initialize websocket for parse resume 
+	var socket = new WebSocket('ws://localhost:8000/notification/parser');
+
+	socket.onmessage = function (e) {  
+		res = JSON.parse(e.data);
+		res['lst_task'] = JSON.parse(res['lst_task'])
+		console.log(res);
+
+		bgTasksAlert.children().remove()
+		
+		if (res['lst_task']) {
+			bgTasksAlert.removeClass('d-none');
+			let alert_string = '';
+
+			const tasks = res['lst_task']
+			console.log(tasks)
+
+			alert_string += `User ${tasks.user.alias} is currently parsing ${tasks.resumes_info.length} resumes\n`
+
+			bgTasksAlert.append(`<div class="alert alert-warning mb-0">${alert_string}</div>`);
+		}
+		else {
+			bgTasksAlert.addClass('d-none')
+		}
+	}
+
+	socket.onopen = function () {  
+		setInterval(
+			function () {  
+				socket.send('ping')
+			},
+			2000
+		)
+	}
+
+	
+
+	
 });

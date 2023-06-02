@@ -116,6 +116,10 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+                    <!-- display active tasks -->
+                    <div id="" class="mb-2 background-tasks-alert" style="font-size: 0.85rem;"></div>
+
+                    <!-- upload -->
                     <div id="upload-resumes-wrapper" class="card shadow text-center p-3">
                         <div class="card-title fw-semibold" style="font-size: 0.95rem;">Upload Resumes</div>
                         <!-- upload resumes container -->
@@ -181,13 +185,11 @@
                 </div>
                 <!-- body -->
                 <div class="modal-body" style="font-size: 0.85rem;">
-                    <!-- display new resumes -->
+                    <!-- display total resumes -->
                     <div id="parse-resumes-list-wrapper" class="py-3" >
                         <div class="fw-medium mb-3" style="font-size:0.9rem">Resumes to parse</div>
-                        <div id="parse-resumes-list" style="max-height:30vh;overflow-y:auto"></div>
-                        {% comment %} <div class="d-flex flex-wrap">
-                            <div class="flex-fill py-2 me-4">filename-{{i}}.pdf</div>
-                        </div> {% endcomment %}
+                        <div id="" class="mb-2 background-tasks-alert" style=""></div>
+                        <div id="parse-resumes-list" style=""></div>
                     </div>
                     
                     <!-- config wrapper -->
@@ -259,6 +261,8 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     {% load static %}
+    <script src="{% static 'django_eventstream/eventsource.min.js' %}"></script>
+    <script src="{% static 'django_eventstream/reconnecting-eventsource.js' %}"></script>
     <script src="{% static 'main/js/browse.js' %}"></script>
     <script>
         const statuses_initscreening = {{statuses.initscreening|safe}}
@@ -270,6 +274,7 @@
         const cbi_update_url = "{% url 'main:cbi.update' %}"
         const get_remarks_url = "{% url 'main:browse.remarks' %}"
         const get_raw_resumes_url = "{% url 'main:candidate.resume.read' %}"
+        const get_parse_resumes_url = "{% url 'main:candidate.resume.parse' %}"
 
     </script>
 

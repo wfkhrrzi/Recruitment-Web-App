@@ -4,14 +4,31 @@ from django.core.serializers import deserialize
 import requests
 import os
 from typing import List
+import time
+from celery_progress.backend import ProgressRecorder
+import json
 
-@shared_task()
-def parse_resumes(job_title,job_description,resumes_json,user_id):
+@shared_task(bind=True)
+def parse_resumes(self,job_title,job_description,resumes_json,user_id):
+
+    print({'job-title':job_title,'job-description':job_description,'resumes':resumes_json})
+
+    user:Users = Users.objects.get(id=1)
+
+    result_state = {
+        'resumes_info':[],
+        'user':{
+            'id':user.pk,
+            'alias':user.alias,
+        },
+    }
+
+    self.update_state(state='STARTED',meta=result_state)
 
     # deserialize candidateresumes back to queryset
     deserialized_objects = list(deserialize('json', resumes_json))
     resumes_obj:List[CandidateResume] = [deserialized_object.object for deserialized_object in deserialized_objects]
-    # resumes_obj = CandidateResume.objects.filter(is_parsed=False)
+
 
     data = {
         'file_meta':[],
@@ -27,19 +44,33 @@ def parse_resumes(job_title,job_description,resumes_json,user_id):
             source = resume.source,
             referral_name = resume.referral_name,
         )
+        file_meta['instance'] = resume
         data['file_meta'].append(file_meta) 
         data['file_list'].append( ('file',resume.submission.open(mode='rb')) )
+        
+        result_state['resumes_info'].append({
+            'name':resume.submission.name
+        })
+
+    self.update_state(state='STARTED',meta=result_state)
 
     # execute parsing process
-    response = requests.post(
-        'http://127.0.0.1:8080/upload',
-        data={
-            'job_title':job_title,
-            'job-description':job_description,
-        },
-        files=data['file_list'],
-        # files=[('file',resume.submission.open(mode='rb')) for resume in resumes_obj],
-    )
+    try:
+        response = requests.post(
+            'http://127.0.0.1:8080/upload',
+            data={
+                'job_title':job_title,
+                'job-description':job_description,
+            },
+            files=data['file_list'],
+            # files=[('file',resume.submission.open(mode='rb')) for resume in resumes_obj],
+        )
+    except: 
+        for resume in resumes_obj:
+            resume.is_parsed = False
+            resume.is_parsing = False
+        CandidateResume.objects.bulk_update(resumes_obj,['is_parsed','is_parsing',])
+
 
     # store parsing output into db
     parsed_resumes = dict(response.json())['parsed resumes']
@@ -98,5 +129,15 @@ def parse_resumes(job_title,job_description,resumes_json,user_id):
     # Update is_parsed to parsed resumes
     for resume in resumes_obj:
         resume.is_parsed = True
+        resume.is_parsing = False
     
-    CandidateResume.objects.bulk_update(resumes_obj,['is_parsed'])
+    CandidateResume.objects.bulk_update(resumes_obj,['is_parsed','is_parsing',])
+
+    return "Done"
+
+
+@shared_task(bind=True)
+def ping(self):
+    self.update_state(state='STARTED',meta={'data':'custom data'})
+    time.sleep(10)
+    return "pong"

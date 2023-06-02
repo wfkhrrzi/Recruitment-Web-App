@@ -82,6 +82,7 @@ class Command(BaseCommand):
         UsersFactory.create_batch(7)
         AdminFactory.create_batch(4)
         AdminFactory.create(email='admin1@test.com',first_name='Wan Fakhrurrazi',last_name='Wan Azizan',)
+        AdminFactory.create(email='admin2@test.com',first_name='Demarcus',last_name='the III',)
 
         # candidates
         NUM_CANDIDATES = 30

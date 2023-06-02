@@ -14,9 +14,12 @@ from django.http import HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.db.models import Count, Q
-import requests
 from main.tasks import parse_resumes
-from celery.result import AsyncResult
+from django_eventstream import send_event
+from main.utils import get_active_tasks
+import json
+from django_celery_results.models import TaskResult
+
 
 class CandidateIndex(CustomLoginRequired,View):
 
@@ -108,7 +111,7 @@ class CandidateResumeRead(CustomLoginRequired,View):
 
     def get(self,request:HttpRequest):
 
-        rawResumes = CandidateResume.objects.filter(is_parsed=False)
+        rawResumes = CandidateResume.objects.filter(is_parsed=False,is_parsing=False)
         candidateResumes = rawResumes.all()
         countResumes = rawResumes.aggregate(
             count=Count(
@@ -127,8 +130,6 @@ class CandidateResumeParse(CustomLoginRequired,View):
 
     def post(self,request:HttpRequest):
 
-        # return JsonResponse(serializers.serialize('python',[request.user]),safe=False)
-        
         for i in ('job_title','job-description',):
             if request.POST.get(i, None) == None:
                 response = JsonResponse({'job_title':'job_title are required'})
@@ -136,10 +137,11 @@ class CandidateResumeParse(CustomLoginRequired,View):
                 return response
         
         # initialize resume object (for parsing process & tracking parsing progress)
-        resumes_obj = CandidateResume.objects.filter(is_parsed=False)
+        resumes_obj = CandidateResume.objects.filter(is_parsed=False,is_parsing=False)
 
-        # execute parsing in job queues 
         if resumes_obj.exists():
+            
+            # execute parsing in job queues 
             task = parse_resumes.apply_async(
                 args=(
                     request.POST['job_title'],
@@ -149,10 +151,19 @@ class CandidateResumeParse(CustomLoginRequired,View):
                 )
             )
 
+            # set is_parsing = True
+            resumes_obj.update(is_parsing=True)
+
             metric = resumes_obj.aggregate(
                 total=Count('id')
             )
 
+            # send notification to the clients via SSE
+            # tasks = TaskResult.objects.filter(status__in=['STARTED', 'PENDING'])
+            # send_event('resume_parser','message',json.dumps({'task_id':task.id}))
+
+
+            # return response to current client
             return JsonResponse({
                 'response':'jobs run in background',
                 'task_id':task.id,

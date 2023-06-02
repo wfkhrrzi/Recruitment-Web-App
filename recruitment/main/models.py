@@ -138,6 +138,7 @@ class CandidateResume(Submission):
     source = models.ForeignKey(Source, null=True, on_delete=models.SET_NULL)
     referral_name = models.CharField(max_length=200,null=True,)
     is_parsed = models.BooleanField(default=False)
+    is_parsing = models.BooleanField(default=False)
     
 
 class Candidate(CreatedMixin,LastModifiedMixin,models.Model):

@@ -1,7 +1,12 @@
 import inspect
-from main.models import Candidate
+from main.models import Candidate, CandidateResume, Users
 from django.db import models
 from django.db.models import F
+from typing import List
+from django.core import serializers
+from django_eventstream import send_event
+from django_celery_results.models import TaskResult
+import json
 
 def return_json(request):
     if request.META.get('HTTP_ACCEPT') == 'application/json':
@@ -49,3 +54,37 @@ def extract_candidate_info(model_instance)->dict:
     )
 
     return list(dict_candidate)[0]
+
+
+def parser_notification_msg(task_id,user) -> dict:
+
+    if isinstance(user,int):
+        # user is user_id
+        out_user = Users.objects.filter(id=user).values(alias=F('alias'),id=F('id'))[0]
+    else:
+        # user is an object
+        out_user = {
+            'alias':user.alias,
+            'id':user.pk,
+        }
+
+    return {
+        'task_id':task_id,
+        'user':out_user,
+    }
+
+def get_active_tasks():
+        # Fetch active tasks
+        active_tasks = TaskResult.objects.filter(status__in=['STARTED', 'PENDING'])
+
+        # return the active tasks
+        if active_tasks.exists():
+            lst_result = []
+        
+            for task in active_tasks:
+                lst_result.append(task.result)
+            
+            return lst_result
+        
+        else:
+            return None

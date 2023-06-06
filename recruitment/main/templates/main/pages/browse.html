@@ -235,6 +235,32 @@
         </div>
     </div>
 
+    <!-- Display resume Modal -->
+    <div class="modal fade" id="openResumeModal" tabindex="-1" aria-labelledby="openResumeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5 text-capitalize" id="openResumeModalLabel">Open resume</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <!-- body -->
+                <div class="modal-body" style="font-size: 0.85rem">
+                    <!-- display resume -->
+                    {% comment %} <div class="ratio ratio-1x1"> {% endcomment %}
+                        <iframe src="" frameborder="0" style="width:100%;height: 100%;"></iframe>
+                    {% comment %} </div> {% endcomment %}
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-danger" data-bs-dismiss="modal">Cancel</button>
+                    <button id="parse-resumes-submit" type="button" class="btn btn-sm btn-success btn-theme">Parse Resumes</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
 {% endblock content %} 
 
 {% block import_css %}
@@ -260,6 +286,7 @@
     <script src="https://cdn.datatables.net/buttons/2.3.6/js/dataTables.buttons.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.bootstrap5.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-base64@3.7.5/base64.min.js"></script>
 
     {% load static %}
     <script src="{% static 'django_eventstream/eventsource.min.js' %}"></script>
@@ -276,6 +303,7 @@
         const get_remarks_url = "{% url 'main:browse.remarks' %}"
         const get_raw_resumes_url = "{% url 'main:candidate.resume.read' %}"
         const get_parse_resumes_url = "{% url 'main:candidate.resume.parse' %}"
+        const get_open_resume_url = "{% url 'main:candidate.resume.open.default' %}"
 
     </script>
 

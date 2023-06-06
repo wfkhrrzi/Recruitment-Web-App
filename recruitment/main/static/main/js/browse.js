@@ -71,6 +71,7 @@ $(document).ready(function () {
 
 	const uploadResumeModal = new bootstrap.Modal('#uploadResumeModal');
 	const parseNewResumeModal = new bootstrap.Modal('#parseNewResumeModal');
+	const openResumeModal = new bootstrap.Modal('#openResumeModal');
 
 
 	function table_child_row(data) {
@@ -412,13 +413,39 @@ $(document).ready(function () {
 				
 			});
 
-			// Linkable row
+			// Linkable row / Open respective resume when clicking a candidate item 
 			$('tr',api.table().body()).each(function (row_i,element) {
+
+				let data = api.table().row(this).data()
 
 				$(this)
 				.on('click', function() {
 	
-					window.location.href = api.row(row_i).data()['href'];
+					// window.location.href = api.row(row_i).data()['href'];
+					
+					console.log(data.id)
+					$.ajax({
+						url: get_open_resume_url+data.id,  // Replace with the URL to your Django view
+						type: 'GET',
+						xhrFields: {
+							responseType: 'blob'
+						},
+						// responseType: 'arraybuffer',  // Use 'arraybuffer' to handle binary data
+						// dataType: 'blob',  // Use 'blob' data type to handle binary data
+						success: function(data) {
+
+							var fileUrl = URL.createObjectURL(data);
+				
+							// // Set the iframe source to display the PDF
+							$(openResumeModal._element).find('iframe').attr('src', fileUrl);
+
+							openResumeModal.toggle()
+
+						},
+						error: function(xhr, status, error) {
+							console.error('Error retrieving PDF:', error);
+						}
+					});
 	
 				})
 				.css('cursor','pointer');
@@ -1077,7 +1104,7 @@ Good in statistical and scripting programming languages (such as R, Python, and 
 	socket.onmessage = function (e) {  
 		res = JSON.parse(e.data);
 		res['lst_task'] = JSON.parse(res['lst_task'])
-		console.log(res);
+		// console.log(res);
 
 		bgTasksAlert.children().remove()
 		

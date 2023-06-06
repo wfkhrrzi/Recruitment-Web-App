@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import JsonResponse,HttpResponse,HttpRequest
+from django.http import JsonResponse,HttpResponse,HttpRequest,FileResponse
 from django.views import View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from main.auth import CustomLoginRequired
@@ -10,7 +10,6 @@ from django.core import serializers
 from main.forms import ResumeSubmissionForm
 from django.shortcuts import redirect
 from django.urls import reverse
-from django.http import HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.db.models import Count, Q
@@ -63,6 +62,17 @@ class CandidateUpdate(UserPassesTestMixin,View):
     
     def post(self,request):
         pass
+
+class CandidateResumeOpen(CustomLoginRequired,View):
+
+    def get(self,request:HttpRequest,candidate_id):
+
+        resume = CandidateResume.objects.get(candidate=Candidate.objects.get(id=candidate_id))
+        response = FileResponse(resume.submission.open(mode='rb'),content_type='application/pdf')
+        # response['Content-Disposition'] = 'inline; filename="file.pdf"'
+
+        return response
+
 
 @method_decorator(csrf_exempt,name='dispatch')
 class CandidateResumeCreate(CustomLoginRequired,View):

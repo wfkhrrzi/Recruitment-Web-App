@@ -2,7 +2,7 @@ from django.urls import path
 
 from . import view
 from . import auth
-from main.views.candidate import CandidateIndex,CandidateEdit,CandidateResumeCreate,CandidateResumeRead,CandidateResumeParse
+from main.views.candidate import CandidateIndex,CandidateEdit,CandidateResumeCreate,CandidateResumeRead,CandidateResumeParse,CandidateResumeOpen
 from main.views.prescreening import PrescreeningCreate, PrescreeningSubmissionCreate, PrescreeningSubmissionDelete, PrescreeningInstructionSent, PrescreeningIndex, PrescreeningUpdate
 from main.views.initscreening import InitialScreeningIndex, InitialScreeningCreate, InitialScreeningEdit, InitialScreeningUpdate,InitialScreeningEvaluationCreate, InitialScreeningEvaluationDelete, InitialScreeningHiringUpdate
 from main.views.cbi import CBICreate, CBIIndex, CBIScheduleCreate, CBIScheduleUpdate, CBISubmissionCreate, CBISubmissionDelete, CBIUpdate
@@ -22,6 +22,8 @@ urlpatterns = [
     path('candidate/resume/create', CandidateResumeCreate.as_view(), name='candidate.resume.create'),
     path('candidate/resume/read', CandidateResumeRead.as_view(), name='candidate.resume.read'),
     path('candidate/resume/parse', CandidateResumeParse.as_view(), name='candidate.resume.parse'),
+    path('candidate/resume/open/<int:candidate_id>', CandidateResumeOpen.as_view(), name='candidate.resume.open'),
+    path('candidate/resume/open/', CandidateResumeOpen.as_view(), name='candidate.resume.open.default'),
     # path('candidate/edit/<int:screening_id>', CandidateEdit.as_view(), name='candidate.edit'),
     
     path('initialscreening/', InitialScreeningIndex.as_view(), name='initscreening.index.default'),

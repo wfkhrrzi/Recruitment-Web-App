@@ -146,6 +146,9 @@ $(document).ready(function () {
 		`;
 	}
 
+	// gpt_status initialized to 'recommended'
+	$('.table-filter-wrapper select[name="gpt_status"]').val('gpt_status:recommended');
+
 	var table = $("#table-candidates").DataTable({
 		orderCellsTop: true,
 		fixedHeader: true,
@@ -193,6 +196,17 @@ $(document).ready(function () {
 				Accept: "application/json",
 			},
 		},
+		searchCols: [
+			null,
+			null,
+			null,
+			null,
+			{ "search": "gpt_status:recommended" },
+			null,
+			null,
+			null,
+			null,
+		],
 		order: [[1, 'asc']],
 		columns: [
 			{
@@ -385,8 +399,8 @@ $(document).ready(function () {
 				var input = $(this).find("input[type='text']");
 				input
 					.on("keypress", function (e) {
-						
 						if(e.which === 13) {
+							console.log('******** run input **********')
 							if (column.search() !== this.value) {
 								// console.log(`Filter= ${this.value}`);
 								column.search(this.value).draw();
@@ -398,6 +412,9 @@ $(document).ready(function () {
 				var select = $(this).find("select");
 				select
 					.on("change", function () {
+						console.log('******** run select **********')
+						console.log(column.search())
+						console.log(this.value)
 						if (column.search() !== this.value) {
 							// console.log(`Filter= ${this.value}`);
 							column.search(this.value).draw();
@@ -408,6 +425,7 @@ $(document).ready(function () {
 				date
 					.on("change", function () {
 						// console.log(`Filter= ${this.value}`);
+						console.log('******** run date **********')
 						column.search(this.value).draw();
 					});
 				

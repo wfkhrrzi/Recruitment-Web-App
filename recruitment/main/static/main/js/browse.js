@@ -215,7 +215,23 @@ $(document).ready(function () {
                 data: null,
                 defaultContent: '',
 			},
-			{ data: "name", width:"15%" ,},
+			{ data: "name", width:"15%", render: function (data,type,row) {
+				out = $(`
+					<div>
+						<div class='d-flex gap-2 align-items-center'>
+							<div>${data}</div>
+						</div>
+					</div>
+				`);
+
+				if (row.new_applicant) {
+					out.find('div.d-flex').append(`
+						<span class="badge text-bg-secondary rounded-pill fw-semibold">NEW</span>
+					`)
+				}
+
+				return out.html();
+			}},
 			{ data: "date", },
 			{ data: "source_" ,width:"10%",},
 			// gpt status column
@@ -631,7 +647,8 @@ $(document).ready(function () {
 	const uploadResumeContent = $('#upload-resumes-content');
 	const uploadResumeWrapper = $('#upload-resumes-wrapper');
 	const uploadResumeFileItemWrapper = $('#upload-resumes-item-wrapper');
-	const uploadResumeClear = $('button:eq(1)',uploadResumeForm);
+	const uploadResumeClear = $('button:eq(2)',uploadResumeForm);
+	const uploadParseResumeTrigger = $('button:eq(1)',uploadResumeForm);
 	const uploadResumeSubmit = $('button:eq(0)',uploadResumeForm);
 
 	// object to manipulate input[type='file']
@@ -917,6 +934,14 @@ $(document).ready(function () {
 		console.log(uploadResumeFileInput.prop('files'))
 		
 		uploadResumeSubmit.prop('disabled',true)
+
+	})
+
+	// when clicked "clear all" button
+	uploadParseResumeTrigger.on('click',function (e) {  
+		e.preventDefault()
+
+		console.log('upload and parse')
 
 	})
 

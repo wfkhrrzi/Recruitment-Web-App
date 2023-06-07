@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.http import JsonResponse,HttpResponse,HttpRequest
 from django.views import View
-from main.models import Candidate, CBISchedule, Status, Source, CBI, Prescreening, InitialScreening
+from main.models import Candidate, CBISchedule, Status, Source, CBI, Prescreening, InitialScreening, CandidateResume
 from django.core.paginator import Paginator, EmptyPage
 from django.core import serializers
 from main.auth import CustomLoginRequired
@@ -23,7 +23,11 @@ class BrowseIndex(CustomLoginRequired, View):
 
     def get(self,request:HttpRequest,template_name='main/pages/browse.html'):
 
-        # return JsonResponse(parser.parse(request.get_full_path().split('?')[1]),safe=False)
+        # Get the start and end of the current week
+        today = timezone.now().date()
+        # start_of_week = today - timezone.timedelta(days=today.weekday())
+        start_of_week = today - timezone.timedelta(days=6)
+        end_of_week = start_of_week + timezone.timedelta(days=6)
 
         if not return_json(request): # first view load
 
@@ -61,23 +65,17 @@ class BrowseIndex(CustomLoginRequired, View):
                 # elif stage == 'gpt_status':
                 #     statuses['gpt'].append(out_status)
 
-            
-            # Get the start and end of the current week
-            today = timezone.now().date()
-            # start_of_week = today - timezone.timedelta(days=today.weekday())
-            start_of_week = today - timezone.timedelta(days=6)
-            end_of_week = start_of_week + timezone.timedelta(days=6)
 
             # fetch action metrics
             latest_cbischedule_status = CBISchedule.objects.filter(cbi__candidate=OuterRef('pk')).order_by('-created_at').values('is_proceed')[:1]
             metrics = Candidate.objects.annotate(
                 latest_cbischedule_status = Subquery(latest_cbischedule_status),
             ).aggregate(
-                new_application=Count(
-                    'id',
-                    filter=
-                        Q(date__range=(start_of_week,today))
-                ),
+                # new_application=Count(
+                #     'id',
+                #     filter=
+                #         Q(date__range=(start_of_week,today))
+                # ),
                 pending_initial_screening=Count(
                     'id',
                     filter=
@@ -102,6 +100,9 @@ class BrowseIndex(CustomLoginRequired, View):
                 ),
             )
 
+            new_application = CandidateResume.objects.filter(is_parsed=False).aggregate(count=Count('id'))
+            
+            metrics = {'new_application':new_application['count'],**metrics}
             out = {"metrics":metrics, 'statuses':statuses, 'source':lst_sources, 'today':today, 'start_of_week':start_of_week, 'end_of_week':end_of_week,}
 
             # return JsonResponse(out)
@@ -163,6 +164,10 @@ class BrowseIndex(CustomLoginRequired, View):
             'id',
             'name',
             'date',
+            new_applicant=Case(
+                When(Q(date__range=(start_of_week,today)),then=Value(True)),
+                default=Value(False)
+            ),
             initialscreening_id=Case(
                 When(Q(initialscreening__status__isnull=False),then=F('initialscreening__id')),
                 default=Value(None)

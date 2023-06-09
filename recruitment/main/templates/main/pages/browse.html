@@ -120,48 +120,51 @@
                     <div id="" class="mb-2 background-tasks-alert" style="font-size: 0.85rem;"></div>
 
                     <!-- upload -->
-                    <div id="upload-resumes-wrapper" class="card shadow text-center p-3">
-                        <div class="card-title fw-semibold" style="font-size: 0.95rem;">Upload Resumes</div>
-                        <!-- upload resumes container -->
-                        <div class="card-body">
-                            <!-- no uploaded file alert -->
-                            <div class="alert alert-danger alert-dismissible fade show d-none" role="alert" style="
-                                font-size:0.8rem;
-                                --bs-alert-padding-x: 0.5rem;
-                                --bs-alert-padding-y: 0.5rem;
-                            ">
-                                No files are chosen yet! Please choose file(s) before uploading.
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="
-                                    padding: 0.7rem 1rem;
-                                "></button>
-                            </div>
-                            
-                            <!-- upload file content -->
-                            <div id="upload-resumes-content" class="mb-4" style="font-size:0.85rem;max-height:30vh;overflow-y:auto">
-                                <!-- no files (template) -->
-                                <div id="upload-resumes-alert" class="text-secondary">Drag and drop files here <span class="fst-italic">OR</span></div>
-                                
-                                <!-- files available (template) -->
-                                <div id="upload-resumes-item-wrapper" class="d-flex flex-wrap justify-content-center gap-2">
-                                    {% comment %} <div class="upload-resumes-item d-flex align-items-center gap-1" style="width:calc(600px/4)">
-                                        <div class="file-name-ellipsis">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Harum quas perspiciatis rerum cum, quo inventore libero deserunt a modi ex quia illo est, aspernatur omnis enim ullam dolorum debitis nobis?</div>
-                                        <button class="btn btn-sm"><i class="fa-solid fa-trash"></i></button>
-                                    </div> {% endcomment %}
-                                </div>                                
-                            </div>
-
-                            <!-- upload resumes buttons -->
-                            <form id="upload-resume-form" action="{% url 'main:candidate.resume.create' %}" method="post" enctype="multipart/form-data">
-                                <div class="d-flex justify-content-center gap-3">
-                                    <div>
-                                        <input id="upload-resumes-input" name="submission" class="invisible position-absolute" type="file" multiple accept="pdf" />
-                                        <label class="btn btn-sm btn-success btn-theme" for="upload-resumes-input">Choose file(s)</label>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary btn-sm" disabled>Upload</button>
-                                    <button type="button" class="btn btn-danger btn-sm d-none">Clear All</button>
+                    <div id="upload-resumes-container">
+                        <div id="upload-resumes-wrapper" class="card shadow text-center p-3">
+                            <div class="card-title fw-semibold" style="font-size: 0.95rem;">Upload Resumes</div>
+                            <!-- upload resumes container -->
+                            <div class="card-body">
+                                <!-- no uploaded file alert -->
+                                <div class="alert alert-danger alert-dismissible fade show d-none" role="alert" style="
+                                    font-size:0.8rem;
+                                    --bs-alert-padding-x: 0.5rem;
+                                    --bs-alert-padding-y: 0.5rem;
+                                ">
+                                    No files are chosen yet! Please choose file(s) before uploading.
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="
+                                        padding: 0.7rem 1rem;
+                                    "></button>
                                 </div>
-                            </form>
-
+                                
+                                <!-- upload file content -->
+                                <div id="upload-resumes-content" class="mb-4" style="font-size:0.85rem;max-height:30vh;overflow-y:auto">
+                                    <!-- no files (template) -->
+                                    <div id="upload-resumes-alert" class="text-secondary">Drag and drop files here <span class="fst-italic">OR</span></div>
+                                    
+                                    <!-- files available (template) -->
+                                    <div id="upload-resumes-item-wrapper" class="d-flex flex-wrap justify-content-center gap-2">
+                                        {% comment %} <div class="upload-resumes-item d-flex align-items-center gap-1" style="width:calc(600px/4)">
+                                            <div class="file-name-ellipsis">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Harum quas perspiciatis rerum cum, quo inventore libero deserunt a modi ex quia illo est, aspernatur omnis enim ullam dolorum debitis nobis?</div>
+                                            <button class="btn btn-sm"><i class="fa-solid fa-trash"></i></button>
+                                        </div> {% endcomment %}
+                                    </div>                                
+                                </div>
+    
+                                <!-- upload resumes buttons -->
+                                <form id="upload-resume-form" action="{% url 'main:candidate.resume.create' %}" method="post" enctype="multipart/form-data">
+                                    <div class="d-flex justify-content-center gap-3">
+                                        <div>
+                                            <input id="upload-resumes-input" name="submission" class="invisible position-absolute" type="file" multiple accept="pdf" />
+                                            <label class="btn btn-sm btn-success btn-theme" for="upload-resumes-input">Choose file(s)</label>
+                                        </div>
+                                        <button id="upload-resume-clear" type="button" class="btn btn-danger btn-sm d-none">Clear All</button>
+                                        <button id="upload-and-parse-resume" type="button" class="btn btn-secondary btn-sm" data-bs-target="#parseNewResumeModal" data-bs-toggle="modal">Upload and Parse</button>
+                                        <button id="upload-resume-submit" type="submit" class="btn btn-primary btn-sm" disabled>Upload</button>
+                                    </div>
+                                </form>
+    
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -185,11 +188,15 @@
                 </div>
                 <!-- body -->
                 <div class="modal-body" style="font-size: 0.85rem;">
+                    
+                    <!-- upload resumes (upload & parse) -->
+                    <div id="upload-and-parse-resumes-container">
+                    </div>
+
                     <!-- display total resumes -->
                     <div id="parse-resumes-list-wrapper" class="py-3" >
                         <div class="fw-medium mb-3" style="font-size:0.9rem">Resumes to parse</div>
-                        <div class="mb-2 background-tasks-alert" style="">
-                        </div>
+                        <div class="mb-2 background-tasks-alert" style=""></div>
                         <div id="parse-resumes-list" style=""></div>
                     </div>
                     

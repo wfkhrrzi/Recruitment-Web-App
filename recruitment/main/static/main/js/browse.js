@@ -1,5 +1,17 @@
 $(document).ready(function () {
 
+	function sleepAfterModalHide() {
+		return new Promise(resolve => setTimeout(resolve, 1000));
+	}
+
+	function uploadSuccess(callback) {
+		if(isUploadSuccess){
+			callback();
+
+			isUploadSuccess = false;
+		}
+	}
+
 	function component_table_dropdown(param_obj,) {
 		/**
 		 * generate status dropdown for the specified column
@@ -428,9 +440,6 @@ $(document).ready(function () {
 				var select = $(this).find("select");
 				select
 					.on("change", function () {
-						console.log('******** run select **********')
-						console.log(column.search())
-						console.log(this.value)
 						if (column.search() !== this.value) {
 							// console.log(`Filter= ${this.value}`);
 							column.search(this.value).draw();
@@ -647,9 +656,13 @@ $(document).ready(function () {
 	const uploadResumeContent = $('#upload-resumes-content');
 	const uploadResumeWrapper = $('#upload-resumes-wrapper');
 	const uploadResumeFileItemWrapper = $('#upload-resumes-item-wrapper');
-	const uploadResumeClear = $('button:eq(2)',uploadResumeForm);
-	const uploadParseResumeTrigger = $('button:eq(1)',uploadResumeForm);
-	const uploadResumeSubmit = $('button:eq(0)',uploadResumeForm);
+	const uploadResumeClear = $('#upload-resume-clear',uploadResumeForm);
+	const uploadParseResumeTrigger = $('#upload-and-parse-resume',uploadResumeForm);
+	const uploadResumeSubmit = $('#upload-resume-submit',uploadResumeForm);
+	const uploadResumeDefaultView = $('#upload-resumes-alert');
+	var isUploadSuccess = false;
+
+	console.log(uploadResumeForm.get(0))
 
 	// object to manipulate input[type='file']
 	const uploadResumeFileInputObj = {
@@ -689,15 +702,13 @@ $(document).ready(function () {
 	// re-render upload-resumes-item-wrapper on every func call
 	const displayFiles = (dt_files) => {  
 
-		let default_view = $('#upload-resumes-alert')
-
 		// reset wrapper
 		uploadResumeFileItemWrapper.empty()
 
 		if (dt_files.length > 0){
 
-			if (!default_view.hasClass('d-none')) {
-				default_view.addClass('d-none');
+			if (!uploadResumeDefaultView.hasClass('d-none')) {
+				uploadResumeDefaultView.addClass('d-none');
 			}
 
 			if (uploadResumeClear.hasClass('d-none')) {
@@ -705,6 +716,7 @@ $(document).ready(function () {
 			}
 
 			uploadResumeSubmit.prop('disabled',false)
+			uploadParseSubmit.prop('disabled',false)
 
 
 			$.each(dt_files, (index, file) => {
@@ -738,8 +750,8 @@ $(document).ready(function () {
 
 		} else {
 			
-			if (default_view.hasClass('d-none')) {
-				default_view.removeClass('d-none');
+			if (uploadResumeDefaultView.hasClass('d-none')) {
+				uploadResumeDefaultView.removeClass('d-none');
 			}
 			
 			if (!uploadResumeClear.hasClass('d-none')) {
@@ -747,6 +759,7 @@ $(document).ready(function () {
 			}
 
 			uploadResumeSubmit.prop('disabled',true)
+			uploadParseSubmit.prop('disabled',true)
 		}
 
 	}
@@ -844,10 +857,8 @@ $(document).ready(function () {
 	var progress_bar = new ProgressBar() // progress bar obj instance --> actual element
 
 	// when clicked "upload" button
-	uploadResumeForm.on('submit',function (e) {  
-		e.preventDefault()
-		
-		const formData = new FormData(e.target)
+	const executeUploadResume = function () {  
+		const formData = new FormData(uploadResumeForm.get(0))
 		
 		var files_count = 0
 
@@ -859,9 +870,9 @@ $(document).ready(function () {
 
 		if (files_count > 0) {
 
-			$.ajax({
+			let ajaxUpload = $.ajax({
 				type: "post",
-				url: e.target.action,
+				url: uploadResumeForm.prop('action'),
 				data: formData,
 				headers:{
 					'Accept':'application/json'
@@ -869,7 +880,7 @@ $(document).ready(function () {
 				contentType: false,
 				processData: false,
 				// actions before ajax start
-				beforeSend: function () {  
+				beforeSend: function () {
 					uploadResumeFileItemWrapper.empty()
 					uploadResumeContent.append(progress_bar.get_component())
 					uploadResumeSubmit.prop('disabled',true)
@@ -877,6 +888,8 @@ $(document).ready(function () {
 				},
 				// actions after ajax completes
 				success: function (response) {
+					isUploadSuccess = true;
+
 					uploadResumeFileItemWrapper.empty()
 					uploadResumeFileItemWrapper.html(`
 					<div class="text-success">
@@ -919,9 +932,22 @@ $(document).ready(function () {
 				}
 			});
 
+			return new Promise(function (resolve,reject) {  
+				ajaxUpload.done(function (response) {  
+					resolve(response)
+				})
+			})
+
+
 		} else {
-			console.log(Error('no files are selected'))
+			return Error('no files are selected')
 		}
+
+	}
+	uploadResumeForm.on('submit',function (e) {  
+		e.preventDefault()
+		console.log('upload submitted')
+		executeUploadResume();
 
 	})
 
@@ -937,14 +963,22 @@ $(document).ready(function () {
 
 	})
 
-	// when clicked "clear all" button
-	uploadParseResumeTrigger.on('click',function (e) {  
-		e.preventDefault()
 
-		console.log('upload and parse')
+	$(uploadResumeModal._element).on('hide.bs.modal', event => {
+		(
+			async () => {
+				await sleepAfterModalHide()
+				
+				// reset uploadResumeFileItemWrapper
+				uploadSuccess(function () {  
+					uploadResumeFileItemWrapper.empty();
+					uploadResumeDefaultView.removeClass('d-none');
+				});
+
+			}
+		)();
 
 	})
-
 
 	// ---------------------------- PARSE NEW RESUME ---------------------------------------
 	const parseNewResumesInputs = $('.parse-resumes-input');
@@ -1011,10 +1045,11 @@ Good in statistical and scripting programming languages (such as R, Python, and 
 
 	// parseNewResumeModal.toggle()
 
+	// return resumes to parse alert + ajax
+	function resumesToParseAlert() {
+		parseNewResumesList.empty();
 
-	$(parseNewResumeModal._element).on('show.bs.modal', event => {
-		// display raw resumes
-		$.ajax({
+		return $.ajax({
 			type: "get",
 			url: get_raw_resumes_url,
 			success: function (response) {
@@ -1048,14 +1083,33 @@ Good in statistical and scripting programming languages (such as R, Python, and 
 				console.log(a)
 			}
 		});
+	}
 
+
+	$(parseNewResumeModal._element).on('show.bs.modal', event => {
 		// display active parsing tasks
+		resumesToParseAlert();
 
 	})
 
 	$(parseNewResumeModal._element).on('hide.bs.modal', event => {
-		// clear all resumes
-		parseNewResumesList.children().remove()
+		(
+			async () => {
+				await sleepAfterModalHide()
+				
+				// clear all resumes
+				parseNewResumesList.children().remove()
+		
+				// reset uploadResumeFileItemWrapper
+				uploadSuccess(function () {  
+					uploadResumeFileItemWrapper.empty();
+					uploadResumeDefaultView.removeClass('d-none');
+				})
+		
+				// remove upload container
+				undoUploadParse();
+			}
+		)();
 	})
 	
 	function disable_parse_inputs(bool=true) {
@@ -1086,8 +1140,8 @@ Good in statistical and scripting programming languages (such as R, Python, and 
 
 	});
 
-	// submimt parse resume
-	parseNewResumesSubmit.on('click', function () {
+	// submit parse resume
+	const executeParseResume = function () {  
 		disable_parse_inputs(false);
 
 		const formData = new FormData(parseNewResumesForm[0])
@@ -1104,7 +1158,7 @@ Good in statistical and scripting programming languages (such as R, Python, and 
 
 		disable_parse_inputs();
 
-		$.ajax({
+		let ajaxParse = $.ajax({
 			type: "post",
 			url: get_parse_resumes_url,
 			data: data,
@@ -1113,18 +1167,31 @@ Good in statistical and scripting programming languages (such as R, Python, and 
 			},
 			success: function (response) {
 				console.log(response)
+				resumesToParseAlert();
 			},
 			error: function(a,b,c) {
 				console.log(Error(a))
 			}
 		});
 
-		parseNewResumeModal.toggle()
+		
+		// return new Promise(function (resolve,reject) {  
+		// 	ajaxParse.done(function (response) {  
+		// 		resolve(response)
+		// 	})
+		// })
 
+		// parseNewResumeModal.toggle()
+
+	}
+
+	parseNewResumesSubmit.on('click', function () {
+		console.log('parse resumes trigger')
+		executeParseResume();		
 	});
 
 	// ---------------------- PARSE RESUMES NOTIFICATION ----------------------------------
-
+	
 	const bgTasksAlert = $('.background-tasks-alert');
 
 	// initialize event source for parse resume 
@@ -1143,22 +1210,22 @@ Good in statistical and scripting programming languages (such as R, Python, and 
 
 	// initialize websocket for parse resume 
 	var socket = new WebSocket('ws://localhost:8000/notification/parser');
-
+	
 	socket.onmessage = function (e) {  
 		res = JSON.parse(e.data);
 		res['lst_task'] = JSON.parse(res['lst_task'])
 		// console.log(res);
-
+		
 		bgTasksAlert.children().remove()
 		
 		if (res['lst_task']) {
 			bgTasksAlert.removeClass('d-none');
 			let alert_string = '';
-
+			
 			const tasks = res['lst_task']
 			console.log(tasks)
 
-			alert_string += `<strong>${tasks.user.alias}</strong>  is currently parsing  <strong>${tasks.resumes_info.length} resumes</strong>\n`
+			alert_string += `<strong class="me-2">${tasks.user.alias}</strong>  is currently parsing  <strong class="ms-2">${tasks.resumes_info.length} resumes</strong>\n`
 
 			bgTasksAlert.append(
 				`<div class="alert alert-warning mb-0">
@@ -1167,7 +1234,7 @@ Good in statistical and scripting programming languages (such as R, Python, and 
 							<span class="visually-hidden">Loading...</span>
 						</div>
 						${alert_string}
-					</div>
+						</div>
 				</div>`
 			);
 		}
@@ -1186,6 +1253,93 @@ Good in statistical and scripting programming languages (such as R, Python, and 
 	}
 
 	
+	// ---------------------- Upload and Parse Resumes ----------------------------------
+
+	const uploadParseResumeContainer = $('#upload-and-parse-resumes-container');
+	const uploadResumeContainer = $('#upload-resumes-container');
+	const uploadParseSubmit = $(`
+		<button id="upload-parse-resumes-submit" type="button" class="btn btn-sm btn-success btn-theme" disabled>Upload & Parse Resumes</button>
+	`)
+
+	var uploadParseResumeBool = false;
+	
+	const triggerUploadParse = function () {
+		
+		uploadParseResumeContainer.addClass('py-3')
+		uploadParseResumeContainer.append(`
+		<div class="fw-medium mb-3" style="font-size:0.9rem">Upload Resumes</div>
+		`)
+		uploadResumeWrapper.appendTo(uploadParseResumeContainer);
+		
+		uploadParseResumeTrigger.addClass('d-none')
+		uploadResumeSubmit.addClass('d-none')
+
+		uploadParseResumeBool = true;
+
+		// change modal appearance
+		$(parseNewResumeModal._element).find('.modal-header h1').text('Upload and Parse')
+		
+		parseNewResumesSubmit.replaceWith(uploadParseSubmit);
+
+		// submit upload parse resumes
+		uploadParseSubmit.on('click', function () {  
+			let execUpload = executeUploadResume();
+			console.log(execUpload)
+			if (execUpload instanceof Promise) {
+
+				execUpload.then(function(response) {
+					console.log(response);
+					executeParseResume();
+					// let execParse = executeParseResume();
+
+					// execParse.then(function (response) {  
+					// 	console.log(response);
+					// 	resumesToParseAlert();
+					// })
+
+				}).catch(function(error) {
+
+					console.error(error);
+
+				});
+
+			} else {
+				// Object is not a promise
+				console.log(execUpload);
+			}
+		
+		});
+		
+	}
+	
+	const undoUploadParse = function () {  
+		console.log(uploadParseResumeBool)
+		if (uploadParseResumeBool) {
+			uploadResumeWrapper.appendTo(uploadResumeContainer);
+			uploadParseResumeContainer.removeClass('py-3');
+			uploadParseResumeContainer.empty();
+	
+			uploadParseResumeTrigger.removeClass('d-none');
+			uploadResumeSubmit.removeClass('d-none')
+
+
+			uploadParseResumeBool = false
+
+			// change modal appearance
+			$(parseNewResumeModal._element).find('.modal-header h1').text('Parse Resumes')
+			uploadParseSubmit.replaceWith(parseNewResumesSubmit);
+
+		}
+	}
+
+
+	// when clicked "upload and parse" button
+	uploadParseResumeTrigger.on('click',function (e) {  
+		e.preventDefault()
+		console.log('upload and parse');
+
+		triggerUploadParse();
+	});
 
 	
 });

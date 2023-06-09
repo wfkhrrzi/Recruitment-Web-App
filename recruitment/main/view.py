@@ -100,9 +100,9 @@ class BrowseIndex(CustomLoginRequired, View):
                 ),
             )
 
-            new_application = CandidateResume.objects.filter(is_parsed=False).aggregate(count=Count('id'))
+            unparsed_resumes = CandidateResume.objects.filter(is_parsed=False).aggregate(count=Count('id'))
             
-            metrics = {'new_application':new_application['count'],**metrics}
+            metrics = {'unparsed_resumes':unparsed_resumes['count'],**metrics}
             out = {"metrics":metrics, 'statuses':statuses, 'source':lst_sources, 'today':today, 'start_of_week':start_of_week, 'end_of_week':end_of_week,}
 
             # return JsonResponse(out)

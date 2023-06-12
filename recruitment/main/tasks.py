@@ -7,11 +7,13 @@ from typing import List
 import time
 from celery_progress.backend import ProgressRecorder
 import json
+from io import BytesIO
+from django.core.files.uploadedfile import InMemoryUploadedFile
 
 @shared_task(bind=True)
 def parse_resumes(self,job_title,job_description,resumes_json,user_id):
 
-    print({'job-title':job_title,'job-description':job_description,'resumes':resumes_json})
+    print({'job-title':job_title,'job-description':job_description,})
 
     user:Users = Users.objects.get(id=user_id)
 
@@ -40,16 +42,19 @@ def parse_resumes(self,job_title,job_description,resumes_json,user_id):
         file_meta = dict(
             instance = resume,
             created_at = resume.created_at,
-            name = resume.submission.name,
+            name = resume.filename,
             source = resume.source,
             referral_name = resume.referral_name,
         )
         file_meta['instance'] = resume
-        data['file_meta'].append(file_meta) 
-        data['file_list'].append( ('file',resume.submission.open(mode='rb')) )
+        data['file_meta'].append(file_meta)
+        resume_bytes = BytesIO(resume.submission)
+        data['file_list'].append( ('file',InMemoryUploadedFile(
+            resume_bytes, None, resume.filename, 'application/pdf', resume_bytes.tell(), None
+        )) )
         
         result_state['resumes_info'].append({
-            'name':resume.submission.name
+            'name':resume.filename
         })
 
     self.update_state(state='STARTED',meta=result_state)
@@ -65,15 +70,15 @@ def parse_resumes(self,job_title,job_description,resumes_json,user_id):
             files=data['file_list'],
             # files=[('file',resume.submission.open(mode='rb')) for resume in resumes_obj],
         )
+        # store parsing output into db
+        parsed_resumes = dict(response.json())['parsed resumes']
     except: 
+        print("*******************REVERT BACKK******************************")
         for resume in resumes_obj:
             resume.is_parsed = False
             resume.is_parsing = False
         CandidateResume.objects.bulk_update(resumes_obj,['is_parsed','is_parsing',])
-
-
-    # store parsing output into db
-    parsed_resumes = dict(response.json())['parsed resumes']
+    
     new_candidates_list = []
     new_initialscreening_list = []
 

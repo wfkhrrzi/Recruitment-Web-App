@@ -18,6 +18,7 @@ from django_eventstream import send_event
 from main.utils import get_active_tasks
 import json
 from django_celery_results.models import TaskResult
+from io import BytesIO
 
 
 class CandidateIndex(CustomLoginRequired,View):
@@ -68,7 +69,7 @@ class CandidateResumeOpen(CustomLoginRequired,View):
     def get(self,request:HttpRequest,candidate_id):
 
         resume = CandidateResume.objects.get(candidate=Candidate.objects.get(id=candidate_id))
-        response = FileResponse(resume.submission.open(mode='rb'),content_type='application/pdf')
+        response = FileResponse(BytesIO(resume.submission),content_type='application/pdf')
         # response['Content-Disposition'] = 'inline; filename="file.pdf"'
 
         return response
@@ -93,7 +94,14 @@ class CandidateResumeCreate(CustomLoginRequired,View):
 
         for file in files:
 
-            ps_obj:CandidateResume = CandidateResume(submission=file)
+            ps_obj:CandidateResume = CandidateResume(filename=file.name)
+
+            # Read the uploaded file and store it as binary data in the model's BinaryField
+            with BytesIO() as buffer:
+                for chunk in file.chunks():
+                    buffer.write(chunk)
+                ps_obj.submission = buffer.getvalue()
+            
             ps_obj.created_by = request.user
             ps_obj.save()
 

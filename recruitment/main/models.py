@@ -112,7 +112,8 @@ class Submission(CreatedMixin,models.Model):
         elif model_name == CandidateResume._meta.model_name:
             return f"Resume/{filename}"            
 
-    submission = models.FileField(upload_to=upload_directory)
+    submission = models.BinaryField(null=False,editable=True)
+    filename = models.CharField(max_length=200,default="")
     is_active = models.BooleanField(default=True,null=False)
     deleted_at = models.DateTimeField(null=True)
     deleted_by = models.ForeignKey(Users,on_delete=models.SET_NULL,null=True,blank=True,related_name='%(app_label)s_%(class)s_deleted_by')

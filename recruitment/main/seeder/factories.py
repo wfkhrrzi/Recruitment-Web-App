@@ -56,8 +56,26 @@ for key, value in dict_status.items():
     lst_codename.append(key)
     lst_status.append(value)
 
-lst_emp_category = ['Fresh DS', 'Head', 'Experienced DS']
-lst_source = ['LinkedIn', 'HeadHunter', 'JobStreet']
+lst_emp_category = ['Fresh DS', 'Head', 'Experienced DS', 'Intern', 'GEES', 'Internal Mobility', 'RTT']
+lst_source = [
+    'Referral',
+    'CADS',
+    # 'Unknown',
+    'Mobility',
+    'Career Day',
+    'University',
+    'GEES',
+    'Internal Transfer',
+    'Headhunter',
+    'LinkedIn',
+    'Hunter One',
+    # 'Self',
+    'Digital Career Day',
+    'MyCareerX',
+    'Scholars',
+    'Email',
+    'PESP2 Master Programme'
+]
 lst_user_category = ['DS Lead', 'HR']
 
 class StatusFactory(DjangoModelFactory):

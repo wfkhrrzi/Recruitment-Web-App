@@ -144,10 +144,10 @@ class CandidateResume(Submission):
 
 class Candidate(CreatedMixin,LastModifiedMixin,models.Model):
     name = models.CharField(max_length=100)
-    date = models.DateField()
+    date = models.DateField(null=True)
     referral_name = models.CharField(max_length=100,null=True)
-    phone_number = models.CharField(max_length=100)
-    email = models.EmailField(max_length=100)
+    phone_number = models.CharField(max_length=100,null=True)
+    email = models.EmailField(max_length=100,null=True)
     highest_education = models.CharField(max_length=100,null=True) # need revision on this
     years_exp = models.IntegerField(null=True)
     CGPA = models.FloatField(null=True)

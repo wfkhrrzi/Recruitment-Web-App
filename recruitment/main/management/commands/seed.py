@@ -86,8 +86,8 @@ class Command(BaseCommand):
 
         # candidates
         NUM_CANDIDATES = 30
-        CandidateFactory.create_batch(NUM_CANDIDATES)
-        InitialScreeningFactory.create_batch(NUM_CANDIDATES)
+        # CandidateFactory.create_batch(NUM_CANDIDATES)
+        # InitialScreeningFactory.create_batch(NUM_CANDIDATES)
 
         self.stdout.write(self.style.SUCCESS('Database seeded successfully.'))
 

@@ -148,6 +148,9 @@ $(document).ready(function () {
 	}
 
 	const gpt_status_badge = (data) => {
+		if(!data){
+			return '-'
+		}
 		let bg_color = data.toLowerCase() == 'recommended' ? 'text-bg-success' : 'text-bg-danger'
 		return `
 		<div class="text-center">

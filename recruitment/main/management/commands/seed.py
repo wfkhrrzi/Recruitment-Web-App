@@ -81,12 +81,13 @@ class Command(BaseCommand):
         # users
         UsersFactory.create_batch(7)
         AdminFactory.create_batch(4)
-        AdminFactory.create(email='admin1@test.com',first_name='Wan Fakhrurrazi',last_name='Wan Azizan',)
+        AdminFactory.create(email='admin1@test.com',first_name='Wan Fakhrurrazi',last_name='Wan Azizan',alias="Wan Fakhrurrazi",)
+        AdminFactory.create(email='admin2@test.com',first_name='Demarcus',last_name='the III',alias="Demarcus",)
 
         # candidates
         NUM_CANDIDATES = 30
-        CandidateFactory.create_batch(NUM_CANDIDATES)
-        InitialScreeningFactory.create_batch(NUM_CANDIDATES)
+        # CandidateFactory.create_batch(NUM_CANDIDATES)
+        # InitialScreeningFactory.create_batch(NUM_CANDIDATES)
 
         self.stdout.write(self.style.SUCCESS('Database seeded successfully.'))
 

@@ -98,26 +98,71 @@ class CreatedMixin(models.Model):
         abstract = True
 
 
+class Submission(CreatedMixin,models.Model):
+
+    def upload_directory(self,filename):
+        model_name = self._meta.model_name
+
+        if model_name == PrescreeningSubmission._meta.model_name:
+            ps_obj:PrescreeningSubmission = self
+            return f"Prescreening/{ps_obj.prescreening.candidate.name}/{filename}"
+        elif model_name == CBISubmission._meta.model_name:
+            cs_obj:CBISubmission = self
+            return f"CBI/{cs_obj.cbi.candidate.name}/{filename}"            
+        elif model_name == CandidateResume._meta.model_name:
+            return f"Resume/{filename}"            
+
+    submission = models.BinaryField(null=False,editable=True)
+    filename = models.CharField(max_length=200,default="")
+    is_active = models.BooleanField(default=True,null=False)
+    deleted_at = models.DateTimeField(null=True)
+    deleted_by = models.ForeignKey(Users,on_delete=models.SET_NULL,null=True,blank=True,related_name='%(app_label)s_%(class)s_deleted_by')
+
+    def delete(self,commit:bool=True):
+        '''Set self.is_active = False'''
+        self.is_active = False
+        
+        if commit:
+            self.save()
+            return None
+        else:
+            return self
+
+    class Meta:
+        abstract = True
+
+
+class CandidateResume(Submission):
+    
+    # candidate = models.ForeignKey(Candidate, null=True, on_delete=models.SET_NULL)
+    candidate_name = models.CharField(max_length=200,null=True)
+    source = models.ForeignKey(Source, null=True, on_delete=models.SET_NULL)
+    referral_name = models.CharField(max_length=200,null=True,)
+    is_parsed = models.BooleanField(default=False)
+    is_parsing = models.BooleanField(default=False)
+    
+
 class Candidate(CreatedMixin,LastModifiedMixin,models.Model):
-    name = models.CharField(max_length=255)
-    date = models.DateField()
-    referral_name = models.CharField(max_length=255)
-    phone_number = models.CharField(max_length=255)
-    email = models.EmailField(max_length=255)
-    highest_education = models.CharField(max_length=255) # need revision on this
-    years_exp = models.IntegerField()
-    CGPA = models.FloatField()
-    recent_role = models.CharField(max_length=255)
-    recent_emp = models.CharField(max_length=255)
-    main_skills = models.CharField(max_length=255)
-    ds_skills = models.CharField(max_length=255)
-    ds_background = models.CharField(max_length=255)
+    name = models.CharField(max_length=100)
+    date = models.DateField(null=True)
+    referral_name = models.CharField(max_length=100,null=True)
+    phone_number = models.CharField(max_length=100,null=True)
+    email = models.EmailField(max_length=100,null=True)
+    highest_education = models.CharField(max_length=100,null=True) # need revision on this
+    years_exp = models.IntegerField(null=True)
+    CGPA = models.FloatField(null=True)
+    recent_role = models.CharField(max_length=100,null=True)
+    recent_emp = models.CharField(max_length=100,null=True)
+    main_skills = models.CharField(max_length=100,null=True)
+    ds_skills = models.CharField(max_length=100,null=True)
+    ds_background = models.CharField(max_length=100,null=True)
     hr_remarks = models.TextField(null=True)
     gpt_status = models.ForeignKey(Status,on_delete=models.SET_NULL,null=True,related_name="candidates_gpt_status")
-    cv_link = models.CharField(max_length=255)
+    cv_link = models.CharField(max_length=255,null=True)
     source = models.ForeignKey(Source,on_delete=models.SET_NULL,null=True)
     category = models.ForeignKey(EmpCategory,on_delete=models.SET_NULL,null=True)
     overall_status = models.ForeignKey(Status,on_delete=models.SET_NULL,null=True,related_name="candidates_overall_status")
+    candidate_resume = models.OneToOneField(CandidateResume, on_delete=models.SET_NULL, null=True)
 
     def __str__(self) -> str:
         return self.name
@@ -140,39 +185,6 @@ class InitialScreeningEvaluation(CreatedMixin,LastModifiedMixin,models.Model):
     user = models.ForeignKey(Users,on_delete=models.SET_NULL,null=True,related_name='initialscreeningevaluation_user')
     initial_screening = models.ForeignKey(InitialScreening,on_delete=models.CASCADE)
     is_proceed = models.BooleanField(null=True)
-
-
-class Submission(CreatedMixin,models.Model):
-
-    def upload_directory(self,filename):
-        model_name = self._meta.model_name
-
-        if model_name == PrescreeningSubmission._meta.model_name:
-            ps_obj:PrescreeningSubmission = self
-            return f"Prescreening/{ps_obj.prescreening.candidate.name}/{filename}"
-        elif model_name == CBISubmission._meta.model_name:
-            cs_obj:CBISubmission = self
-            return f"CBI/{cs_obj.cbi.candidate.name}/{filename}"            
-        elif model_name == CandidateResume._meta.model_name:
-            return f"Resume/{filename}"            
-
-    submission = models.FileField(upload_to=upload_directory)
-    is_active = models.BooleanField(default=True,null=False)
-    deleted_at = models.DateTimeField(null=True)
-    deleted_by = models.ForeignKey(Users,on_delete=models.SET_NULL,null=True,blank=True,related_name='%(app_label)s_%(class)s_deleted_by')
-
-    def delete(self,commit:bool=True):
-        '''Set self.is_active = False'''
-        self.is_active = False
-        
-        if commit:
-            self.save()
-            return None
-        else:
-            return self
-
-    class Meta:
-        abstract = True
 
 
 class Prescreening(CreatedMixin,LastModifiedMixin,models.Model):
@@ -252,11 +264,3 @@ class Hiring(models.Model):
     remark = models.TextField(null=True)
     status = models.ForeignKey(Status,on_delete=models.CASCADE,null=False)
     candidate = models.OneToOneField(Candidate,on_delete=models.CASCADE,null=False)
-
-class CandidateResume(Submission):
-    
-    # candidate = models.ForeignKey(Candidate, null=True, on_delete=models.SET_NULL)
-    candidate_name = models.CharField(max_length=200,null=True)
-    source = models.ForeignKey(Source, null=True, on_delete=models.SET_NULL)
-    referral_name = models.CharField(max_length=200,null=True,)
-    

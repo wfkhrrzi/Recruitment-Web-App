@@ -5,6 +5,7 @@
 {% load custom_templatetags %}
 
 {% block content %}
+    <!-- Greetings -->
     <div class="mt-3 px-3">
         <h1 class="">Hello, 
             <span style="color:#00a19c">
@@ -13,7 +14,7 @@
         </h1>
     </div>
     
-    {% comment %} Action metrics {% endcomment %}
+    <!-- Action metrics -->
     <div class="my-4 d-flex flex-row">
         {% for key,value in metrics.items %}
             <div class="shadow rounded py-4 px-5 me-4 text-center bg-white">
@@ -28,12 +29,11 @@
         {% endfor %}
     </div>
 
-
+    <!-- Candidates table -->
     <div class="my-5"> 
         <table id="table-candidates" class="table table-hover bg-white rounded" width="100%">
             <thead>
                 <tr>
-                    {% comment %} <th scope="col">Id</th> {% endcomment %}
                     <th></th>
                     <th scope="col">Name</th>
                     <th scope="col">Received Date</th>
@@ -46,7 +46,6 @@
                 </tr>
 
                 <tr>
-                    {% comment %} <th class="table-filter-wrapper"></th> {% endcomment %}
                     <th></th>
                     <th class="table-filter-wrapper">
                         <input type="text" class="form-control table-filter" placeholder="Filter Name">
@@ -108,7 +107,7 @@
 
     </div>
     
-    <!-- Modal -->
+    <!-- Upload Resume Modal -->
     <div class="modal fade" id="uploadResumeModal" tabindex="-1" aria-labelledby="uploadResumeModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -117,48 +116,55 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div id="upload-resumes-wrapper" class="card shadow text-center p-3">
-                        <div class="card-title fw-semibold" style="font-size: 0.95rem;">Upload Resumes</div>
-                        <!-- upload resumes container -->
-                        <div class="card-body">
-                            <!-- no uploaded file alert -->
-                            <div class="alert alert-danger alert-dismissible fade show d-none" role="alert" style="
-                                font-size:0.8rem;
-                                --bs-alert-padding-x: 0.5rem;
-                                --bs-alert-padding-y: 0.5rem;
-                            ">
-                                No files are chosen yet! Please choose file(s) before uploading.
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="
-                                    padding: 0.7rem 1rem;
-                                "></button>
-                            </div>
-                            
-                            <!-- upload file content -->
-                            <div id="upload-resumes-content" class="mb-4" style="font-size:0.85rem;max-height:30vh;overflow-y:auto">
-                                <!-- no files (template) -->
-                                <div id="upload-resumes-alert" class="text-secondary">Drag and drop files here <span class="fst-italic">OR</span></div>
-                                
-                                <!-- files available (template) -->
-                                <div id="upload-resumes-item-wrapper" class="d-flex flex-wrap justify-content-center gap-2">
-                                    {% comment %} <div class="upload-resumes-item d-flex align-items-center gap-1" style="width:calc(600px/4)">
-                                        <div class="file-name-ellipsis">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Harum quas perspiciatis rerum cum, quo inventore libero deserunt a modi ex quia illo est, aspernatur omnis enim ullam dolorum debitis nobis?</div>
-                                        <button class="btn btn-sm"><i class="fa-solid fa-trash"></i></button>
-                                    </div> {% endcomment %}
-                                </div>                                
-                            </div>
+                    <!-- display active tasks -->
+                    <div id="" class="mb-2 background-tasks-alert" style="font-size: 0.85rem;"></div>
 
-                            <!-- upload resumes buttons -->
-                            <form id="upload-resume-form" action="{% url 'main:candidate.resume.create' %}" method="post" enctype="multipart/form-data">
-                                <div class="d-flex justify-content-center gap-3">
-                                    <div>
-                                        <input id="upload-resumes-input" name="submission" class="invisible position-absolute" type="file" multiple accept="pdf" />
-                                        <label class="btn btn-sm btn-success btn-theme" for="upload-resumes-input">Choose file(s)</label>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary btn-sm" disabled>Upload</button>
-                                    <button type="button" class="btn btn-danger btn-sm d-none">Clear All</button>
+                    <!-- upload -->
+                    <div id="upload-resumes-container">
+                        <div id="upload-resumes-wrapper" class="card shadow text-center p-3">
+                            <div class="card-title fw-semibold" style="font-size: 0.95rem;">Upload Resumes</div>
+                            <!-- upload resumes container -->
+                            <div class="card-body">
+                                <!-- no uploaded file alert -->
+                                <div class="alert alert-danger alert-dismissible fade show d-none" role="alert" style="
+                                    font-size:0.8rem;
+                                    --bs-alert-padding-x: 0.5rem;
+                                    --bs-alert-padding-y: 0.5rem;
+                                ">
+                                    No files are chosen yet! Please choose file(s) before uploading.
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="
+                                        padding: 0.7rem 1rem;
+                                    "></button>
                                 </div>
-                            </form>
-
+                                
+                                <!-- upload file content -->
+                                <div id="upload-resumes-content" class="mb-4" style="font-size:0.85rem;max-height:30vh;overflow-y:auto">
+                                    <!-- no files (template) -->
+                                    <div id="upload-resumes-alert" class="text-secondary">Drag and drop files here <span class="fst-italic">OR</span></div>
+                                    
+                                    <!-- files available (template) -->
+                                    <div id="upload-resumes-item-wrapper" class="d-flex flex-wrap justify-content-center gap-2">
+                                        {% comment %} <div class="upload-resumes-item d-flex align-items-center gap-1" style="width:calc(600px/4)">
+                                            <div class="file-name-ellipsis">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Harum quas perspiciatis rerum cum, quo inventore libero deserunt a modi ex quia illo est, aspernatur omnis enim ullam dolorum debitis nobis?</div>
+                                            <button class="btn btn-sm"><i class="fa-solid fa-trash"></i></button>
+                                        </div> {% endcomment %}
+                                    </div>                                
+                                </div>
+    
+                                <!-- upload resumes buttons -->
+                                <form id="upload-resume-form" action="{% url 'main:candidate.resume.create' %}" method="post" enctype="multipart/form-data">
+                                    <div class="d-flex justify-content-center gap-3">
+                                        <div>
+                                            <input id="upload-resumes-input" name="submission" class="invisible position-absolute" type="file" multiple accept="pdf" />
+                                            <label class="btn btn-sm btn-success btn-theme" for="upload-resumes-input">Choose file(s)</label>
+                                        </div>
+                                        <button id="upload-resume-clear" type="button" class="btn btn-danger btn-sm d-none">Clear All</button>
+                                        <button id="upload-and-parse-resume" type="button" class="btn btn-secondary btn-sm" data-bs-target="#parseNewResumeModal" data-bs-toggle="modal">Upload and Parse</button>
+                                        <button id="upload-resume-submit" type="submit" class="btn btn-primary btn-sm" disabled>Upload</button>
+                                    </div>
+                                </form>
+    
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -171,6 +177,96 @@
             </div>
         </div>
     </div>
+    
+    <!-- Parse new resume Modal -->
+    <div class="modal fade" id="parseNewResumeModal" tabindex="-1" aria-labelledby="parseNewResumeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5 text-capitalize" id="parseNewResumeModalLabel">parse resumes</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <!-- body -->
+                <div class="modal-body" style="font-size: 0.85rem;">
+                    
+                    <!-- upload resumes (upload & parse) -->
+                    <div id="upload-and-parse-resumes-container">
+                    </div>
+
+                    <!-- display total resumes -->
+                    <div id="parse-resumes-list-wrapper" class="py-3" >
+                        <div class="fw-medium mb-3" style="font-size:0.9rem">Resumes to parse</div>
+                        <div class="mb-2 background-tasks-alert" style=""></div>
+                        <div id="parse-resumes-list" style=""></div>
+                    </div>
+                    
+                    <!-- config wrapper -->
+                    <div id="parse-resumes-config-wrapper" class="py-3">
+                        <div class="fw-medium mb-3" style="font-size:0.9rem">Parser Configuration</div>
+
+                        <!-- default config checkbox -->
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="parse-resumes-default-checkbox" checked>
+                            <label class="form-check-label" for="parse-resumes-default-checkbox">
+                                Use default configuration
+                            </label>
+                        </div>
+    
+                        <!-- config form -->
+                        <form id="parse-resumes-config-form" action="#" method="post" class="">
+                            <div class="mt-3">
+                                <label for="parse-resumes-jobRole" class="form-label">Job Role</label>
+                                <input name="job_title" type="text" class="form-control parse-resumes-input" id="parse-resumes-jobRole" placeholder="Input Job Role">
+                            </div>
+                            <div class="mt-3">
+                                <label for="parse-resumes-jobDesc" class="form-label">Job Description</label>
+                                <textarea name="job-description" class="form-control parse-resumes-input" id="parse-resumes-jobDesc" rows="10" placeholder="Input Job Role"></textarea>
+                            </div>
+                            {% comment %} <div class="mt-3">
+                                <label for="parse-resumes-skills" class="form-label">Skills Keywords</label>
+                                <div id="skillsHelpBlock" class="form-text mt-0 mb-1">
+                                    If no skill set is provided, a generic recommendation from the AI based on the job title will be used for matching skills.
+                                </div>
+                                <input name="skills" class="form-control parse-resumes-input" type="file" id="parse-resumes-skills" aria-labelledby="skillsHelpBlock">
+                            </div> {% endcomment %}
+                        </form>
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-danger" data-bs-dismiss="modal">Cancel</button>
+                    <button id="parse-resumes-submit" type="button" class="btn btn-sm btn-success btn-theme">Parse Resumes</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Display resume Modal -->
+    <div class="modal fade" id="openResumeModal" tabindex="-1" aria-labelledby="openResumeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5 text-capitalize" id="openResumeModalLabel">Open resume</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <!-- body -->
+                <div class="modal-body" style="font-size: 0.85rem;height:60vh">
+                    <!-- display resume -->
+                    {% comment %} <div class="ratio ratio-1x1"> {% endcomment %}
+                        <iframe src="" frameborder="0" style="width:100%;height: 100%;"></iframe>
+                    {% comment %} </div> {% endcomment %}
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-danger" data-bs-dismiss="modal">Cancel</button>
+                    <button id="parse-resumes-submit" type="button" class="btn btn-sm btn-success btn-theme">Parse Resumes</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
 
 {% endblock content %} 
 
@@ -196,8 +292,12 @@
     <script src="https://cdn.datatables.net/select/1.6.2/js/dataTables.select.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.3.6/js/dataTables.buttons.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-base64@3.7.5/base64.min.js"></script>
 
     {% load static %}
+    <script src="{% static 'django_eventstream/eventsource.min.js' %}"></script>
+    <script src="{% static 'django_eventstream/reconnecting-eventsource.js' %}"></script>
     <script src="{% static 'main/js/browse.js' %}"></script>
     <script>
         const statuses_initscreening = {{statuses.initscreening|safe}}
@@ -208,6 +308,10 @@
         const prescreening_update_url = "{% url 'main:prescreening.update' %}"
         const cbi_update_url = "{% url 'main:cbi.update' %}"
         const get_remarks_url = "{% url 'main:browse.remarks' %}"
+        const get_raw_resumes_url = "{% url 'main:candidate.resume.read' %}"
+        const get_parse_resumes_url = "{% url 'main:candidate.resume.parse' %}"
+        const get_open_resume_url = "{% url 'main:candidate.resume.open.default' %}"
+
     </script>
 
 

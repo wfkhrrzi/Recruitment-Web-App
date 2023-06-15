@@ -11,6 +11,30 @@ import os
 
 from django.core.asgi import get_asgi_application
 
+from django.urls import path, re_path
+from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.auth import AuthMiddlewareStack
+import django_eventstream
+from main.ws_urls import ws_urlpatterns
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'recruitment.settings')
 
-application = get_asgi_application()
+# application = get_asgi_application()
+application = ProtocolTypeRouter({
+    'http': URLRouter([
+        path(
+            'notification/parser', 
+            AuthMiddlewareStack(URLRouter(django_eventstream.routing.urlpatterns)), 
+            { 'channels': ['resume_parser'] }
+        ),
+        path(
+            'notification/upload', 
+            AuthMiddlewareStack(URLRouter(django_eventstream.routing.urlpatterns)), 
+            { 'channels': ['resume_upload'] }
+        ),
+        re_path(r'', get_asgi_application()),
+    ]),
+
+    'websocket':AuthMiddlewareStack(URLRouter(ws_urlpatterns))
+
+})

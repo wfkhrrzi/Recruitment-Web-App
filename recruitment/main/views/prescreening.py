@@ -173,14 +173,17 @@ class PrescreeningUpdate(CustomLoginRequired,View): # mail functionality coming 
 
             elif int(is_proceed) == 2: #send instruction
                 
+                prescreening.is_proceed = False
                 prescreening.status = Status.objects.get(codename='prescreening:send instruction')
 
             elif int(is_proceed) == 3: #pending submission
                 
+                prescreening.is_proceed = False
                 prescreening.status = Status.objects.get(codename='prescreening:pending submission')
 
             elif int(is_proceed) == 4: #assessment submitted
                 
+                prescreening.is_proceed = False
                 prescreening.status = Status.objects.get(codename='prescreening:assessment submitted')
 
 

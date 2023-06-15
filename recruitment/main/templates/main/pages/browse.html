@@ -37,7 +37,7 @@
                     <th></th>
                     <th scope="col">Name</th>
                     <th scope="col">Received Date</th>
-                    <th scope="col">Source</th>
+                    <th scope="col">Category</th>
                     <th scope="col">GPT Recommendation</th>
                     <th scope="col">Initial Screening</th>
                     <th scope="col">Pre-assessment</th>
@@ -54,10 +54,10 @@
                         <input type="date" class="form-control table-filter" placeholder="Filter Date">
                     </th>
                     <th class="table-filter-wrapper">
-                        <select name="source" id="" class="form-select table-filter">
+                        <select name="category" id="" class="form-select table-filter">
                             <option class="table-filter-none" value="">Filter</option>
-                            {% for source in source %}
-                                <option value="{{source.id}}">{{source.source|title}}</option>
+                            {% for category in category %}
+                                <option value="{{category.id}}">{{category.category|title}}</option>
                             {% endfor %}
                         </select>
                     </th>
@@ -306,7 +306,7 @@
         const initscreening_update_url = "{% url 'main:initscreening.update' %}"
         const prescreening_update_url = "{% url 'main:prescreening.update' %}"
         const cbi_update_url = "{% url 'main:cbi.update' %}"
-        const get_remarks_url = "{% url 'main:browse.remarks' %}"
+        const get_details_url = "{% url 'main:browse.details' %}"
         const get_raw_resumes_url = "{% url 'main:candidate.resume.read' %}"
         const get_parse_resumes_url = "{% url 'main:candidate.resume.parse' %}"
         const get_open_resume_url = "{% url 'main:candidate.resume.open.default' %}"

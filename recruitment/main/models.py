@@ -143,7 +143,7 @@ class CandidateResume(Submission):
     
 
 class Candidate(CreatedMixin,LastModifiedMixin,models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=255)
     date = models.DateField(null=True)
     referral_name = models.CharField(max_length=100,null=True)
     phone_number = models.CharField(max_length=100,null=True)

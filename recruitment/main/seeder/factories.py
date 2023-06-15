@@ -61,20 +61,15 @@ lst_emp_category = ['Fresh DS', 'Head', 'Experienced DS', 'Intern', 'GEES', 'Int
 lst_source = [
     'Referral',
     'CADS',
-    # 'Unknown',
+    'Unknown',
     'Mobility',
     'Career Day',
     'University',
     'GEES',
-    'Internal Transfer',
     'Headhunter',
     'LinkedIn',
-    'Hunter One',
-    # 'Self',
-    'Digital Career Day',
     'MyCareerX',
-    'Scholars',
-    'Email',
+    'PESP1',
     'PESP2 Master Programme'
 ]
 lst_user_category = ['DS Lead', 'HR']

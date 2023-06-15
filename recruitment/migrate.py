@@ -10,7 +10,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "recruitment.settings")
 django.setup()
 
 # Import your Django models
-from main.models import Candidate,Source,EmpCategory,CandidateResume
+from main.models import Candidate,Source,EmpCategory,CandidateResume,Nationality
 
 def migrate_data():
 
@@ -41,6 +41,7 @@ def migrate_data():
 
         candidate = Candidate(
             name = row['Candidate Name'],
+            nationality = Nationality.objects.get(nationality=row['Nationality']),
             source = source,
             category = category,
             date = date,
@@ -49,7 +50,7 @@ def migrate_data():
 
         for file in files:
             if f"resume_{row['id']}.pdf" in file:
-                resume = CandidateResume(submission=open(directory+'/'+file,'rb').read(), filename=file)
+                resume = CandidateResume(submission=open(directory+'/'+file,'rb').read(), filename=file, is_parsed=True)
                 resume.save()
 
                 candidate.candidate_resume = resume

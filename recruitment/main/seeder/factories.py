@@ -56,6 +56,7 @@ for key, value in dict_status.items():
     lst_codename.append(key)
     lst_status.append(value)
 
+lst_nationality = ['Local','Expat']
 lst_emp_category = ['Fresh DS', 'Head', 'Experienced DS', 'Intern', 'GEES', 'Internal Mobility', 'RTT']
 lst_source = [
     'Referral',
@@ -86,6 +87,15 @@ class StatusFactory(DjangoModelFactory):
     
     codename = Iterator(lst_codename)
     status = Iterator(lst_status)
+
+
+class NationalityFactory(DjangoModelFactory):
+    
+    class Meta:
+        model = Nationality
+        
+    
+    nationality = Iterator(lst_nationality)
 
 
 class EmpCategoryFactory(DjangoModelFactory):

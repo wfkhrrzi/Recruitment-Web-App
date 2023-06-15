@@ -5,8 +5,6 @@ import requests
 import os
 from typing import List
 import time
-from celery_progress.backend import ProgressRecorder
-import json
 from io import BytesIO
 from django.core.files.uploadedfile import InMemoryUploadedFile
 

@@ -77,6 +77,7 @@ class Command(BaseCommand):
         EmpCategoryFactory.create_batch(len(lst_emp_category))
         SourceFactory.create_batch(len(lst_source))
         StatusFactory.create_batch(len(dict_status))
+        NationalityFactory.create_batch(len(lst_nationality))
 
         # users
         UsersFactory.create_batch(7)

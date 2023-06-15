@@ -74,6 +74,12 @@ class Source(models.Model):
     def __str__(self) -> str:
         return self.source
 
+class Nationality(models.Model):
+    nationality = models.CharField(max_length=100)
+
+    def __str__(self) -> str:
+        return self.nationality
+
 class EmpCategory(models.Model):
     category = models.CharField(max_length=100)
 
@@ -160,6 +166,7 @@ class Candidate(CreatedMixin,LastModifiedMixin,models.Model):
     gpt_status = models.ForeignKey(Status,on_delete=models.SET_NULL,null=True,related_name="candidates_gpt_status")
     cv_link = models.CharField(max_length=255,null=True)
     source = models.ForeignKey(Source,on_delete=models.SET_NULL,null=True)
+    nationality = models.ForeignKey(Nationality,on_delete=models.SET_NULL,null=True)
     category = models.ForeignKey(EmpCategory,on_delete=models.SET_NULL,null=True)
     overall_status = models.ForeignKey(Status,on_delete=models.SET_NULL,null=True,related_name="candidates_overall_status")
     candidate_resume = models.OneToOneField(CandidateResume, on_delete=models.SET_NULL, null=True)

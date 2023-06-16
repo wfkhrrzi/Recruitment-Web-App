@@ -88,18 +88,21 @@ $(document).ready(function () {
 
 	function table_child_row(data) {
 
-		let remarks = null
+		let res = null
 		$.ajax({
 			type: "get",
-			url: get_remarks_url+`?candidate_id=${data.id}`,
+			url: get_details_url+`?candidate_id=${data.id}`,
 			async:false,
 			success: function (response) {
-				// console.log(response)
-				remarks = response
+				console.log(response)
+				res = response
 			}
 		});
+
+		let remarks = res['remarks']
+		let details = res['details']
 		
-		output_obj={
+		let remarks_obj={
 			initial_screening:{
 				form_action:initscreening_update_url,
 				id:data.initialscreening_id,
@@ -124,12 +127,14 @@ $(document).ready(function () {
 			// },
 		}
 
-		const rootWrapper = $('<div>').addClass('d-flex justify-content-start gap-2');
-		$(rootWrapper).append('<div class="ps-3 pe-4 align-self-center fw-medium">Remarks</div>');
-
-		for (const key in output_obj) {
-			if (Object.hasOwnProperty.call(output_obj, key)) {
-				const stage = output_obj[key];
+		let rootWrapper = $('<div>').addClass('d-flex justify-content-start gap-4');
+		let remarksWrapper = $('<div class="flex-fill px-2">')
+		$(remarksWrapper).append('<div class="mb-2 align-self-center fw-medium">Remarks</div>');
+		$(remarksWrapper).append('<div></div>').find('div').addClass('d-flex justify-content-start gap-2');
+		
+		for (const key in remarks_obj) {
+			if (Object.hasOwnProperty.call(remarks_obj, key)) {
+				const stage = remarks_obj[key];
 				
 				// if (stage.id) {
 					$(`
@@ -138,10 +143,22 @@ $(document).ready(function () {
 							<textarea ${stage.id ? '' : 'disabled'} data-form-action="${stage.form_action}" data-stage="${key}" data-stage-id=${stage.id} class="form-control table-remarks" rows="3" style="font-size:inherit;" placeholder="Optional. Make sure to save the remarks">${stage.cur_remarks === '-' ? '': stage.cur_remarks}</textarea>
 						</div>
 					`)
-						.appendTo(rootWrapper)
+						.appendTo(remarksWrapper.find('div:eq(1)'))
 				// }
 			}
 		}
+		
+		let sourceWrapper = $('<div class="px-2">')
+		$(sourceWrapper).append('<div class="mb-2 align-self-center fw-medium">Source</div>');
+		$(sourceWrapper).append(`<div>${details['source_']}</div>`)
+		
+		let nationalityWrapper = $('<div class="px-2">')
+		$(nationalityWrapper).append('<div class="mb-2 align-self-center fw-medium">Nationality</div>');
+		$(nationalityWrapper).append(`<div>${details['nationality_']}</div>`)
+		
+		rootWrapper.append(sourceWrapper)
+		rootWrapper.append(nationalityWrapper)
+		rootWrapper.append(remarksWrapper)
 		
 		return rootWrapper.prop('outerHTML')
 		
@@ -248,7 +265,7 @@ $(document).ready(function () {
 				return out.html();
 			}},
 			{ data: "date", },
-			{ data: "source_" ,width:"10%",},
+			{ data: "category_" ,width:"10%",},
 			// gpt status column
 			{ 
 				data: "gpt_status_", 

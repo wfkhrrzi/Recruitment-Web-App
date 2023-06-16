@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.http import JsonResponse,HttpResponse,HttpRequest
 from django.views import View
-from main.models import Candidate, CBISchedule, Status, Source, CBI, Prescreening, InitialScreening, CandidateResume
+from main.models import Candidate, CBISchedule, Status, Source, CBI, Prescreening, InitialScreening, CandidateResume, EmpCategory
 from django.core.paginator import Paginator, EmptyPage
 from django.core import serializers
 from main.auth import CustomLoginRequired
@@ -32,6 +32,7 @@ class BrowseIndex(CustomLoginRequired, View):
         if not return_json(request): # first view load
 
             #fetch statuses
+            lst_category = list(EmpCategory.objects.all().values())
             lst_sources = list(Source.objects.all().values())
             lst_statuses = Status.objects.all().values('pk','codename','status')
             statuses = dict(
@@ -103,7 +104,7 @@ class BrowseIndex(CustomLoginRequired, View):
             unparsed_resumes = CandidateResume.objects.filter(is_parsed=False).aggregate(count=Count('id'))
             
             metrics = {'unparsed_resumes':unparsed_resumes['count'],**metrics}
-            out = {"metrics":metrics, 'statuses':statuses, 'source':lst_sources, 'today':today, 'start_of_week':start_of_week, 'end_of_week':end_of_week,}
+            out = {"metrics":metrics, 'statuses':statuses, 'source':lst_sources, 'category':lst_category, 'today':today, 'start_of_week':start_of_week, 'end_of_week':end_of_week,}
 
             # return JsonResponse(out)
 
@@ -139,6 +140,9 @@ class BrowseIndex(CustomLoginRequired, View):
                         
                         # source,
                         if dt_attr == 'source':
+                            candidates = candidates.filter(**{f"{dt_attr}__id":dt_filter_val})
+                        # category,
+                        if dt_attr == 'category':
                             candidates = candidates.filter(**{f"{dt_attr}__id":dt_filter_val})
                         # gpt_status, overall_status    
                         elif dt_attr in ('gpt_status','overall_status'):
@@ -181,7 +185,7 @@ class BrowseIndex(CustomLoginRequired, View):
                 default=Value(None)
             ),
             overall_status_=F('overall_status__status'),
-            source_=F('source__source'),
+            category_=F('category__category'),
             gpt_status_=F('gpt_status__status'),
             initialscreening_status=Case(
                 When(Q(initialscreening__status__isnull=False),then=F('initialscreening__status__status')),
@@ -255,11 +259,13 @@ class BrowseView(CustomLoginRequired, View):
         
         return JsonResponse(list(Candidate.objects.filter(id=candidate_id).values()),safe=False)
 
-class BrowseRemarksView(CustomLoginRequired,View):
+class BrowseRowDetailsView(CustomLoginRequired,View):
 
     def get(self,request:HttpRequest):
 
-        out = Candidate.objects.filter(id=request.GET['candidate_id']).values(
+        candidate = Candidate.objects.filter(id=request.GET['candidate_id'])
+        
+        remarks = candidate.values(
             initialscreening_remarks=Case(
                 When(Q(initialscreening__remarks__isnull=False),then=F('initialscreening__remarks')),
                 default=Value('-'),
@@ -276,5 +282,10 @@ class BrowseRemarksView(CustomLoginRequired,View):
             ),
         )[0]
 
-        return JsonResponse(out)
+        details = candidate.values(
+            source_ = F('source__source'),
+            nationality_ = F('nationality__nationality'),
+        )[0]
+
+        return JsonResponse({'remarks':remarks,'details':details})
 

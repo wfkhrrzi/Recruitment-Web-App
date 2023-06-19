@@ -72,7 +72,8 @@ lst_source = [
     'PESP1',
     'PESP2 Master Programme'
 ]
-lst_user_category = ['DS Lead', 'HR']
+lst_user_category = ['DS Lead', 'HR', 'Admin']
+lst_ds_leads = ['Dr Samba','Dr Assad','Dr Vikram','Dr Tosin','Dr Liang','Dr Khor','Dr Bassam','Dr Premeela','Aleks','Marc','Krishna','Neeraj','Prem Kumar']
 
 class StatusFactory(DjangoModelFactory):
     
@@ -135,6 +136,19 @@ class AdminFactory(BaseUsersFactory):
         model = Users
     
     is_superuser = True
+    is_staff = True
+    user_category = LazyAttribute(lambda o:UserCategory.objects.get(category__iexact='admin'))
+
+
+class DSLeadFactory(BaseUsersFactory):
+    class Meta:
+        model = Users
+    
+    first_name=Iterator(lst_ds_leads)
+    last_name=''
+    alias=Iterator(lst_ds_leads)
+    email = LazyAttribute(lambda m: f"{m.first_name.lower().replace(' ','')}@test.com")
+    is_superuser = False
     is_staff = True
     user_category = LazyAttribute(lambda o:UserCategory.objects.get(category__iexact='ds lead'))
 

@@ -80,10 +80,11 @@ class Command(BaseCommand):
         NationalityFactory.create_batch(len(lst_nationality))
 
         # users
-        UsersFactory.create_batch(7)
-        AdminFactory.create_batch(4)
+        UsersFactory.create_batch(1)
+        # AdminFactory.create_batch(4)
         AdminFactory.create(email='admin1@test.com',first_name='Wan Fakhrurrazi',last_name='Wan Azizan',alias="Wan Fakhrurrazi",)
         AdminFactory.create(email='admin2@test.com',first_name='Demarcus',last_name='the III',alias="Demarcus",)
+        DSLeadFactory.create_batch(len(lst_ds_leads))
 
         # candidates
         NUM_CANDIDATES = 30

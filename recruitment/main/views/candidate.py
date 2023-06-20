@@ -4,7 +4,7 @@ from django.views import View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from main.auth import CustomLoginRequired
 from main.utils import return_json
-from main.models import Candidate, CandidateResume
+from main.models import Candidate, CandidateResume, ParserConfiguration
 from django.core.paginator import Paginator, EmptyPage
 from django.core import serializers
 from main.forms import ResumeSubmissionForm
@@ -143,6 +143,37 @@ class CandidateResumeRead(CustomLoginRequired,View):
             'count':countResumes['count'],
         })
 
+
+class ParserConfigRead(CustomLoginRequired,View):
+
+    def get(self,request:HttpRequest):
+
+        config = ParserConfiguration.objects.values('job_title','job_description')[0]
+
+        return JsonResponse(config)
+
+@method_decorator(csrf_exempt,name='dispatch')
+class ParserConfigUpdate(CustomLoginRequired,View):
+
+    def post(self,request:HttpRequest):
+
+        if request.POST.get('job_title',None) == None and request.POST.get('job_description',None) == None:
+            response = JsonResponse({'error':'No data is supplied'})
+            response.status_code = 400
+            return response
+
+        pc = ParserConfiguration.objects.get(id=1)
+
+        if request.POST.get('job_title',None):
+            pc.job_title = request.POST.get('job_title')
+        if request.POST.get('job_description',None):
+            pc.job_description = request.POST.get('job_description')
+
+        pc.save()
+
+        return JsonResponse({'response':'success'})
+
+
 @method_decorator(csrf_exempt,name='dispatch')
 class CandidateResumeParse(CustomLoginRequired,View):
 
@@ -198,5 +229,5 @@ class CandidateResumeParse(CustomLoginRequired,View):
             return response
             
         
-            
+    
         

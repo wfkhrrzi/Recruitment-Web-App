@@ -271,3 +271,8 @@ class Hiring(models.Model):
     remark = models.TextField(null=True)
     status = models.ForeignKey(Status,on_delete=models.CASCADE,null=False)
     candidate = models.OneToOneField(Candidate,on_delete=models.CASCADE,null=False)
+
+
+class ParserConfiguration(models.Model):
+    job_title = models.CharField(max_length=200)
+    job_description = models.TextField()

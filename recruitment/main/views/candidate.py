@@ -200,9 +200,6 @@ class CandidateResumeParse(CustomLoginRequired,View):
                 )
             )
 
-            # set is_parsing = True
-            resumes_obj.update(is_parsing=True)
-
             metric = resumes_obj.aggregate(
                 total=Count('id')
             )

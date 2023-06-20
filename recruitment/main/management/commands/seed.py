@@ -78,9 +78,10 @@ class Command(BaseCommand):
         SourceFactory.create_batch(len(lst_source))
         StatusFactory.create_batch(len(dict_status))
         NationalityFactory.create_batch(len(lst_nationality))
+        ParseConfigurationFactory.create()
 
         # users
-        UsersFactory.create_batch(1)
+        # UsersFactory.create_batch(1)
         # AdminFactory.create_batch(4)
         AdminFactory.create(email='admin1@test.com',first_name='Wan Fakhrurrazi',last_name='Wan Azizan',alias="Wan Fakhrurrazi",)
         AdminFactory.create(email='admin2@test.com',first_name='Demarcus',last_name='the III',alias="Demarcus",)

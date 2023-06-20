@@ -179,7 +179,7 @@ $(document).ready(function () {
 	}
 
 	// gpt_status initialized to 'recommended'
-	$('.table-filter-wrapper select[name="gpt_status"]').val('gpt_status:recommended');
+	// $('.table-filter-wrapper select[name="gpt_status"]').val('gpt_status:recommended');
 
 	var table = $("#table-candidates").DataTable({
 		orderCellsTop: true,
@@ -233,7 +233,8 @@ $(document).ready(function () {
 			null,
 			null,
 			null,
-			{ "search": "gpt_status:recommended" },
+			// { "search": "gpt_status:recommended" },
+			null,
 			null,
 			null,
 			null,

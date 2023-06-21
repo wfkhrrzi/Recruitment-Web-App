@@ -38,9 +38,7 @@ steps:
         print('##vso[task.setvariable variable=projectRoot]{}'.format(project_location))
 
   - script: |
-      python -m venv .venv
-      source .venv/bin/activate
-      python -m pip install --upgrade pip
+      python -m pip install --upgrade pip setuptools wheel
       pip install -r requirements.txt
       echo "Dependencies installation completed"
       cd recruitment

@@ -72,7 +72,8 @@ lst_source = [
     'PESP1',
     'PESP2 Master Programme'
 ]
-lst_user_category = ['DS Lead', 'HR']
+lst_user_category = ['DS Lead', 'HR', 'Admin']
+lst_ds_leads = ['Dr Samba','Dr Assad','Dr Vikram','Dr Tosin','Dr Liang','Dr Khor','Dr Bassam','Dr Premeela','Aleks','Marc','Krishna','Neeraj','Prem Kumar']
 
 class StatusFactory(DjangoModelFactory):
     
@@ -136,6 +137,19 @@ class AdminFactory(BaseUsersFactory):
     
     is_superuser = True
     is_staff = True
+    user_category = LazyAttribute(lambda o:UserCategory.objects.get(category__iexact='admin'))
+
+
+class DSLeadFactory(BaseUsersFactory):
+    class Meta:
+        model = Users
+    
+    first_name=Iterator(lst_ds_leads)
+    last_name=''
+    alias=Iterator(lst_ds_leads)
+    email = LazyAttribute(lambda m: f"{m.first_name.lower().replace(' ','')}@test.com")
+    is_superuser = False
+    is_staff = True
     user_category = LazyAttribute(lambda o:UserCategory.objects.get(category__iexact='ds lead'))
 
 
@@ -175,3 +189,63 @@ class InitialScreeningFactory(DjangoModelFactory):
     candidate = Iterator(Candidate.objects.all())
     status= LazyAttribute(lambda o:Status.objects.get(codename='initscreening:pending'))
        
+
+class ParseConfigurationFactory(DjangoModelFactory):
+
+    class Meta:
+        model = ParserConfiguration
+
+    job_title = 'data scientist'
+    job_description = """This is for example is our JD for experienced data scientist:\n
+Responsible for design, planning, and coordinating the implementation of Data Science work activities in the Group Digital with established structured processes and procedures to support PETRONAS's digital agenda.\n
+1) Technical & Professional Excellence
+
+Responsible for ensuring data required for analytic models is of required quality and models are constructed to standards and deployed effectively.
+Implement data science industry best practices, relevant cutting-edge technology, and innovation in projects to ensure the right solutions fulfill the business requirements.
+
+2) Technical/Skill Leadership & Solutioning
+
+Responsible for developing appropriate technical solutions to address business pain points with insights and recommendations.
+Implement an established analytics strategy by adopting the right technologies and technical requirements when executing projects to ensure business value generation.
+Execute operational excellence through continuous technical and process improvement initiatives within projects to improve operations efficiency and effectiveness within own activity & projects.
+
+3) Technical Expertise
+
+Track and follow up with relevant parties to ensure Technical Excellence Programmes are successfully deployed and integrated into work processes, documents, policies, and guidelines.
+Participate in a community of practices and network with internal and external technical experts by identifying solutions to common problems and capturing and sharing existing data science knowledge for continuous excellence.
+
+
+Be part of our DS team in at least one of the following areas:
+
+Machine Learning
+
+Roles: Design analytics solutions for business problems; develop, evaluate, optimize, deploy and maintain models.
+
+Tech stack: ML Algorithms, Python, SQL, Spark, Git, Cloud Services, Deep Learning frameworks, MLOps, etc
+
+
+Natural Language Processing
+
+Roles: Design text analytics solutions for business problems; develop, evaluate, optimize, deploy and maintain text processing and analytics solutions.
+
+Tech stack: Python, SQL, Git, NLTK, Deep Learning frameworks, MLOps, Text analytics, NLP, NLU, NLG, Language Models, etc
+
+
+Computer Vision
+
+Roles: Design Image and video analytics solutions for business problems; develop, evaluate, optimize, deploy and maintain solutions
+
+Tech stack: Tensorflow, OpenCV, Fastai, Pytorch, MLFlow, Spark, MLlib Python, SQL, Git, Deep Learning frameworks, MLOps, etc
+
+
+Optimization / Simulation
+
+Roles: Design optimization/simulation analytics solutions for business problems; develop, evaluate, optimize, deploy and maintain solutions
+
+Tech stack: mathematical/process models, Simulation modeling, AnyLogic, Simio, mixed-integer programming (linear and nonlinear), Python, Pyomo, Gurobi solver, MLOps, etc.
+
+What are the requirements?
+
+Bachelor's or Master's degree in Data Science, Mathematics, Engineering, Computer Science, or in any other discipline
+At least 2 years of relevant experience covering advanced statistical analysis and machine learning.
+Good in statistical and scripting programming languages (such as R, Python, and MATLAB)"""

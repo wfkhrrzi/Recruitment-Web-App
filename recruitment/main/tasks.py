@@ -29,6 +29,9 @@ def parse_resumes(self,job_title,job_description,resumes_json,user_id):
     deserialized_objects = list(deserialize('json', resumes_json))
     resumes_obj:List[CandidateResume] = [deserialized_object.object for deserialized_object in deserialized_objects]
 
+    for resume in resumes_obj:
+        resume.is_parsing=True
+    CandidateResume.objects.bulk_update(resumes_obj,['is_parsing',])
 
     data = {
         'file_meta':[],
@@ -76,6 +79,8 @@ def parse_resumes(self,job_title,job_description,resumes_json,user_id):
             resume.is_parsed = False
             resume.is_parsing = False
         CandidateResume.objects.bulk_update(resumes_obj,['is_parsed','is_parsing',])
+
+        return "Error on the parser. Reverting resume parse status"
     
     new_candidates_list = []
     new_initialscreening_list = []

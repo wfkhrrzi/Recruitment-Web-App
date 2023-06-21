@@ -234,6 +234,12 @@
                     </div>
                 </div>
                 <div class="modal-footer">
+                    <div class="form-check me-3" style="font-size:0.9rem;">
+                        <input class="form-check-input" type="checkbox" id="parse-config-update-checkbox" disabled>
+                        <label class="form-check-label" for="parse-config-update-checkbox">
+                            Save configuration  
+                        </label>
+                    </div>
                     <button type="button" class="btn btn-sm btn-danger" data-bs-dismiss="modal">Cancel</button>
                     <button id="parse-resumes-submit" type="button" class="btn btn-sm btn-success btn-theme">Parse Resumes</button>
                 </div>
@@ -310,6 +316,8 @@
         const get_raw_resumes_url = "{% url 'main:candidate.resume.read' %}"
         const get_parse_resumes_url = "{% url 'main:candidate.resume.parse' %}"
         const get_open_resume_url = "{% url 'main:candidate.resume.open.default' %}"
+        const read_parserConfig_url = "{% url 'main:candidate.resume.parse.config.read' %}"
+        const update_parserConfig_url = "{% url 'main:candidate.resume.parse.config.update' %}"
 
     </script>
 

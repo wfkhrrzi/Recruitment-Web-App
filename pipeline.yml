@@ -19,8 +19,7 @@ steps:
     displayName: "Setting Python version"
     inputs:
       versionSpec: '3.9'
-      # architecture: 'x64'
-      addToPath: true
+      architecture: 'x64'
 
   - task: PythonScript@0
     displayName: 'Export project path'
@@ -60,4 +59,5 @@ steps:
       ResourceGroupName: $(resource_group)
       SlotName: $(slot_name)
       packageForLinux:  '$(System.DefaultWorkingDirectory)/'
+      RuntimeStack: 'PYTHON|3.9'
       appSettings: '-SCM_DO_BUILD_DURING_DEPLOYMENT true'

@@ -11,7 +11,7 @@ pool:
 trigger: 
   branches:
     include:
-    - v2.2
+    - deploy_v1
 
 ## Pipeline steps
 steps:

@@ -2,6 +2,7 @@
 .vscode
 test.ipynb
 submission_files/
+staticfiles/
 .prettierrc
 
 # Byte-compiled / optimized / DLL files

@@ -6,6 +6,11 @@ variables:
 
 pool:
   vmImage: ubuntu-latest
+strategy:
+  matrix:
+    Python37:
+      PYTHON_VERSION: '3.7'
+  maxParallel: 3
 
 ## No code trigger (events )
 trigger: 
@@ -18,7 +23,7 @@ steps:
   - task: UsePythonVersion@0
     displayName: "Setting Python version"
     inputs:
-      versionSpec: '3.9'
+      versionSpec: '$(PYTHON_VERSION)'
       architecture: 'x64'
 
   - task: PythonScript@0
@@ -41,9 +46,6 @@ steps:
       python -m pip install --upgrade pip setuptools wheel
       pip install -r requirements.txt
       echo "Dependencies installation completed"
-      cd recruitment
-      python manage.py collectstatic
-      echo "Collectstatic completed"
     displayName: "Install requirements"
   
   # Step 3, deploy zip package to azure app service
@@ -56,6 +58,6 @@ steps:
       deployToSlotOrASE: true
       ResourceGroupName: $(resource_group)
       SlotName: $(slot_name)
-      packageForLinux:  '$(System.DefaultWorkingDirectory)/recruitment'
-      RuntimeStack: 'PYTHON|3.9'
+      packageForLinux:  '$(projectRoot)'
+      RuntimeStack: 'PYTHON|3.7'
       appSettings: '-SCM_DO_BUILD_DURING_DEPLOYMENT true'

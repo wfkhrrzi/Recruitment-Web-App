@@ -56,6 +56,6 @@ steps:
       deployToSlotOrASE: true
       ResourceGroupName: $(resource_group)
       SlotName: $(slot_name)
-      packageForLinux:  '$(System.DefaultWorkingDirectory)/'
+      packageForLinux:  '$(System.DefaultWorkingDirectory)/recruitment'
       RuntimeStack: 'PYTHON|3.9'
       appSettings: '-SCM_DO_BUILD_DURING_DEPLOYMENT true'

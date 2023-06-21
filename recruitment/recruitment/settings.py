@@ -43,7 +43,6 @@ INSTALLED_APPS = [
     'django_eventstream',
     'django_celery_results',
     'rest_framework.authtoken',
-    'django_seed',
 ]
 
 MEDIA_ROOT=os.path.join(BASE_DIR,'submission_files')

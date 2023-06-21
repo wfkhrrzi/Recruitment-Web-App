@@ -23,8 +23,8 @@ steps:
       addToPath: true
 
   - task: PythonScript@0
-  displayName: 'Export project path'
-  inputs:
+    displayName: 'Export project path'
+    inputs:
     scriptSource: 'inline'
     script: |
       """Search all subdirectories for `manage.py`."""

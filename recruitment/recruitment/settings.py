@@ -25,15 +25,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-2rs$xqpskq7=shem)go3)6s=c=ubl1qj622zz7-5@x%_#eu-ng'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['http://ptsg-5dspwb04-dstats.azurewebsites.net/']
+ALLOWED_HOSTS = ['http://ptsg-5dspwb04-dstats.azurewebsites.net/','localhost']
 
 
 # Application definition
 
 INSTALLED_APPS = [
-    'channels',
+    # 'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -57,7 +57,7 @@ AUTH_USER_MODEL = 'main.Users'
 LOGIN_URL = '/login'
 
 MIDDLEWARE = [
-    'django_grip.GripMiddleware',
+    # 'django_grip.GripMiddleware',
     'django.middleware.security.SecurityMiddleware',
     "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -88,7 +88,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'recruitment.wsgi.application'
-ASGI_APPLICATION = 'recruitment.asgi.application'
+# ASGI_APPLICATION = 'recruitment.asgi.application'
 
 EVENTSTREAM_STORAGE_CLASS = 'django_eventstream.storage.DjangoModelStorage'
 

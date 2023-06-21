@@ -6,6 +6,11 @@ variables:
 
 pool:
   vmImage: ubuntu-latest
+strategy:
+  matrix:
+    Python37:
+      PYTHON_VERSION: '3.7'
+  maxParallel: 3
 
 ## No code trigger (events )
 trigger: 
@@ -18,40 +23,30 @@ steps:
   - task: UsePythonVersion@0
     displayName: "Setting Python version"
     inputs:
-      versionSpec: '3.9'
-      # architecture: 'x64'
-      addToPath: true
+      versionSpec: '$(PYTHON_VERSION)'
+      architecture: 'x64'
 
-  # Step 1, Make a venv, activate, install requirements, run collectstatic
+  - task: PythonScript@0
+    displayName: 'Export project path'
+    inputs:
+      scriptSource: 'inline'
+      script: |
+        """Search all subdirectories for `manage.py`."""
+        from glob import iglob
+        from os import path
+        # Python >= 3.5
+        manage_py = next(iglob(path.join('**', 'manage.py'), recursive=True), None)
+        if not manage_py:
+            raise SystemExit('Could not find a Django project')
+        project_location = path.dirname(path.abspath(manage_py))
+        print('Found Django project in', project_location)
+        print('##vso[task.setvariable variable=projectRoot]{}'.format(project_location))
+
   - script: |
-      python -m venv .venv
-      source .venv/bin/activate
-      python -m pip install --upgrade pip
+      python -m pip install --upgrade pip setuptools wheel
       pip install -r requirements.txt
       echo "Dependencies installation completed"
-      cd recruitment
-      python manage.py collectstatic
-      echo "Collectstatic completed"
-    workingDirectory: "$(System.DefaultWorkingDirectory)"
     displayName: "Install requirements"
-
-
-   # Step 2, create zip file be deployed
-  - task: ArchiveFiles@2
-    displayName: "Archive files"
-    inputs:
-      rootFolderOrFile: "$(System.DefaultWorkingDirectory)/recruitment"
-      includeRootFolder: false
-      archiveType: 'zip'
-      archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
-      replaceExistingArchive: true
-
-  - task: PublishBuildArtifacts@1
-    inputs:
-      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-      artifactName: 'drop'
-    displayName: 'Publish build artifacts'
-
   
   # Step 3, deploy zip package to azure app service
   - task: AzureRmWebAppDeployment@4
@@ -63,10 +58,6 @@ steps:
       deployToSlotOrASE: true
       ResourceGroupName: $(resource_group)
       SlotName: $(slot_name)
-      packageForLinux:  '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
-      # RuntimeStack: 'PYTHON|3.7.8'
-      DeploymentType: 'zipDeploy'
-      # StartupCommand: 'gunicorn --bind=0.0.0.0:8080 --timeout=2400'
-      # StartupCommand: 'cd recruitment && uvicorn recruitment.asgi:application --host 0.0.0.0 --port 8080'
-      appSettings: '-Port 8080 -RequestTimeout "10:20:00" -WEBSITE_TIME_ZONE "Singapore Standard Time" -WEBSITES_PORT 8080 -WEBSITES_ENABLE_APP_SERVICE_STORAGE true -SCM_DO_BUILD_DURING_DEPLOYMENT true -ENABLE_ORYX_BUILD true'
-      # timeoutInMinutes: 60 # Set the timeout to 60 minutes
+      packageForLinux:  '$(projectRoot)'
+      RuntimeStack: 'PYTHON|3.7'
+      appSettings: '-SCM_DO_BUILD_DURING_DEPLOYMENT true'

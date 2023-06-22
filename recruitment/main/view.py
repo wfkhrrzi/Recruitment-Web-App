@@ -136,13 +136,10 @@ class BrowseIndex(CustomLoginRequired, View):
                     elif dt_attr == 'date':
                         candidates = candidates.filter(**{f"{dt_attr}":datetime.strptime(dt_filter_val,'%Y-%m-%d').date()})
                     else:
+                        print(dt_attr)
                         dt_attr = dt_attr.rsplit('_',1)[0]
-                        
-                        # source,
-                        if dt_attr == 'source':
-                            candidates = candidates.filter(**{f"{dt_attr}__id":dt_filter_val})
-                        # category,
-                        if dt_attr == 'category':
+                        # source, category
+                        if dt_attr in ('source','category'):
                             candidates = candidates.filter(**{f"{dt_attr}__id":dt_filter_val})
                         # gpt_status, overall_status    
                         elif dt_attr in ('gpt_status','overall_status'):
@@ -186,6 +183,7 @@ class BrowseIndex(CustomLoginRequired, View):
             ),
             overall_status_=F('overall_status__status'),
             category_=F('category__category'),
+            source_=F('source__source'),
             gpt_status_=F('gpt_status__status'),
             initialscreening_status=Case(
                 When(Q(initialscreening__status__isnull=False),then=F('initialscreening__status__status')),

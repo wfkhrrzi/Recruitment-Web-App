@@ -188,7 +188,7 @@ $(document).ready(function () {
 		autoWidth: true,
 		dom: 
 			// "<'row mb-2'<'col-sm-12 col-md-4'l><'col-sm-12 col-md-8'<'d-flex justify-content-end'<B><'ms-4'f>>>>" + // search bar is 'f'
-			"<'row mb-2'<'col-sm-12 col-md-4'l><'col-sm-12 col-md-8'<'d-flex justify-content-end'<B>>>>" + 
+			"<'row mb-2'<'col-sm-12 col-md-4'l><'col-sm-12 col-md-8'<'d-flex justify-content-end'<B><'#sourceFilter'>>>>" + 
         	"<'row'<'col-sm-12'tr>>" +
         	"<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
 		buttons: {
@@ -431,10 +431,30 @@ $(document).ready(function () {
 					return gpt_status_badge(data);
 				}
 			},
+			{
+				name:"source",
+				data: "source_",
+				visible: false,
+			},
 		],
 
 		initComplete: function () {
+			const api = this.api();
 
+			// source filter
+			let options = '<option value="">Source</option>'
+			for (const source of sources) {
+				options += `<option value="${source.id}">${source.source}</option>`
+			}
+
+			$("#sourceFilter").addClass('ms-3').append(`
+				<select name="source" id="" class="table-filter form-select">
+					${options}
+				</select>
+			`).on('change',function (event) {  
+				// console.log(event.target.value)
+				api.column('source:name').search(event.target.value).draw()
+			});
 		}, //end initComplete
 
 		drawCallback: function () {  
@@ -659,7 +679,7 @@ $(document).ready(function () {
 						row.child.hide();
 						$(this).removeClass('shown');
 					}
-				})
+				});
 
 
 			});			

@@ -75,22 +75,19 @@ stages:
     pool:
       vmImage: $(vmImageName)
     # environment: $(environmentName)
-    strategy:
-      runOnce:
-        deploy:
-          steps:
+    
+    steps:
 
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(pythonVersion)'
-            displayName: 'Use Python version'
-
-          - task: AzureWebApp@1
-            displayName: 'Deploy Azure Web App : {{ webAppName }}'
-            inputs:
-              azureSubscription: $(azureServiceConnectionId)
-              appName: $(webAppName)
-              package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
-              deployToSlotOrASE: true # boolean. Optional. Use when appType != "". Deploy to Slot or App Service Environment. Default: false.
-              resourceGroupName: $(resource_group) # string. Required when deployToSlotOrASE = true. Resource group. 
-              slotName: $(slot_name) # string. Required when deployToSlotOrASE = true. Slot. Default: production.
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(pythonVersion)'
+      displayName: 'Use Python version'
+    - task: AzureWebApp@1
+      displayName: 'Deploy Azure Web App : {{ webAppName }}'
+      inputs:
+        azureSubscription: $(azureServiceConnectionId)
+        appName: $(webAppName)
+        package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
+        deployToSlotOrASE: true # boolean. Optional. Use when appType != "". Deploy to Slot or App Service Environment. Default: false.
+        resourceGroupName: $(resource_group) # string. Required when deployToSlotOrASE = true. Resource group. 
+        slotName: $(slot_name) # string. Required when deployToSlotOrASE = true. Slot. Default: production.

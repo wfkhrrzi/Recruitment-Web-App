@@ -53,7 +53,7 @@ stages:
         cd recruitment
         python manage.py collectstatic
         echo "Collectstatic completed"
-      workingDirectory: $(projectRoot)
+      workingDirectory: $(System.DefaultWorkingDirectory)
       displayName: "Install requirements & collectstatic"
 
     - task: ArchiveFiles@2

@@ -19,7 +19,7 @@ variables:
   vmImageName: 'ubuntu-latest'
 
   # Environment name
-  environmentName: 'ptsg-5dspwb04'
+  environmentName: 'PTAZSG-DEV-DSP-RG'
 
   # Project root folder. Point to the folder containing manage.py file.
   projectRoot: $(System.DefaultWorkingDirectory)/recruitment

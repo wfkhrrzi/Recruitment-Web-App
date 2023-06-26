@@ -19,7 +19,7 @@ variables:
   vmImageName: 'ubuntu-latest'
 
   # Environment name
-  # environmentName: 'ptsg-5dspwb04'
+  environmentName: 'ptsg-5dspwb04'
 
   # Project root folder. Point to the folder containing manage.py file.
   projectRoot: $(System.DefaultWorkingDirectory)/recruitment
@@ -74,7 +74,7 @@ stages:
   - deployment: DeploymentJob
     pool:
       vmImage: $(vmImageName)
-    # environment: $(environmentName)
+    environment: $(environmentName)
     strategy:
       runOnce:
         deploy:

@@ -45,13 +45,16 @@ stages:
       displayName: 'Use Python $(pythonVersion)'
 
     - script: |
-        python -m venv antenv
-        source antenv/bin/activate
+        python -m venv .venv
+        source .venv/bin/activate
         python -m pip install --upgrade pip
-        pip install setup
         pip install -r requirements.txt
+        echo "Dependencies installation completed"
+        cd recruitment
+        python manage.py collectstatic
+        echo "Collectstatic completed"
       workingDirectory: $(projectRoot)
-      displayName: "Install requirements"
+      displayName: "Install requirements & collectstatic"
 
     - task: ArchiveFiles@2
       displayName: 'Archive files'

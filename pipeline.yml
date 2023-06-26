@@ -1,72 +1,96 @@
+# Python to Linux Web App on Azure
+# Build your Python project and deploy it to Azure as a Linux Web App.
+# Change python version to one thats appropriate for your application.
+# https://docs.microsoft.com/azure/devops/pipelines/languages/python
+
+trigger:
+  branches:
+      include:
+      - deploy_v1
+
 variables:
-  service_connection: 'dssandbox-spn'
+  # Azure Resource Manager connection created during pipeline creation
+  azureServiceConnectionId: 'dssandbox-spn'
+
+  # Web app name
+  webAppName: 'ptsg-5dspwb04'
+
+  # Agent VM image name
+  vmImageName: 'ubuntu-latest'
+
+  # Environment name
+  environmentName: 'ptsg-5dspwb04'
+
+  # Project root folder. Point to the folder containing manage.py file.
+  projectRoot: $(System.DefaultWorkingDirectory)/recruitment
+
+  # Python version: 3.7
+  pythonVersion: '3.9'
+  
   resource_group: 'PTAZSG-DEV-DSP-RG'
-  app_name: 'ptsg-5dspwb04'
+  
   slot_name: 'dstats'
 
-pool:
-  vmImage: ubuntu-latest
+stages:
+- stage: Build
+  displayName: Build stage
+  jobs:
+  - job: BuildJob
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(pythonVersion)'
+      displayName: 'Use Python $(pythonVersion)'
 
-## No code trigger (events )
-trigger: 
-  branches:
-    include:
-    - deploy_v1
+    - script: |
+        python -m venv antenv
+        source antenv/bin/activate
+        python -m pip install --upgrade pip
+        pip install setup
+        pip install -r requirements.txt
+      workingDirectory: $(projectRoot)
+      displayName: "Install requirements"
 
-## Pipeline steps
-steps:
-  - task: UsePythonVersion@0
-    displayName: "Setting Python version"
-    inputs:
-      versionSpec: '3.9'
-      # architecture: 'x64'
-      addToPath: true
+    - task: ArchiveFiles@2
+      displayName: 'Archive files'
+      inputs:
+        rootFolderOrFile: '$(projectRoot)'
+        includeRootFolder: false
+        archiveType: zip
+        archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+        replaceExistingArchive: true
 
-  # Step 1, Make a venv, activate, install requirements, run collectstatic
-  - script: |
-      python -m venv .venv
-      source .venv/bin/activate
-      python -m pip install --upgrade pip
-      pip install -r requirements.txt
-      echo "Dependencies installation completed"
-      cd recruitment
-      python manage.py collectstatic
-      echo "Collectstatic completed"
-    workingDirectory: "$(System.DefaultWorkingDirectory)"
-    displayName: "Install requirements"
+    - upload: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+      displayName: 'Upload package'
+      artifact: drop
 
+- stage: Deploy
+  displayName: 'Deploy Web App'
+  dependsOn: Build
+  condition: succeeded()
+  jobs:
+  - deployment: DeploymentJob
+    pool:
+      vmImage: $(vmImageName)
+    environment: $(environmentName)
+    strategy:
+      runOnce:
+        deploy:
+          steps:
 
-   # Step 2, create zip file be deployed
-  - task: ArchiveFiles@2
-    displayName: "Archive files"
-    inputs:
-      rootFolderOrFile: "$(System.DefaultWorkingDirectory)/recruitment"
-      includeRootFolder: false
-      archiveType: 'zip'
-      archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
-      replaceExistingArchive: true
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(pythonVersion)'
+            displayName: 'Use Python version'
 
-  - task: PublishBuildArtifacts@1
-    inputs:
-      PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
-      artifactName: 'drop'
-    displayName: 'Publish build artifacts'
-
-  
-  # Step 3, deploy zip package to azure app service
-  - task: AzureRmWebAppDeployment@4
-    inputs:
-      ConnectionType: 'AzureRM'
-      azureSubscription: $(service_connection)
-      appType: 'webAppLinux'
-      WebAppName: $(app_name)
-      deployToSlotOrASE: true
-      ResourceGroupName: $(resource_group)
-      SlotName: $(slot_name)
-      packageForLinux:  '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
-      RuntimeStack: 'PYTHON|3.9'
-      DeploymentType: 'zipDeploy'
-      StartupCommand: "gunicorn --bind=0.0.0.0:8080 --timeout=600 recruitment.wsgi --access-logfile '-' --error-logfile '-'"
-      # StartupCommand: 'cd recruitment && uvicorn recruitment.asgi:application --host 0.0.0.0 --port 8080'
-      # appSettings: '-Port 8080 -RequestTimeout "10:20:00" -WEBSITE_TIME_ZONE "Singapore Standard Time" -WEBSITES_PORT 8080 -WEBSITES_ENABLE_APP_SERVICE_STORAGE true -SCM_DO_BUILD_DURING_DEPLOYMENT true -ENABLE_ORYX_BUILD true'
-      # timeoutInMinutes: 60 # Set the timeout to 60 minutes
+          - task: AzureWebApp@1
+            displayName: 'Deploy Azure Web App : {{ webAppName }}'
+            inputs:
+              azureSubscription: $(azureServiceConnectionId)
+              appName: $(webAppName)
+              package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
+              deployToSlotOrASE: true # boolean. Optional. Use when appType != "". Deploy to Slot or App Service Environment. Default: false.
+              resourceGroupName: $(resource_group) # string. Required when deployToSlotOrASE = true. Resource group. 
+              slotName: $(slot_name) # string. Required when deployToSlotOrASE = true. Slot. Default: production.

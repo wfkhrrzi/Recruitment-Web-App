@@ -1,100 +1,64 @@
-# Python to Linux Web App on Azure
-# Build your Python project and deploy it to Azure as a Linux Web App.
-# Change python version to one thats appropriate for your application.
-# https://docs.microsoft.com/azure/devops/pipelines/languages/python
-
-trigger:
-  branches:
-      include:
-      - deploy_v1
-
 variables:
-  # Azure Resource Manager connection created during pipeline creation
-  azureServiceConnectionId: 'dssandbox-spn'
-
-  # Web app name
-  webAppName: 'ptsg-5dspwb04'
-
-  # Agent VM image name
-  vmImageName: 'ubuntu-latest'
-
-  # Environment name
-  environmentName: 'PTAZSG-DEV-DSP-RG'
-
-  # Project root folder. Point to the folder containing manage.py file.
-  projectRoot: $(System.DefaultWorkingDirectory)/recruitment
-
-  # Python version: 3.7
-  pythonVersion: '3.9'
-  
+  service_connection: 'dssandbox-spn'
   resource_group: 'PTAZSG-DEV-DSP-RG'
-  
+  app_name: 'ptsg-5dspwb04'
   slot_name: 'dstats'
 
-stages:
-- stage: Build
-  displayName: Build stage
-  jobs:
-  - job: BuildJob
-    pool:
-      vmImage: $(vmImageName)
-    steps:
-    - task: UsePythonVersion@0
-      inputs:
-        versionSpec: '$(pythonVersion)'
-      displayName: 'Use Python $(pythonVersion)'
+pool:
+  vmImage: ubuntu-latest
 
-    - script: |
-        python -m venv .venv
-        source .venv/bin/activate
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        echo "Dependencies installation completed"
-        cd recruitment
-        python manage.py collectstatic
-        echo "Collectstatic completed"
-      workingDirectory: $(System.DefaultWorkingDirectory)
-      displayName: "Install requirements & collectstatic"
+## No code trigger (events )
+trigger: 
+  branches:
+    include:
+    - deploy_v1
 
-    - task: ArchiveFiles@2
-      displayName: 'Archive files'
-      inputs:
-        rootFolderOrFile: '$(projectRoot)'
-        includeRootFolder: false
-        archiveType: zip
-        archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
-        replaceExistingArchive: true
+## Pipeline steps
+steps:
+  - task: UsePythonVersion@0
+    displayName: "Setting Python version"
+    inputs:
+      versionSpec: '3.9'
+      # architecture: 'x64'
+      addToPath: true
 
-    # - upload: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
-    #   displayName: 'Upload package'
-    #   artifact: drop
-    - task: PublishBuildArtifacts@1
-      inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
-        artifactName: 'drop'
-      displayName: 'Publish build artifacts'
+  # Step 1, Make a venv, activate, install requirements, run collectstatic
+  - script: |
+      python -m venv .venv
+      source .venv/bin/activate
+      python -m pip install --upgrade pip
+      pip install -r requirements.txt
+      echo "Dependencies installation completed"
+      cd recruitment
+      python manage.py collectstatic
+      echo "Collectstatic completed"
+    workingDirectory: "$(System.DefaultWorkingDirectory)"
+    displayName: "Install requirements"
 
-- stage: Deploy
-  displayName: 'Deploy Web App'
-  dependsOn: Build
-  condition: succeeded()
-  jobs:
-  - job: DeploymentJob
-    pool:
-      vmImage: $(vmImageName)
-    # environment: $(environmentName)
-    
-    steps:
 
-    - task: UsePythonVersion@0
+   # Step 2, create zip file be deployed
+  - task: ArchiveFiles@2
+    displayName: "Archive files"
+    inputs:
+      rootFolderOrFile: "$(System.DefaultWorkingDirectory)/recruitment"
+      includeRootFolder: false
+      archiveType: 'zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+      replaceExistingArchive: true
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+      artifactName: 'drop'
+    displayName: 'Publish build artifacts'
+
+  
+  # Step 3, deploy zip package to azure app service
+  - task: AzureWebApp@1
+      displayName: 'Deploy Azure Web App : $(app_name)'
       inputs:
-        versionSpec: '$(pythonVersion)'
-      displayName: 'Use Python version'
-    - task: AzureWebApp@1
-      displayName: 'Deploy Azure Web App : {{ webAppName }}'
-      inputs:
-        azureSubscription: $(azureServiceConnectionId)
-        appName: $(webAppName)
+        azureSubscription: $(service_connection)
+        appName: $(app_name)
         package: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
         deployToSlotOrASE: true # boolean. Optional. Use when appType != "". Deploy to Slot or App Service Environment. Default: false.
         resourceGroupName: $(resource_group) # string. Required when deployToSlotOrASE = true. Resource group. 

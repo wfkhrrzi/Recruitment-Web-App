@@ -65,9 +65,14 @@ stages:
         archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
         replaceExistingArchive: true
 
-    - upload: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
-      displayName: 'Upload package'
-      artifact: drop
+    # - upload: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+    #   displayName: 'Upload package'
+    #   artifact: drop
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+        artifactName: 'drop'
+      displayName: 'Publish build artifacts'
 
 - stage: Deploy
   displayName: 'Deploy Web App'

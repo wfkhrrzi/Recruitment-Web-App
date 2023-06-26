@@ -71,10 +71,10 @@ stages:
   dependsOn: Build
   condition: succeeded()
   jobs:
-  - deployment: DeploymentJob
+  - job: DeploymentJob
     pool:
       vmImage: $(vmImageName)
-    environment: $(environmentName)
+    # environment: $(environmentName)
     strategy:
       runOnce:
         deploy:

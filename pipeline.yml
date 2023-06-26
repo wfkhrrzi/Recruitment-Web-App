@@ -58,6 +58,7 @@ steps:
     displayName: 'Deploy Azure Web App : $(app_name)'
     inputs:
       azureSubscription: $(service_connection)
+      appType: 'webAppLinux'
       appName: $(app_name)
       package: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
       deployToSlotOrASE: true # boolean. Optional. Use when appType != "". Deploy to Slot or App Service Environment. Default: false.

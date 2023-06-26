@@ -90,7 +90,7 @@ stages:
       inputs:
         azureSubscription: $(azureServiceConnectionId)
         appName: $(webAppName)
-        package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
+        package: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
         deployToSlotOrASE: true # boolean. Optional. Use when appType != "". Deploy to Slot or App Service Environment. Default: false.
         resourceGroupName: $(resource_group) # string. Required when deployToSlotOrASE = true. Resource group. 
         slotName: $(slot_name) # string. Required when deployToSlotOrASE = true. Slot. Default: production.

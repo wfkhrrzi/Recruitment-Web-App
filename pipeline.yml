@@ -55,11 +55,11 @@ steps:
   
   # Step 3, deploy zip package to azure app service
   - task: AzureWebApp@1
-      displayName: 'Deploy Azure Web App : $(app_name)'
-      inputs:
-        azureSubscription: $(service_connection)
-        appName: $(app_name)
-        package: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
-        deployToSlotOrASE: true # boolean. Optional. Use when appType != "". Deploy to Slot or App Service Environment. Default: false.
-        resourceGroupName: $(resource_group) # string. Required when deployToSlotOrASE = true. Resource group. 
-        slotName: $(slot_name) # string. Required when deployToSlotOrASE = true. Slot. Default: production.
+    displayName: 'Deploy Azure Web App : $(app_name)'
+    inputs:
+      azureSubscription: $(service_connection)
+      appName: $(app_name)
+      package: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+      deployToSlotOrASE: true # boolean. Optional. Use when appType != "". Deploy to Slot or App Service Environment. Default: false.
+      resourceGroupName: $(resource_group) # string. Required when deployToSlotOrASE = true. Resource group. 
+      slotName: $(slot_name) # string. Required when deployToSlotOrASE = true. Slot. Default: production.

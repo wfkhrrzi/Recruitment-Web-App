@@ -10,7 +10,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "recruitment.settings")
 django.setup()
 
 # Import your Django models
-from main.models import Candidate,Source,EmpCategory,Status,CandidateResume,Nationality,InitialScreening,InitialScreeningEvaluation,Users
+from main.models import Candidate,Source,EmpCategory,Status,CandidateResume,Nationality,InitialScreening,InitialScreeningEvaluation,Users,Prescreening,CBI
 
 def migrate_data():
 
@@ -22,10 +22,12 @@ def migrate_data():
     # Retrieve files in the directory
     files = os.listdir(directory)
 
-    # Iterate over the files
+    # Iterate over the candidates
     candidates_list = []
     initialscreening_list = []
     initialscreening_eval_list = []
+    prescreening_list = []
+    cbi_list = []
     for index, row in df.iterrows():
 
         try:
@@ -60,7 +62,8 @@ def migrate_data():
                 candidate.candidate_resume = resume
 
                 break
-
+        
+        #initial screening
 
         is_proceed = bool(row['Selection']) if not pd.isnull(row['Selection']) else None
         is_hm_proceed = None if is_proceed == None else False if row[7:20].isna().all() and is_proceed else True
@@ -94,11 +97,77 @@ def migrate_data():
                     )
                 )
 
-    # print(candidates_list)
+        # prescreening, cbi
+        prescreening = Prescreening(candidate=candidate)
+        prescreening.status = Status.objects.get(codename='prescreening:send instruction')
+        prescreening.assessment_status = Status.objects.get(codename='prescreening:send instruction')
+
+        cbi = CBI(candidate=candidate)
+        cbi.status = Status.objects.get(codename='cbi:pending schedule')
+
+        if not pd.isnull(row['Remark']):
+            if 'salary' in row['Remark'].lower():
+                prescreening.is_proceed = True
+                prescreening.status = Status.objects.get(codename='prescreening:proceed')
+
+                if row['Joining Status'] == 'Recruited':
+                    cbi.is_proceed = True
+                    cbi.status = Status.objects.get(codename='cbi:proceed')
+                else:
+                    cbi.is_proceed = False
+                    cbi.status = Status.objects.get(codename='cbi:not proceed')
+
+                prescreening_list.append(prescreening)
+                cbi_list.append(cbi)
+
+            elif 'screen' in row['Remark'].lower() and 'interview' in row['Remark'].lower():
+
+                prescreening.is_proceed = False
+                prescreening.status = Status.objects.get(codename='prescreening:not proceed')
+
+                prescreening_list.append(prescreening)
+
+            elif 'cbi result' in row['Remark'].lower():
+                prescreening.is_proceed = True
+                prescreening.status = Status.objects.get(codename='prescreening:proceed')
+
+                cbi.status = Status.objects.get(codename='cbi:pending result')
+                prescreening_list.append(prescreening)
+                cbi_list.append(cbi)
+
+        elif row['Joining Status'] == 'Pending Pre screen':
+            prescreening.status = Status.objects.get(codename='prescreening:proceed')
+
+        elif row['Joining Status'] == 'Pending Pre screen':
+            prescreening.status = Status.objects.get(codename='prescreening:pending')
+            
+            prescreening_list.append(prescreening)
+
+        elif row['Joining Status'] == 'Not recommended':
+            prescreening.is_proceed = True
+            prescreening.status = Status.objects.get(codename='prescreening:proceed')
+            cbi.is_proceed = False
+            cbi.status = Status.objects.get(codename='cbi:not proceed')
+
+            prescreening_list.append(prescreening)
+            cbi_list.append(cbi)
+
+        elif row['Joining Status'] in ('Recruited','Declined','Pending SP'):
+            prescreening.is_proceed = True
+            prescreening.status = Status.objects.get(codename='prescreening:proceed')
+            cbi.is_proceed = True
+            cbi.status = Status.objects.get(codename='cbi:proceed')
+
+            prescreening_list.append(prescreening)
+            cbi_list.append(cbi)
+
+
+    # Bulk create instances
     Candidate.objects.bulk_create(candidates_list)
     InitialScreening.objects.bulk_create(initialscreening_list)
     InitialScreeningEvaluation.objects.bulk_create(initialscreening_eval_list)
-
+    Prescreening.objects.bulk_create(prescreening_list)
+    CBI.objects.bulk_create(cbi_list)
 
     print('Done migration.')
                 

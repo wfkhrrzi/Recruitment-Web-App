@@ -3,6 +3,7 @@
 test.ipynb
 submission_files/
 staticfiles/
+migrate conditions.txt
 .prettierrc
 
 # Byte-compiled / optimized / DLL files

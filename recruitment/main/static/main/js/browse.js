@@ -985,12 +985,59 @@ $(document).ready(function () {
 		}
 
 	}
+
 	uploadResumeForm.on('submit',function (e) {  
 		e.preventDefault()
-		console.log('upload submitted')
-		executeUploadResume();
+		console.log('upload submitted');
+
+		let source_input = $('#upload-resumes-source-hidden').val();
+
+		if (source_input == ""){
+			console.log('source is NULL');
+			uploadResumeContainer.find('.card-body')
+			.prepend(
+				displayUploadErrorAlert('Select the <b>source</b> of the resume(s)!')
+			);
+
+			setTimeout(() => {
+				clearUploadErrorAlert();
+				console.log('Deleted upload error messages');
+			}, 5000);
+
+			return
+		}
+
+		else {
+			clearUploadErrorAlert();
+		}
+
+		console.log('run upload');
+
+		// executeUploadResume();
 
 	})
+
+	const displayUploadErrorAlert = function (message) {  
+		let component = $(`
+		<div class="alert alert-danger alert-dismissible fade show upload-resumes-error-alert" role="alert" style="
+			font-size:0.8rem;
+			--bs-alert-padding-x: 0.5rem;
+			--bs-alert-padding-y: 0.5rem;
+		">
+			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="
+				padding: 0.7rem 1rem;
+			"></button>
+		</div>
+		`)
+
+		component.prepend(message)
+
+		return component.prop('outerHTML')
+	}
+
+	const clearUploadErrorAlert = function () {  
+		$('.upload-resumes-error-alert').remove()
+	}
 
 	// when clicked "clear all" button
 	uploadResumeClear.on('click',function (e) {  
@@ -1019,6 +1066,11 @@ $(document).ready(function () {
 			}
 		)();
 
+	})
+
+	// update source hidden input for every change in upload modal's source input
+	$("#upload-resumes-source-select").on('change',function (event) {  
+		$('#upload-resumes-source-hidden').val(event.target.value)
 	})
 
 	// ---------------------------- PARSE NEW RESUME ---------------------------------------

@@ -164,6 +164,7 @@ class Candidate(CreatedMixin,LastModifiedMixin,models.Model):
     ds_background = models.CharField(max_length=100,null=True)
     hr_remarks = models.TextField(null=True)
     gpt_status = models.ForeignKey(Status,on_delete=models.SET_NULL,null=True,related_name="candidates_gpt_status")
+    gpt_score = models.FloatField(null=True)
     cv_link = models.CharField(max_length=255,null=True)
     source = models.ForeignKey(Source,on_delete=models.SET_NULL,null=True)
     nationality = models.ForeignKey(Nationality,on_delete=models.SET_NULL,null=True)

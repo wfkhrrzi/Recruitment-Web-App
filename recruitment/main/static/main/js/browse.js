@@ -181,6 +181,8 @@ $(document).ready(function () {
 	// gpt_status initialized to 'recommended'
 	// $('.table-filter-wrapper select[name="gpt_status"]').val('gpt_status:recommended');
 
+	const init_gpt_score = 80
+
 	var table = $("#table-candidates").DataTable({
 		orderCellsTop: true,
 		fixedHeader: true,
@@ -188,7 +190,7 @@ $(document).ready(function () {
 		autoWidth: true,
 		dom: 
 			// "<'row mb-2'<'col-sm-12 col-md-4'l><'col-sm-12 col-md-8'<'d-flex justify-content-end'<B><'ms-4'f>>>>" + // search bar is 'f'
-			"<'row mb-2'<'col-sm-12 col-md-4'l><'col-sm-12 col-md-8'<'d-flex justify-content-end'<B><'#sourceFilter'>>>>" + 
+			"<'row mb-2 align-items-center'<'col-sm-12 col-md-4'l><'col-sm-12 col-md-8'<'d-flex justify-content-end align-items-center'<B><'#gpt-score-thre'><'#sourceFilter'>>>>" + 
         	"<'row'<'col-sm-12'tr>>" +
         	"<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
 		buttons: {
@@ -239,6 +241,9 @@ $(document).ready(function () {
 			null,
 			null,
 			null,
+			null,
+			{ "search": init_gpt_score },
+
 		],
 		order: [[1, 'asc']],
 		columns: [
@@ -436,6 +441,11 @@ $(document).ready(function () {
 				data: "source_",
 				visible: false,
 			},
+			{
+				name:"gpt_score",
+				data: "gpt_score",
+				visible: false,
+			},
 		],
 
 		initComplete: function () {
@@ -455,6 +465,20 @@ $(document).ready(function () {
 				// console.log(event.target.value)
 				api.column('source:name').search(event.target.value).draw()
 			});
+
+			$('#gpt-score-thre').addClass('ms-3').append(`
+				<label class="fw-medium" style="font-size:0.8rem;margin:0;">GPT Threshold: <span id="gpt-score-thre-value" >${init_gpt_score}</span>%</label>
+				<input type="range" class="form-range" value="${init_gpt_score}">
+			`)
+			.find('input[type="range"]').on('input change',function () {  
+				$(this).attr('value',this.value);
+				$('#gpt-score-thre-value').html(this.value);
+			}).on('change',function () {  
+				// api call to filter table based on gpt score
+				console.log('threshold value:',this.value)
+				api.column('gpt_score:name').search(this.value).draw()		
+			})
+
 		}, //end initComplete
 
 		drawCallback: function () {  

@@ -4,6 +4,7 @@ import os
 import pandas as pd
 from io import BytesIO
 from datetime import datetime
+import random
 
 # Set up Django environment
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "recruitment.settings")
@@ -50,6 +51,7 @@ def migrate_data():
             nationality = Nationality.objects.get(nationality=row['Nationality']),
             source = source,
             category = category,
+            gpt_score=random.randint(1, 100),
             date = date,
             referral_name = row['Referred By'],
         )

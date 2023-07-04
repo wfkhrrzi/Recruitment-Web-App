@@ -80,8 +80,8 @@ class BrowseIndex(CustomLoginRequired, View):
                 pending_initial_screening=Count(
                     'id',
                     filter=
-                        Q(initialscreening__status__isnull=False) & 
-                        ~Q(initialscreening__status__codename="initscreening:proceed") & 
+                        # Q(initialscreening__status__isnull=False) & 
+                        ~Q(initialscreening__status__codename__in=["initscreening:selected","initscreening:not selected"]) & 
                         Q(prescreening__status__isnull=True) &
                         Q(cbi__status__isnull=True)
                 ),

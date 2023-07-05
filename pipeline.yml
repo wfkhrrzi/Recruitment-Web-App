@@ -43,7 +43,7 @@ steps:
       rootFolderOrFile: "$(System.DefaultWorkingDirectory)/recruitment"
       includeRootFolder: false
       archiveType: 'zip'
-      archiveFile: '$(Build.ArtifactStagingDirectory)/Application$(Build.BuildId).zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
       replaceExistingArchive: true
 
   - task: PublishBuildArtifacts@1
@@ -63,7 +63,7 @@ steps:
       ResourceGroupName: $(resource_group)
       SlotName: $(slot_name)
       # packageForLinux:  '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
-      packageForLinux:  '$(Build.ArtifactStagingDirectory)/Application$(Build.BuildId).zip'
+      packageForLinux:  '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
       runtimeStack: 'PYTHON|3.9'
       DeploymentType: 'zipDeploy'
       StartUpCommand: "celery -A recruitment worker -l info & gunicorn --bind=0.0.0.0:8080 --timeout=600 recruitment.wsgi"

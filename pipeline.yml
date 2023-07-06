@@ -29,7 +29,7 @@ steps:
       python -m pip install --upgrade pip
       pip install -r requirements.txt
       echo "Dependencies installation completed"
-      cd recruitments
+      cd recruitment
       python manage.py collectstatic
       echo "Collectstatic completed"      
     workingDirectory: "$(System.DefaultWorkingDirectory)"
@@ -39,14 +39,14 @@ steps:
   #   inputs:
   #     SourceFolder: '$(System.DefaultWorkingDirectory)'  # Root folder
   #     Contents: 'requirements.txt'  # File to copy
-  #     TargetFolder: '$(System.DefaultWorkingDirectory)/recruitments'  # Destination subfolder
+  #     TargetFolder: '$(System.DefaultWorkingDirectory)/recruitment'  # Destination subfolder
 
 
    # Step 2, create zip file be deployed
   - task: ArchiveFiles@2
     displayName: "Archive files"
     inputs:
-      rootFolderOrFile: "$(System.DefaultWorkingDirectory)/recruitments"
+      rootFolderOrFile: "$(System.DefaultWorkingDirectory)/recruitment"
       includeRootFolder: false
       archiveType: 'zip'
       archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
@@ -75,5 +75,6 @@ steps:
       DeploymentType: 'zipDeploy'
       StartUpCommand: "gunicorn --bind=0.0.0.0:8080 --timeout 600 recruitment.wsgi"
       # StartUpCommand: "python manage.py runserver"
-      AppSettings: '-Port 8080 -RequestTimeout "10:20:00" -WEBSITE_TIME_ZONE "Singapore Standard Time" -WEBSITES_PORT 8080 -WEBSITES_ENABLE_APP_SERVICE_STORAGE true -SCM_DO_BUILD_DURING_DEPLOYMENT true -ENABLE_ORYX_BUILD true'
+      # AppSettings: '-Port 8080 -RequestTimeout "10:20:00" -WEBSITE_TIME_ZONE "Singapore Standard Time" -WEBSITES_PORT 8080 -WEBSITES_ENABLE_APP_SERVICE_STORAGE true -SCM_DO_BUILD_DURING_DEPLOYMENT true -ENABLE_ORYX_BUILD true'
+      AppSettings: '-Port 8080 -RequestTimeout "10:20:00" -WEBSITE_TIME_ZONE "Singapore Standard Time" -WEBSITES_PORT 8080 -WEBSITES_ENABLE_APP_SERVICE_STORAGE true -SCM_DO_BUILD_DURING_DEPLOYMENT true'
       # timeoutInMinutes: 60 # Set the timeout to 60 minutes

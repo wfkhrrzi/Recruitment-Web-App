@@ -26,7 +26,6 @@ steps:
   - script: |
       python -m venv .venv
       source .venv/bin/activate
-    # python -m pip install --upgrade pip
       sudo apt install python3-django
       sudo pip install django
       pip install -r requirements.txt

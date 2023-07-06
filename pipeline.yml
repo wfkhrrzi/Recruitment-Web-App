@@ -29,7 +29,7 @@ steps:
       python -m pip install --upgrade pip
       pip install -r requirements.txt
       echo "Dependencies installation completed"
-      cd recruitment
+      cd recruitments
       python manage.py collectstatic
       echo "Collectstatic completed"      
     workingDirectory: "$(System.DefaultWorkingDirectory)"
@@ -39,14 +39,14 @@ steps:
   #   inputs:
   #     SourceFolder: '$(System.DefaultWorkingDirectory)'  # Root folder
   #     Contents: 'requirements.txt'  # File to copy
-  #     TargetFolder: '$(System.DefaultWorkingDirectory)/recruitment'  # Destination subfolder
+  #     TargetFolder: '$(System.DefaultWorkingDirectory)/recruitments'  # Destination subfolder
 
 
    # Step 2, create zip file be deployed
   - task: ArchiveFiles@2
     displayName: "Archive files"
     inputs:
-      rootFolderOrFile: "$(System.DefaultWorkingDirectory)/recruitment"
+      rootFolderOrFile: "$(System.DefaultWorkingDirectory)/recruitments"
       includeRootFolder: false
       archiveType: 'zip'
       archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'

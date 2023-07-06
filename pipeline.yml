@@ -31,9 +31,15 @@ steps:
       echo "Dependencies installation completed"
       cd recruitment
       python manage.py collectstatic
-      echo "Collectstatic completed"
+      echo "Collectstatic completed"      
     workingDirectory: "$(System.DefaultWorkingDirectory)"
     displayName: "Install requirements"
+    
+  - task: CopyFiles@2
+    inputs:
+      SourceFolder: '$(System.DefaultWorkingDirectory)'  # Root folder
+      Contents: 'requirements.txt'  # File to copy
+      TargetFolder: '$(System.DefaultWorkingDirectory)/recruitment'  # Destination subfolder
 
 
    # Step 2, create zip file be deployed

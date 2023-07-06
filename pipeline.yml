@@ -66,7 +66,7 @@ steps:
       packageForLinux:  '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
       runtimeStack: 'PYTHON|3.9'
       DeploymentType: 'zipDeploy'
-      StartUpCommand: "gunicorn --bind=0.0.0.0:8080 --timeout=600 app:manage"
+      # StartUpCommand: "gunicorn --bind=0.0.0.0:8080 --timeout=600 app:manage"
       StartUpCommand: "python manage.py runserver"
       appSettings: '-Port 8080 -RequestTimeout "10:20:00" -WEBSITE_TIME_ZONE "Singapore Standard Time" -WEBSITES_PORT 8080 -WEBSITES_ENABLE_APP_SERVICE_STORAGE true -SCM_DO_BUILD_DURING_DEPLOYMENT true -ENABLE_ORYX_BUILD true'
       # timeoutInMinutes: 60 # Set the timeout to 60 minutes

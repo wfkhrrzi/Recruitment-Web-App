@@ -18,7 +18,7 @@ steps:
   - task: UsePythonVersion@0
     displayName: "Setting Python version"
     inputs:
-      versionSpec: '3.9'
+      versionSpec: '3.7'
       # architecture: 'x64'
       addToPath: true
 
@@ -71,7 +71,7 @@ steps:
       SlotName: $(slot_name)
       # packageForLinux:  '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
       packageForLinux:  '$(Build.ArtifactStagingDirectory)/**/*.zip'
-      RuntimeStack: 'PYTHON|3.9'
+      RuntimeStack: 'PYTHON|3.7'
       DeploymentType: 'zipDeploy'
       StartUpCommand: "gunicorn --bind=0.0.0.0:8080 --timeout 600 recruitment.wsgi --access-logfile '-' --error-logfile '-'"
       # StartUpCommand: "python manage.py runserver"

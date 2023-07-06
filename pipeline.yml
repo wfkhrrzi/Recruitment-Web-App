@@ -63,7 +63,7 @@ steps:
       ResourceGroupName: $(resource_group)
       SlotName: $(slot_name)
       # packageForLinux:  '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
-      packageForLinux:  '$(Build.ArtifactStagingDirectory)/*/**.zip'
+      packageForLinux:  '$(Build.ArtifactStagingDirectory)/**/*.zip'
       runtimeStack: 'PYTHON|3.9'
       DeploymentType: 'zipDeploy'
       StartUpCommand: "gunicorn --bind=0.0.0.0 --timeout 600 recruitment.wsgi --access-logfile '-' --error-logfile '-'"

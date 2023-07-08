@@ -64,12 +64,12 @@ steps:
   - task: AzureRmWebAppDeployment@4
     inputs:
       ConnectionType: 'AzureRM'
-      azureSubscription: 'dssandbox-spn'
+      azureSubscription: $(service_connection)
       appType: 'webAppLinux'
-      WebAppName: 'ptsg-5dspwb04'
+      WebAppName: $(app_name)
       deployToSlotOrASE: true
-      ResourceGroupName: 'PTAZSG-DEV-DSP-RG'
-      SlotName: 'dstats'
+      ResourceGroupName: $(resource_group)
+      SlotName: $(slot_name)
       packageForLinux:  '$(Build.ArtifactStagingDirectory)/recruitment$(Build.BuildId).zip'
       # packageForLinux:  '$(Build.ArtifactStagingDirectory)/**/*.zip'
       RuntimeStack: 'PYTHON|3.9'
@@ -80,4 +80,4 @@ steps:
       # timeoutInMinutes: 60 # Set the timeout to 60 minutes
     # Post Deployment Action
       ScriptType: 'Inline Script'
-      InlineScript: "cd .. & ls -la"
+      InlineScript: "cd . & ls -la"

@@ -80,4 +80,4 @@ steps:
       # timeoutInMinutes: 60 # Set the timeout to 60 minutes
     # Post Deployment Action
       ScriptType: 'Inline Script'
-      InlineScript: "ls -la"
+      InlineScript: "cd .. & ls -la"

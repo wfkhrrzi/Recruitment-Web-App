@@ -58,8 +58,8 @@ steps:
       artifactName: 'drop'
     displayName: 'Publish build artifacts'
 
-  - displayName: View directory
-    run: ls -la
+  - script: ls -la
+    displayName: View directory
   
   # Step 3, deploy zip package to azure app service
   # - task: AzureRmWebAppDeployment@4

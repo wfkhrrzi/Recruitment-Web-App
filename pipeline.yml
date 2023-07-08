@@ -59,7 +59,7 @@ steps:
     displayName: 'Publish build artifacts'
 
   
-  Step 3, deploy zip package to azure app service
+  #Step 3, deploy zip package to azure app service
   - task: AzureRmWebAppDeployment@4
     inputs:
       azureSubscription: $(service_connection)

@@ -64,12 +64,12 @@ steps:
   - task: AzureRmWebAppDeployment@4
     inputs:
       ConnectionType: 'AzureRM'
-      azureSubscription: $(service_connection)
+      azureSubscription: 'dssandbox-spn'
       appType: 'webAppLinux'
-      WebAppName: $(app_name)
+      WebAppName: 'ptsg-5dspwb04'
       deployToSlotOrASE: true
-      ResourceGroupName: $(resource_group)
-      SlotName: $(slot_name)
+      ResourceGroupName: 'PTAZSG-DEV-DSP-RG'
+      SlotName: 'dstats'
       packageForLinux:  '$(Build.ArtifactStagingDirectory)/recruitment$(Build.BuildId).zip'
       # packageForLinux:  '$(Build.ArtifactStagingDirectory)/**/*.zip'
       RuntimeStack: 'PYTHON|3.9'

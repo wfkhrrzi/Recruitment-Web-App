@@ -50,12 +50,12 @@ steps:
       rootFolderOrFile: "$(System.DefaultWorkingDirectory)/recruitment"
       includeRootFolder: false
       archiveType: 'zip'
-      archiveFile: '$(Build.ArtifactStagingDirectory)/recruitment$(Build.BuildId).zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
       replaceExistingArchive: true
 
   - task: PublishBuildArtifacts@1
     inputs:
-      PathtoPublish: '$(Build.ArtifactStagingDirectory)/recruitment$(Build.BuildId).zip'
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
       artifactName: 'drop'
     displayName: 'Publish build artifacts'
 
@@ -70,7 +70,7 @@ steps:
       deployToSlotOrASE: true
       ResourceGroupName: $(resource_group)
       SlotName: $(slot_name)
-      packageForLinux:  '$(Build.ArtifactStagingDirectory)/recruitment$(Build.BuildId).zip'
+      packageForLinux:  '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
       # packageForLinux:  '$(Build.ArtifactStagingDirectory)/**/*.zip'
       RuntimeStack: 'PYTHON|3.9'
       DeploymentType: 'zipDeploy'

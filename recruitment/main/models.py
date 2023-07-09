@@ -31,7 +31,7 @@ class UsersManager(BaseUserManager):
 class Users(PermissionsMixin,AbstractBaseUser):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
-    alias = models.CharField(max_length=10,null=True)
+    alias = models.CharField(max_length=100,null=True)
     user_name = models.CharField(max_length=50)
     email = models.EmailField(max_length=100,unique=True)
     password = models.CharField(max_length=200)
@@ -149,7 +149,7 @@ class CandidateResume(Submission):
     
 
 class Candidate(CreatedMixin,LastModifiedMixin,models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=255)
     date = models.DateField(null=True)
     referral_name = models.CharField(max_length=100,null=True)
     phone_number = models.CharField(max_length=100,null=True)

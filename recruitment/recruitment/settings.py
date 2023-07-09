@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
+import  urllib
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -24,15 +25,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-2rs$xqpskq7=shem)go3)6s=c=ubl1qj622zz7-5@x%_#eu-ng'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
 
 INSTALLED_APPS = [
-    'channels',
+    # 'channels',
+    "whitenoise.runserver_nostatic",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -43,7 +45,6 @@ INSTALLED_APPS = [
     'django_eventstream',
     'django_celery_results',
     'rest_framework.authtoken',
-    'django_seed',
 ]
 
 MEDIA_ROOT=os.path.join(BASE_DIR,'submission_files')
@@ -57,8 +58,9 @@ AUTH_USER_MODEL = 'main.Users'
 LOGIN_URL = '/login'
 
 MIDDLEWARE = [
-    'django_grip.GripMiddleware',
+    # 'django_grip.GripMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -87,7 +89,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'recruitment.wsgi.application'
-ASGI_APPLICATION = 'recruitment.asgi.application'
+# ASGI_APPLICATION = 'recruitment.asgi.application'
 
 EVENTSTREAM_STORAGE_CLASS = 'django_eventstream.storage.DjangoModelStorage'
 
@@ -96,26 +98,26 @@ EVENTSTREAM_STORAGE_CLASS = 'django_eventstream.storage.DjangoModelStorage'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
     # 'default': {
-    #     'ENGINE': 'django.db.backends.postgresql',
-    #     'NAME': "dsats_db",
-    #     'USER': "dsats_user@ptsg-5dsppsql01",
-    #     'PASSWORD': "ds_dsats@2023",
-    #     'HOST': "ptsg-5dsppsql01.postgres.database.azure.com",
-    #     'PORT': "5432",  # 5432 by default
-    # }
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': BASE_DIR / 'db.sqlite3',
+    # },
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': "dsats_db",
+        'USER': "dsats_user@ptsg-5dsppsql01",
+        'PASSWORD': "ds_dsats@2023",
+        'HOST': "ptsg-5dsppsql01.postgres.database.azure.com",
+        'PORT': "5432",  # 5432 by default
+    }
 }
 
 # Celery settings
-CELERY_BROKER_URL = 'sqla+sqlite:///' + str(DATABASES['default']['NAME'])
-# CELERY_RESULT_BACKEND = 'db+sqlite:///' + str(DATABASES['default']['NAME'])
-CELERY_RESULT_BACKEND = 'django-db'
-CELERY_RESULT_EXTENDED = True
-CELERY_TASK_TRACK_STARTED = True
+# CELERY_BROKER_URL = f"sqla+postgresql://{str(DATABASES['default']['USER'])}:{urllib.parse.quote(str(DATABASES['default']['PASSWORD']), safe='')}@{str(DATABASES['default']['HOST'])}:{str(DATABASES['default']['PORT'])}/{str(DATABASES['default']['NAME'])}"
+# # CELERY_RESULT_BACKEND = 'db+sqlite:///' + str(DATABASES['default']['NAME'])
+# CELERY_RESULT_BACKEND = 'django-db'
+# CELERY_RESULT_EXTENDED = True
+# CELERY_TASK_TRACK_STARTED = True
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -152,6 +154,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

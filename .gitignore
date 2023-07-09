@@ -1,4 +1,5 @@
 .venv
+.venvDeploy
 .vscode
 test.ipynb
 submission_files/

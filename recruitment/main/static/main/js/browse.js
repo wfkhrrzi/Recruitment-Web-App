@@ -181,6 +181,8 @@ $(document).ready(function () {
 	// gpt_status initialized to 'recommended'
 	// $('.table-filter-wrapper select[name="gpt_status"]').val('gpt_status:recommended');
 
+	const init_gpt_score = 80
+
 	var table = $("#table-candidates").DataTable({
 		orderCellsTop: true,
 		fixedHeader: true,
@@ -188,7 +190,7 @@ $(document).ready(function () {
 		autoWidth: true,
 		dom: 
 			// "<'row mb-2'<'col-sm-12 col-md-4'l><'col-sm-12 col-md-8'<'d-flex justify-content-end'<B><'ms-4'f>>>>" + // search bar is 'f'
-			"<'row mb-2'<'col-sm-12 col-md-4'l><'col-sm-12 col-md-8'<'d-flex justify-content-end'<B><'#sourceFilter'>>>>" + 
+			"<'row mb-2 align-items-center'<'col-sm-12 col-md-4'l><'col-sm-12 col-md-8'<'d-flex justify-content-end align-items-center'<B><'#gpt-score-thre'><'#sourceFilter'>>>>" + 
         	"<'row'<'col-sm-12'tr>>" +
         	"<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
 		buttons: {
@@ -239,6 +241,9 @@ $(document).ready(function () {
 			null,
 			null,
 			null,
+			null,
+			{ "search": init_gpt_score },
+
 		],
 		order: [[1, 'asc']],
 		columns: [
@@ -436,6 +441,11 @@ $(document).ready(function () {
 				data: "source_",
 				visible: false,
 			},
+			{
+				name:"gpt_score",
+				data: "gpt_score",
+				visible: false,
+			},
 		],
 
 		initComplete: function () {
@@ -455,6 +465,20 @@ $(document).ready(function () {
 				// console.log(event.target.value)
 				api.column('source:name').search(event.target.value).draw()
 			});
+
+			$('#gpt-score-thre').addClass('ms-3').append(`
+				<label class="fw-medium" style="font-size:0.8rem;margin:0;">GPT Threshold: <span id="gpt-score-thre-value" >${init_gpt_score}</span>%</label>
+				<input type="range" class="form-range" value="${init_gpt_score}">
+			`)
+			.find('input[type="range"]').on('input change',function () {  
+				$(this).attr('value',this.value);
+				$('#gpt-score-thre-value').html(this.value);
+			}).on('change',function () {  
+				// api call to filter table based on gpt score
+				console.log('threshold value:',this.value)
+				api.column('gpt_score:name').search(this.value).draw()		
+			})
+
 		}, //end initComplete
 
 		drawCallback: function () {  
@@ -985,12 +1009,59 @@ $(document).ready(function () {
 		}
 
 	}
+
 	uploadResumeForm.on('submit',function (e) {  
 		e.preventDefault()
-		console.log('upload submitted')
-		executeUploadResume();
+		console.log('upload submitted');
+
+		let source_input = $('#upload-resumes-source-hidden').val();
+
+		if (source_input == ""){
+			console.log('source is NULL');
+			uploadResumeContainer.find('.card-body')
+			.prepend(
+				displayUploadErrorAlert('Select the <b>source</b> of the resume(s)!')
+			);
+
+			setTimeout(() => {
+				clearUploadErrorAlert();
+				console.log('Deleted upload error messages');
+			}, 5000);
+
+			return
+		}
+
+		else {
+			clearUploadErrorAlert();
+		}
+
+		console.log('run upload');
+
+		// executeUploadResume();
 
 	})
+
+	const displayUploadErrorAlert = function (message) {  
+		let component = $(`
+		<div class="alert alert-danger alert-dismissible fade show upload-resumes-error-alert" role="alert" style="
+			font-size:0.8rem;
+			--bs-alert-padding-x: 0.5rem;
+			--bs-alert-padding-y: 0.5rem;
+		">
+			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="
+				padding: 0.7rem 1rem;
+			"></button>
+		</div>
+		`)
+
+		component.prepend(message)
+
+		return component.prop('outerHTML')
+	}
+
+	const clearUploadErrorAlert = function () {  
+		$('.upload-resumes-error-alert').remove()
+	}
 
 	// when clicked "clear all" button
 	uploadResumeClear.on('click',function (e) {  
@@ -1019,6 +1090,11 @@ $(document).ready(function () {
 			}
 		)();
 
+	})
+
+	// update source hidden input for every change in upload modal's source input
+	$("#upload-resumes-source-select").on('change',function (event) {  
+		$('#upload-resumes-source-hidden').val(event.target.value)
 	})
 
 	// ---------------------------- PARSE NEW RESUME ---------------------------------------

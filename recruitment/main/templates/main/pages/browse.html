@@ -126,19 +126,34 @@
                             <!-- upload resumes container -->
                             <div class="card-body">
                                 <!-- no uploaded file alert -->
-                                <div class="alert alert-danger alert-dismissible fade show d-none" role="alert" style="
+                                <div class="alert alert-danger alert-dismissible fade show upload-resumes-error-alert d-none" role="alert" style="
                                     font-size:0.8rem;
                                     --bs-alert-padding-x: 0.5rem;
                                     --bs-alert-padding-y: 0.5rem;
                                 ">
-                                    No files are chosen yet! Please choose file(s) before uploading.
+                                    Overwrite this error message!
                                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="
                                         padding: 0.7rem 1rem;
                                     "></button>
                                 </div>
                                 
+                                <div class="row justify-content-center mb-4">
+                                    <div class="row w-50">
+                                        <label class="col-sm-4 col-form-label col-form-label-sm" for="-hidden-select">Source</label>
+                                        <div class="col-sm-8">
+                                            <select id="upload-resumes-source-select" class="form-select form-select-sm" aria-label=".form-select-sm example">
+                                                <option selected value="">Open this select menu</option>
+                                                {% for source in source %}
+                                                    <option value="{{source.id}}">{{source.source|title}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <!-- upload file content -->
                                 <div id="upload-resumes-content" class="mb-4" style="font-size:0.85rem;max-height:30vh;overflow-y:auto">
+
                                     <!-- no files (template) -->
                                     <div id="upload-resumes-alert" class="text-secondary">Drag and drop files here <span class="fst-italic">OR</span></div>
                                     
@@ -154,9 +169,10 @@
                                 <!-- upload resumes buttons -->
                                 <form id="upload-resume-form" action="{% url 'main:candidate.resume.create' %}" method="post" enctype="multipart/form-data">
                                     <div class="d-flex justify-content-center gap-3">
+                                        <input id="upload-resumes-source-hidden" name="source" type="hidden" />
                                         <div>
-                                            <input id="upload-resumes-input" name="submission" class="invisible position-absolute" type="file" multiple accept="pdf" />
-                                            <label class="btn btn-sm btn-success btn-theme" for="upload-resumes-input">Choose file(s)</label>
+                                            <input id="upload-resumes-submission" name="submission" class="invisible position-absolute" type="file" multiple accept="pdf" />
+                                            <label class="btn btn-sm btn-success btn-theme" for="upload-resumes-submission">Choose file(s)</label>
                                         </div>
                                         <button id="upload-resume-clear" type="button" class="btn btn-danger btn-sm d-none">Clear All</button>
                                         <button id="upload-and-parse-resume" type="button" class="btn btn-secondary btn-sm" data-bs-target="#parseNewResumeModal" data-bs-toggle="modal">Upload and Parse</button>

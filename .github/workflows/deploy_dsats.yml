@@ -23,10 +23,9 @@ jobs:
           python-version: '3.9'
 
       - name: Create and start virtual environment
-        working-directory: 'recruitment'
         run: |
-          python -m venv antvenv
-          source antvenv/bin/activate
+          python -m venv venv
+          source venv/bin/activate
       
       - name: Install dependencies
         run: pip install -r requirements.txt

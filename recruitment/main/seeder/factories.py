@@ -15,7 +15,7 @@ dict_status = {
     'prescreening:pending':'pending',
     'prescreening:send instruction':'pending instruction',
     'prescreening:pending submission':'pending response',
-    # 'prescreening:assessment submitted':'ready for validation', not needed
+    'prescreening:assessment submitted':'ready for validation', #not needed
     # 'prescreening:hackerrank passed':'Passed',
     # 'prescreening:hackerrank failed':'Failed',
     'prescreening:proceed':'proceed',

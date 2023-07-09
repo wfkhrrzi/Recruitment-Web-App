@@ -29,6 +29,9 @@ jobs:
       
       - name: Install dependencies
         run: pip install -r requirements.txt
+
+      - name: Collect static
+        run: python manage.py collectstatic
         
       # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
       
@@ -60,4 +63,5 @@ jobs:
         with:
           app-name: 'dsats'
           slot-name: 'Production'
+          startup-command: 'gunicorn --bind=0.0.0.0:8080 --timeout 600 --chdir recruitment recruitment.wsgi'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_7891F2410FAB4628B8B8239C1DF287BC }}

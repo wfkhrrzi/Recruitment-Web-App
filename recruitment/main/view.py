@@ -80,8 +80,8 @@ class BrowseIndex(CustomLoginRequired, View):
                 pending_initial_screening=Count(
                     'id',
                     filter=
-                        Q(initialscreening__status__isnull=False) & 
-                        ~Q(initialscreening__status__codename="initscreening:proceed") & 
+                        # Q(initialscreening__status__isnull=False) & 
+                        ~Q(initialscreening__status__codename__in=["initscreening:selected","initscreening:not selected"]) & 
                         Q(prescreening__status__isnull=True) &
                         Q(cbi__status__isnull=True)
                 ),
@@ -133,6 +133,8 @@ class BrowseIndex(CustomLoginRequired, View):
                     # name, date
                     if dt_attr == 'name':
                         candidates = candidates.filter(**{f"{dt_attr}__contains":dt_filter_val})
+                    elif dt_attr == 'gpt_score':
+                        candidates = candidates.filter(**{f"{dt_attr}__gte":float(dt_filter_val)})
                     elif dt_attr == 'date':
                         candidates = candidates.filter(**{f"{dt_attr}":datetime.strptime(dt_filter_val,'%Y-%m-%d').date()})
                     else:
@@ -165,6 +167,7 @@ class BrowseIndex(CustomLoginRequired, View):
             'id',
             'name',
             'date',
+            'gpt_score',
             new_applicant=Case(
                 When(Q(date__range=(start_of_week,today)),then=Value(True)),
                 default=Value(False)

@@ -4,7 +4,7 @@ from django.views import View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from main.auth import CustomLoginRequired
 from main.utils import return_json
-from main.models import Candidate, CandidateResume, ParserConfiguration
+from main.models import Candidate, CandidateResume, ParserConfiguration, Source
 from django.core.paginator import Paginator, EmptyPage
 from django.core import serializers
 from main.forms import ResumeSubmissionForm
@@ -82,6 +82,8 @@ class CandidateResumeCreate(CustomLoginRequired,View):
 
         files = request.FILES.getlist('submission') or request.FILES.getlist('submission[]') or None
 
+        source = request.POST.get('source',None)
+
         # return JsonResponse({'POST':request.POST,'FILES':request.FILES.get('submission').name})
         
         # handle missing submission
@@ -89,6 +91,14 @@ class CandidateResumeCreate(CustomLoginRequired,View):
             response = JsonResponse({'submission':'submission are required'})
             response.status_code = 400
             return response
+        
+        # handle missing source
+        if source == None:
+            response = JsonResponse({'source':'Source are required'})
+            response.status_code = 400
+            return response
+        else:
+            source = Source.objects.get(id=int(source))
         
         form_errors = dict()
 
@@ -102,6 +112,7 @@ class CandidateResumeCreate(CustomLoginRequired,View):
                     buffer.write(chunk)
                 ps_obj.submission = buffer.getvalue()
             
+            ps_obj.source = source
             ps_obj.created_by = request.user
             ps_obj.save()
 
@@ -118,7 +129,7 @@ class CandidateResumeCreate(CustomLoginRequired,View):
 
         if return_json(request):
             return JsonResponse({
-                'prescreening_submission':'success',
+                'candidate_resume_submission':'success',
                 'errors':form_errors,
             })
 

@@ -19,8 +19,8 @@ steps:
     displayName: "Setting Python version"
     inputs:
       versionSpec: '3.9'
-      # architecture: 'x64'
-      addToPath: true
+      architecture: 'x64'
+      # addToPath: true
 
   # Step 1, Make a venv, activate, install requirements, run collectstatic
   - script: |

@@ -3,5 +3,8 @@
 {% block sidebar %}{% endblock sidebar %} <!-- overridden so does not display sidebar -->
 
 {% block content %}
-<div></div>
+<div style="height: calc(100vh - 50px);" class="d-flex flex-column justify-content-center align-items-center">
+    <p>This is a home page</p>
+    <p>Head to <a href="{% url 'main:browse.index' %}">Candidates</a> to browse candidates</p>
+</div>
 {% endblock content %}

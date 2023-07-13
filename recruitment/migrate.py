@@ -61,6 +61,7 @@ def migrate_data():
                 resume = CandidateResume(submission=open(directory+'/'+file,'rb').read(), filename=file, is_parsed=True)
                 resume.save()
                 
+                candidate.cv_link = file
                 candidate.candidate_resume = resume
 
                 break

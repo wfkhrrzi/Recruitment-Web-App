@@ -186,6 +186,7 @@ class BrowseIndex(CustomLoginRequired, View):
                 default=Value(None)
             ),
             overall_status_=F('overall_status__status'),
+            overall_status_codename=F('overall_status__codename'),
             category_=F('category__category'),
             source_=F('source__source'),
             gpt_status_=F('gpt_status__status'),

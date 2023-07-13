@@ -137,7 +137,7 @@ class BrowseIndex(CustomLoginRequired, View):
                     elif dt_attr == 'gpt_score':
                         candidates = candidates.filter(**{f"{dt_attr}__gte":float(dt_filter_val)})
                     elif dt_attr == 'date':
-                        candidates = candidates.filter(**{f"{dt_attr}":datetime.strptime(dt_filter_val,'%Y-%m-%d').date()})
+                        candidates = candidates.filter(**{f"{dt_attr}__gte":datetime.strptime(dt_filter_val,'%Y-%m-%d').date()})
                     else:
                         print(dt_attr)
                         dt_attr = dt_attr.rsplit('_',1)[0]

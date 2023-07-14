@@ -6,7 +6,7 @@ submission_files/
 staticfiles/
 migrate conditions.txt
 .prettierrc
-.ipynb
+*.ipynb
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

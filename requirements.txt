@@ -13,3 +13,4 @@ django-celery-results
 uvicorn
 gunicorn
 whitenoise
+django-session-security

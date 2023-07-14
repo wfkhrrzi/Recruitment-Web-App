@@ -29,6 +29,7 @@ steps:
       python3.9 -m pip install --upgrade pip
       pip install -r requirements.txt
       echo "Dependencies installation completed"
+      cd recruitment
       python3.9 manage.py collectstatic
       echo "Collectstatic completed"      
     workingDirectory: "$(System.DefaultWorkingDirectory)"

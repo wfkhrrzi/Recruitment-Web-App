@@ -250,7 +250,6 @@ $(document).ready(function () {
 			{
 				targets: -3,
 				createdCell: function (td, cellData, rowData, row, col) {
-					console.log(td)
 					if (rowData.overall_status_.includes('not')) {
 						$(td).css('color', 'white')
 						$(td).css('background-color', 'red')
@@ -489,8 +488,11 @@ $(document).ready(function () {
 			});
 
 			$('#gpt-score-thre').addClass('ms-3').append(`
-				<label class="fw-medium" style="font-size:0.8rem;margin:0;">GPT Threshold: <span id="gpt-score-thre-value" >${init_gpt_score}</span>%</label>
-				<input type="range" class="form-range" value="${init_gpt_score}">
+				<div class="form-check form-switch">
+					<input class="form-check-input" type="checkbox" role="switch" id="gpt-score-toggle" checked>
+					<label class="form-check-label fw-medium" for="gpt-score-toggle" style="font-size:0.8rem;margin:0;">GPT Threshold: <span id="gpt-score-thre-value" >${init_gpt_score}</span>%</label>
+				</div>
+				<input id="gpt-score-range" type="range" class="form-range" value="${init_gpt_score}">
 			`)
 			.find('input[type="range"]').on('input change',function () {  
 				$(this).attr('value',this.value);
@@ -499,6 +501,25 @@ $(document).ready(function () {
 				// api call to filter table based on gpt score
 				console.log('threshold value:',this.value)
 				api.column('gpt_score:name').search(this.value).draw()		
+			})
+			
+			$('#gpt-score-toggle').on('change',function () {  
+				if($(this).prop('checked')) {
+					// filter on
+					$('#gpt-score-range').prop('disabled',false)
+					
+					api.column('gpt_score:name').search( 
+						$('#gpt-score-range').attr('value')
+					).draw()		
+				}
+				else {
+					// filter on
+					$('#gpt-score-range').prop('disabled',true)
+					
+					api.column('gpt_score:name').search(0).draw()		
+				}
+
+
 			})
 
 		}, //end initComplete
@@ -758,8 +779,6 @@ $(document).ready(function () {
 	const uploadResumeSubmit = $('#upload-resume-submit',uploadResumeForm);
 	const uploadResumeDefaultView = $('#upload-resumes-alert');
 	var isUploadSuccess = false;
-
-	console.log(uploadResumeForm.get(0))
 
 	// object to manipulate input[type='file']
 	const uploadResumeFileInputObj = {

@@ -39,4 +39,5 @@ def logout(request):
 class CustomLoginView(LoginView):
     template_name = 'admin/login.html'
     next_page = reverse_lazy('main:index')
+    success_url = reverse_lazy('main:index')
     redirect_authenticated_user = True

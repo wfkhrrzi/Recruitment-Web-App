@@ -426,6 +426,11 @@ class InitialScreeningUpdate(CustomLoginRequired,View):
             return PrescreeningCreate.post(prescreening_request)
         
         else:
+
+            # update overall status
+            initial_screening.candidate.overall_status = initial_screening.status
+            initial_screening.candidate.save()
+
             if return_json(request):
                 return JsonResponse({
                     'initial_screening:update':'success',

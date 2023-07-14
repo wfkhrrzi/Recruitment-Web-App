@@ -71,7 +71,7 @@ class CBICreate(CustomLoginRequired,View):
 
         cbi.save()
         
-        candidate.overall_status = Status.objects.get(codename='cbi:ongoing')
+        candidate.overall_status = cbi.status
         candidate.save()
 
         if return_json(request):
@@ -114,6 +114,9 @@ class CBIScheduleCreate(CustomLoginRequired,View): # mail functionality coming s
         #     return 
         
         cbischedule.save()
+
+        cbi.candidate.overall_status = cbischedule.status
+        cbi.candidate.save()
         
         if return_json(request):
             return JsonResponse({
@@ -311,6 +314,9 @@ class CBIUpdate(CustomLoginRequired,View): # mail functionality coming soon
 
         cbi.last_modified_by = request.user
         cbi.save()
+
+        cbi.candidate.overall_status = cbi.status
+        cbi.candidate.save()
             
         if return_json(request):
             return JsonResponse({

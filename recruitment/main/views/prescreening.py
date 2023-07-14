@@ -71,7 +71,7 @@ class PrescreeningCreate(CustomLoginRequired,View):
         
         prescreening.save()
         
-        candidate.overall_status = Status.objects.get(codename='prescreening:ongoing')
+        candidate.overall_status = prescreening.status
         candidate.save()
             
         if return_json(request):
@@ -109,6 +109,9 @@ class PrescreeningInstructionSent(CustomLoginRequired,View): # mail functionalit
 
         prescreening.last_modified_by = request.user
         prescreening.save()
+
+        prescreening.candidate.overall_status = prescreening.status
+        prescreening.candidate.save()
             
         if return_json(request):
             return JsonResponse({
@@ -198,6 +201,9 @@ class PrescreeningUpdate(CustomLoginRequired,View): # mail functionality coming 
             return CBICreate.post(cbi_request)
         
         else:
+            prescreening.candidate.overall_status = prescreening.status
+            prescreening.candidate.save()
+            
             if return_json(request):
                 return JsonResponse({
                     'prescreening:update':'success',

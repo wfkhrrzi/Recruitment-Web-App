@@ -246,6 +246,25 @@ $(document).ready(function () {
 
 		],
 		order: [[1, 'asc']],
+		columnDefs: [ 
+			{
+				targets: -3,
+				createdCell: function (td, cellData, rowData, row, col) {
+					console.log(td)
+					if (rowData.overall_status_.includes('not')) {
+						$(td).css('color', 'white')
+						$(td).css('background-color', 'red')
+					}
+					else if (rowData.overall_status_.includes('selected') || rowData.overall_status_.includes('recommended') || rowData.overall_status_.includes('proceed')) {
+						$(td).css('color', 'white')
+						$(td).css('background-color', 'green')
+					} 
+					else {
+						$(td).css('background-color', 'yellow')
+					}
+				}
+			} 
+		],
 		columns: [
 			{
 				className: 'dt-control',
@@ -430,10 +449,13 @@ $(document).ready(function () {
 				},
 			},
 			{ 
-				data: "gpt_status_", 
+				data: "overall_status_", 
 				width:"15%",
-				render: function (data) {  
-					return gpt_status_badge(data);
+				render: function (data,type,row) {  
+					stage = row.overall_status_codename.split(':')[0]
+					stage = stage == 'initscreening' ? 'Initial Screening' : stage == 'prescreening' ? 'Prescreening' :  stage == 'cbi' ? 'CBI' : 'Error'
+
+					return `${data} @ ${stage}`;
 				}
 			},
 			{

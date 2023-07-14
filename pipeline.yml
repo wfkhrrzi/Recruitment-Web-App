@@ -35,12 +35,12 @@ steps:
     workingDirectory: "$(System.DefaultWorkingDirectory)"
     displayName: "Install requirements"
     
-  # - task: CopyFiles@2
-  #   displayName: "Copy antvenv into recruitment"
-  #   inputs:
-  #     SourceFolder: '$(System.DefaultWorkingDirectory)'  # Root folder
-  #     Contents: 'requirements.txt'  # File to copy
-  #     TargetFolder: '$(System.DefaultWorkingDirectory)/recruitment'  # Destination subfolder
+  - task: CopyFiles@2
+    displayName: "Copy antvenv into recruitment"
+    inputs:
+      SourceFolder: '$(System.DefaultWorkingDirectory)'  # Root folder
+      Contents: 'requirements.txt'  # File to copy
+      TargetFolder: '$(System.DefaultWorkingDirectory)/recruitment'  # Destination subfolder
 
 
    # Step 2, create zip file be deployed

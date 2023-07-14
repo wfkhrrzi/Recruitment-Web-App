@@ -16,7 +16,8 @@ from datetime import datetime
 
 # Create your views here.
 def index(request):
-    return JsonResponse('Hello world',safe=False)
+    # return JsonResponse('Hello world',safe=False)
+    return render(request,'main/pages/home.html')
     
 
 class BrowseIndex(CustomLoginRequired, View):

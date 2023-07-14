@@ -57,6 +57,8 @@ AUTH_USER_MODEL = 'main.Users'
 
 LOGIN_URL = '/login'
 
+LOGIN_REDIRECT_URL = '/browse'
+
 MIDDLEWARE = [
     # 'django_grip.GripMiddleware',
     'django.middleware.security.SecurityMiddleware',

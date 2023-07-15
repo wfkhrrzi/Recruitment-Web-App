@@ -108,7 +108,7 @@ def migrate_data():
         cbi = CBI(candidate=candidate)
         cbi.status = Status.objects.get(codename='cbi:pending schedule')
 
-        if not pd.isnull(row['Remark']):
+        if not pd.isnull(row['Remark']) and row['Remark'] != "null":
             if 'salary' in row['Remark'].lower():
                 prescreening.is_proceed = True
                 prescreening.status = Status.objects.get(codename='prescreening:proceed')
@@ -120,6 +120,8 @@ def migrate_data():
                     cbi.is_proceed = False
                     cbi.status = Status.objects.get(codename='cbi:not proceed')
 
+                candidate.overall_status = cbi.status
+
                 prescreening_list.append(prescreening)
                 cbi_list.append(cbi)
 
@@ -127,6 +129,7 @@ def migrate_data():
 
                 prescreening.is_proceed = False
                 prescreening.status = Status.objects.get(codename='prescreening:not proceed')
+                candidate.overall_status = prescreening.status
 
                 prescreening_list.append(prescreening)
 
@@ -135,15 +138,15 @@ def migrate_data():
                 prescreening.status = Status.objects.get(codename='prescreening:proceed')
 
                 cbi.status = Status.objects.get(codename='cbi:pending result')
+                candidate.overall_status = cbi.status
+
                 prescreening_list.append(prescreening)
                 cbi_list.append(cbi)
 
         elif row['Joining Status'] == 'Pending Pre screen':
-            prescreening.status = Status.objects.get(codename='prescreening:proceed')
-
-        elif row['Joining Status'] == 'Pending Pre screen':
             prescreening.status = Status.objects.get(codename='prescreening:pending')
-            
+            candidate.overall_status = prescreening.status
+
             prescreening_list.append(prescreening)
 
         elif row['Joining Status'] == 'Not recommended':
@@ -151,6 +154,7 @@ def migrate_data():
             prescreening.status = Status.objects.get(codename='prescreening:proceed')
             cbi.is_proceed = False
             cbi.status = Status.objects.get(codename='cbi:not proceed')
+            candidate.overall_status = cbi.status
 
             prescreening_list.append(prescreening)
             cbi_list.append(cbi)
@@ -160,6 +164,7 @@ def migrate_data():
             prescreening.status = Status.objects.get(codename='prescreening:proceed')
             cbi.is_proceed = True
             cbi.status = Status.objects.get(codename='cbi:proceed')
+            candidate.overall_status = cbi.status
 
             prescreening_list.append(prescreening)
             cbi_list.append(cbi)

@@ -266,10 +266,21 @@ $(document).ready(function () {
 		],
 		columns: [
 			{
-				className: 'dt-control',
+				className: 'dt-resume',
                 orderable: false,
-                data: null,
-                defaultContent: '',
+                // width: "5%",
+                searchable: false,
+                data: "is_resume",
+				render: function (data,type,row) {
+					if (data){
+						return `
+							<span><i class="fa-solid fa-file fa-lg"></i></span>
+						`
+					}
+					else {
+						return ''
+					}
+				}
 			},
 			{ data: "name", width:"15%", render: function (data,type,row) {
 				out = $(`
@@ -565,9 +576,13 @@ $(document).ready(function () {
 			});
 
 			// Linkable row / Open respective resume when clicking a candidate item 
-			$('tr',api.table().body()).css('cursor','pointer').on('click',function (row_i,element) {
+			// $('tr',api.table().body()).css('cursor','pointer').on('click',function (row_i,element) {
+			$('td.dt-resume',api.table().body()).css('cursor','pointer').on('click', function (e) {
+				
+				e.stopPropagation()
 
-				let data = api.table().row(this).data()
+				const tr = $(this).closest('tr');
+				let data = api.table().row(tr).data()
 	
 				// window.location.href = api.row(row_i).data()['href'];
 					
@@ -682,11 +697,13 @@ $(document).ready(function () {
 
 
 			// Add event listener for opening and closing child rows (remarks)
-			$('td.dt-control',api.table().body()).on('click', function (e) {
+			// $('td.dt-control',api.table().body()).on('click', function (e) {
+			$('tr',api.table().body()).css('cursor','pointer').on('click',function (e) {
+
 				e.stopPropagation()
 
 				// current row
-				const tr = $(this).closest('tr');
+				const tr = $(this);
 				const tr_index = $(tr).index()
 				const row = api.table().row(tr);
 		 

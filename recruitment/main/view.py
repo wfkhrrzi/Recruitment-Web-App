@@ -218,7 +218,11 @@ class BrowseIndex(CustomLoginRequired, View):
                 default=Concat(
                     Value(reverse('main:initscreening.index.default')), F('initialscreening_id'), output_field=CharField(),
                 )
-            )
+            ),
+            is_resume=Case(
+                When(Q(candidate_resume__isnull=False),then=Value(True)),
+                default=Value(False)
+            ),
         )
 
         # sorting

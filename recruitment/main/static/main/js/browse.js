@@ -266,10 +266,21 @@ $(document).ready(function () {
 		],
 		columns: [
 			{
-				className: 'dt-control',
+				className: 'dt-resume',
                 orderable: false,
-                data: null,
-                defaultContent: '',
+                // width: "5%",
+                searchable: false,
+                data: "is_resume",
+				render: function (data,type,row) {
+					if (data){
+						return `
+							<span><i class="fa-solid fa-file fa-lg"></i></span>
+						`
+					}
+					else {
+						return ''
+					}
+				}
 			},
 			{ data: "name", width:"15%", render: function (data,type,row) {
 				out = $(`
@@ -565,41 +576,38 @@ $(document).ready(function () {
 			});
 
 			// Linkable row / Open respective resume when clicking a candidate item 
-			$('tr',api.table().body()).each(function (row_i,element) {
-
-				let data = api.table().row(this).data()
-
-				$(this)
-				.on('click', function() {
-	
-					// window.location.href = api.row(row_i).data()['href'];
-					
-					console.log(data.id)
-					$.ajax({
-						url: get_open_resume_url+data.id,  // Replace with the URL to your Django view
-						type: 'GET',
-						xhrFields: {
-							responseType: 'blob'
-						},
-						// responseType: 'arraybuffer',  // Use 'arraybuffer' to handle binary data
-						// dataType: 'blob',  // Use 'blob' data type to handle binary data
-						success: function(data) {
-
-							var fileUrl = URL.createObjectURL(data);
+			// $('tr',api.table().body()).css('cursor','pointer').on('click',function (row_i,element) {
+			$('td.dt-resume',api.table().body()).css('cursor','pointer').on('click', function (e) {
 				
-							// // Set the iframe source to display the PDF
-							$(openResumeModal._element).find('iframe').attr('src', fileUrl);
+				e.stopPropagation()
 
-							openResumeModal.toggle()
-
-						},
-						error: function(xhr, status, error) {
-							console.error('Error retrieving PDF:', error);
-						}
-					});
+				const tr = $(this).closest('tr');
+				let data = api.table().row(tr).data()
 	
-				})
-				.css('cursor','pointer');
+				// window.location.href = api.row(row_i).data()['href'];
+					
+				$.ajax({
+					url: get_open_resume_url+data.id,  // Replace with the URL to your Django view
+					type: 'GET',
+					xhrFields: {
+						responseType: 'blob'
+					},
+					// responseType: 'arraybuffer',  // Use 'arraybuffer' to handle binary data
+					// dataType: 'blob',  // Use 'blob' data type to handle binary data
+					success: function(data) {
+
+						var fileUrl = URL.createObjectURL(data);
+			
+						// // Set the iframe source to display the PDF
+						$(openResumeModal._element).find('iframe').attr('src', fileUrl);
+
+						openResumeModal.toggle()
+
+					},
+					error: function(xhr, status, error) {
+						console.error('Error retrieving PDF:', error);
+					}
+				});
 	
 			});
 
@@ -689,11 +697,13 @@ $(document).ready(function () {
 
 
 			// Add event listener for opening and closing child rows (remarks)
-			$('td.dt-control',api.table().body()).on('click', function (e) {
+			// $('td.dt-control',api.table().body()).on('click', function (e) {
+			$('tr',api.table().body()).css('cursor','pointer').on('click',function (e) {
+
 				e.stopPropagation()
 
 				// current row
-				const tr = $(this).closest('tr');
+				const tr = $(this);
 				const tr_index = $(tr).index()
 				const row = api.table().row(tr);
 		 

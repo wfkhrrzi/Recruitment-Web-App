@@ -5,6 +5,7 @@ import pandas as pd
 from io import BytesIO
 from datetime import datetime
 import random
+from tqdm import tqdm
 
 # Set up Django environment
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "recruitment.settings")
@@ -29,7 +30,7 @@ def migrate_data():
     initialscreening_eval_list = []
     prescreening_list = []
     cbi_list = []
-    for index, row in df.iterrows():
+    for index, row in tqdm(df.iterrows(), total=df.shape[0]):
 
         try:
             source = Source.objects.get(source=row['Source'])
@@ -71,7 +72,7 @@ def migrate_data():
         is_proceed = bool(row['Selection']) if not pd.isnull(row['Selection']) else None
         is_hm_proceed = None if is_proceed == None else False if row[7:20].isna().all() and is_proceed else True
         
-        is_status = Status.objects.get(codename='initscreening:selected' if is_proceed else 'initscreening:not selected') if is_proceed != None else None
+        is_status = Status.objects.get(codename='initscreening:selected' if is_proceed == True else 'initscreening:not selected' if is_proceed == False else 'initscreening:pending')
         is_hm_status = Status.objects.get(codename='initscreening:selected' if is_hm_proceed else 'initscreening:not selected') if is_hm_proceed != None else None
 
         initialscreening = InitialScreening(
@@ -108,8 +109,11 @@ def migrate_data():
         cbi = CBI(candidate=candidate)
         cbi.status = Status.objects.get(codename='cbi:pending schedule')
 
-        # if not pd.isnull(row['Remark']) and row['Remark'] != "null":
-        if not pd.isnull(row['Remark']) and 'salary' in row['Remark'].lower():
+        if pd.isnull(row['Selection']):
+            
+            candidate.overall_status = initialscreening.status
+        
+        elif not pd.isnull(row['Remark']) and 'salary' in row['Remark'].lower():
             prescreening.is_proceed = True
             prescreening.status = Status.objects.get(codename='prescreening:proceed')
 
@@ -163,7 +167,7 @@ def migrate_data():
             prescreening_list.append(prescreening)
             cbi_list.append(cbi)
 
-        elif row['Joining Status'] in ('Pending Pre screen','Hold'):
+        elif row['Joining Status'] in ('Pending Pre screen','Hold','Pending'):
             prescreening.status = Status.objects.get(codename='prescreening:pending')
             candidate.overall_status = prescreening.status
 
@@ -179,7 +183,7 @@ def migrate_data():
             prescreening_list.append(prescreening)
             cbi_list.append(cbi)
 
-        elif row['Joining Status'] in ('Recruited','Declined','Pending SP'):
+        elif row['Joining Status'] in ('Recruited','Declined ','Pending SP'):
             prescreening.is_proceed = True
             prescreening.status = Status.objects.get(codename='prescreening:proceed')
             cbi.is_proceed = True

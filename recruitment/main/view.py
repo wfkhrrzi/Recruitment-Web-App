@@ -137,7 +137,7 @@ class BrowseIndex(CustomLoginRequired, View):
                     elif dt_attr == 'gpt_score':
                         candidates = candidates.filter(**{f"{dt_attr}__gte":float(dt_filter_val)})
                     elif dt_attr == 'date':
-                        candidates = candidates.filter(**{f"{dt_attr}":datetime.strptime(dt_filter_val,'%Y-%m-%d').date()})
+                        candidates = candidates.filter(**{f"{dt_attr}__gte":datetime.strptime(dt_filter_val,'%Y-%m-%d').date()})
                     else:
                         print(dt_attr)
                         dt_attr = dt_attr.rsplit('_',1)[0]
@@ -186,6 +186,7 @@ class BrowseIndex(CustomLoginRequired, View):
                 default=Value(None)
             ),
             overall_status_=F('overall_status__status'),
+            overall_status_codename=F('overall_status__codename'),
             category_=F('category__category'),
             source_=F('source__source'),
             gpt_status_=F('gpt_status__status'),
@@ -217,7 +218,11 @@ class BrowseIndex(CustomLoginRequired, View):
                 default=Concat(
                     Value(reverse('main:initscreening.index.default')), F('initialscreening_id'), output_field=CharField(),
                 )
-            )
+            ),
+            is_resume=Case(
+                When(Q(candidate_resume__isnull=False),then=Value(True)),
+                default=Value(False)
+            ),
         )
 
         # sorting

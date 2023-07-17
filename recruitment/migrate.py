@@ -5,6 +5,7 @@ import pandas as pd
 from io import BytesIO
 from datetime import datetime
 import random
+from tqdm import tqdm
 
 # Set up Django environment
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "recruitment.settings")
@@ -29,7 +30,7 @@ def migrate_data():
     initialscreening_eval_list = []
     prescreening_list = []
     cbi_list = []
-    for index, row in df.iterrows():
+    for index, row in tqdm(df.iterrows(), total=df.shape[0]):
 
         try:
             source = Source.objects.get(source=row['Source'])
@@ -71,7 +72,7 @@ def migrate_data():
         is_proceed = bool(row['Selection']) if not pd.isnull(row['Selection']) else None
         is_hm_proceed = None if is_proceed == None else False if row[7:20].isna().all() and is_proceed else True
         
-        is_status = Status.objects.get(codename='initscreening:selected' if is_proceed else 'initscreening:not selected') if is_proceed != None else None
+        is_status = Status.objects.get(codename='initscreening:selected' if is_proceed == True else 'initscreening:not selected' if is_proceed == False else 'initscreening:pending')
         is_hm_status = Status.objects.get(codename='initscreening:selected' if is_hm_proceed else 'initscreening:not selected') if is_hm_proceed != None else None
 
         initialscreening = InitialScreening(
@@ -108,58 +109,86 @@ def migrate_data():
         cbi = CBI(candidate=candidate)
         cbi.status = Status.objects.get(codename='cbi:pending schedule')
 
-        if not pd.isnull(row['Remark']):
-            if 'salary' in row['Remark'].lower():
-                prescreening.is_proceed = True
-                prescreening.status = Status.objects.get(codename='prescreening:proceed')
-
-                if row['Joining Status'] == 'Recruited':
-                    cbi.is_proceed = True
-                    cbi.status = Status.objects.get(codename='cbi:proceed')
-                else:
-                    cbi.is_proceed = False
-                    cbi.status = Status.objects.get(codename='cbi:not proceed')
-
-                prescreening_list.append(prescreening)
-                cbi_list.append(cbi)
-
-            elif 'screen' in row['Remark'].lower() and 'interview' in row['Remark'].lower():
-
-                prescreening.is_proceed = False
-                prescreening.status = Status.objects.get(codename='prescreening:not proceed')
-
-                prescreening_list.append(prescreening)
-
-            elif 'cbi result' in row['Remark'].lower():
-                prescreening.is_proceed = True
-                prescreening.status = Status.objects.get(codename='prescreening:proceed')
-
-                cbi.status = Status.objects.get(codename='cbi:pending result')
-                prescreening_list.append(prescreening)
-                cbi_list.append(cbi)
-
-        elif row['Joining Status'] == 'Pending Pre screen':
-            prescreening.status = Status.objects.get(codename='prescreening:proceed')
-
-        elif row['Joining Status'] == 'Pending Pre screen':
-            prescreening.status = Status.objects.get(codename='prescreening:pending')
+        if pd.isnull(row['Selection']):
             
-            prescreening_list.append(prescreening)
-
-        elif row['Joining Status'] == 'Not recommended':
+            candidate.overall_status = initialscreening.status
+        
+        elif not pd.isnull(row['Remark']) and 'salary' in row['Remark'].lower():
             prescreening.is_proceed = True
             prescreening.status = Status.objects.get(codename='prescreening:proceed')
-            cbi.is_proceed = False
-            cbi.status = Status.objects.get(codename='cbi:not proceed')
+
+            if row['Joining Status'] == 'Recruited':
+                cbi.is_proceed = True
+                cbi.status = Status.objects.get(codename='cbi:proceed')
+            else:
+                cbi.is_proceed = False
+                cbi.status = Status.objects.get(codename='cbi:not proceed')
+
+            candidate.overall_status = cbi.status
 
             prescreening_list.append(prescreening)
             cbi_list.append(cbi)
 
-        elif row['Joining Status'] in ('Recruited','Declined','Pending SP'):
+        elif not pd.isnull(row['Remark']) and 'screen' in row['Remark'].lower() and 'interview' in row['Remark'].lower():
+
+            prescreening.is_proceed = False
+            prescreening.status = Status.objects.get(codename='prescreening:not proceed')
+            candidate.overall_status = prescreening.status
+
+            prescreening_list.append(prescreening)
+
+        elif not pd.isnull(row['Remark']) and 'cbi result' in row['Remark'].lower():
+            prescreening.is_proceed = True
+            prescreening.status = Status.objects.get(codename='prescreening:proceed')
+
+            cbi.status = Status.objects.get(codename='cbi:pending result')
+            candidate.overall_status = cbi.status
+
+            prescreening_list.append(prescreening)
+            cbi_list.append(cbi)
+
+        elif row['Joining Status'] == 'Pending CBI':
+            prescreening.is_proceed = True
+            prescreening.status = Status.objects.get(codename='prescreening:proceed')
+
+            cbi.status = Status.objects.get(codename='cbi:pending schedule')
+            candidate.overall_status = cbi.status
+
+            prescreening_list.append(prescreening)
+            cbi_list.append(cbi)
+
+        elif row['Joining Status'] == 'Pending HKR Result':
+            prescreening.is_proceed = True
+            prescreening.status = Status.objects.get(codename='prescreening:proceed')
+
+            cbi.status = Status.objects.get(codename='cbi:pending result')
+            candidate.overall_status = cbi.status
+
+            prescreening_list.append(prescreening)
+            cbi_list.append(cbi)
+
+        elif row['Joining Status'] in ('Pending Pre screen','Hold','Pending'):
+            prescreening.status = Status.objects.get(codename='prescreening:pending')
+            candidate.overall_status = prescreening.status
+
+            prescreening_list.append(prescreening)
+
+        elif row['Joining Status'] in ('Not Recommended','Withdraw'):
+            prescreening.is_proceed = True
+            prescreening.status = Status.objects.get(codename='prescreening:proceed')
+            cbi.is_proceed = False
+            cbi.status = Status.objects.get(codename='cbi:not proceed')
+            candidate.overall_status = cbi.status
+
+            prescreening_list.append(prescreening)
+            cbi_list.append(cbi)
+
+        elif row['Joining Status'] in ('Recruited','Declined ','Pending SP'):
             prescreening.is_proceed = True
             prescreening.status = Status.objects.get(codename='prescreening:proceed')
             cbi.is_proceed = True
             cbi.status = Status.objects.get(codename='cbi:proceed')
+            candidate.overall_status = cbi.status
 
             prescreening_list.append(prescreening)
             cbi_list.append(cbi)

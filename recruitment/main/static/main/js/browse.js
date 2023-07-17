@@ -246,12 +246,41 @@ $(document).ready(function () {
 
 		],
 		order: [[1, 'asc']],
+		columnDefs: [ 
+			{
+				targets: -3,
+				createdCell: function (td, cellData, rowData, row, col) {
+					if (rowData.overall_status_.includes('not')) {
+						$(td).css('color', 'white')
+						$(td).css('background-color', 'red')
+					}
+					else if (rowData.overall_status_.includes('selected') || rowData.overall_status_.includes('recommended') || rowData.overall_status_.includes('proceed')) {
+						$(td).css('color', 'white')
+						$(td).css('background-color', 'green')
+					} 
+					else {
+						$(td).css('background-color', 'yellow')
+					}
+				}
+			} 
+		],
 		columns: [
 			{
-				className: 'dt-control',
+				className: 'dt-resume',
                 orderable: false,
-                data: null,
-                defaultContent: '',
+                // width: "5%",
+                searchable: false,
+                data: "is_resume",
+				render: function (data,type,row) {
+					if (data){
+						return `
+							<span><i class="fa-solid fa-file fa-lg"></i></span>
+						`
+					}
+					else {
+						return ''
+					}
+				}
 			},
 			{ data: "name", width:"15%", render: function (data,type,row) {
 				out = $(`
@@ -430,10 +459,13 @@ $(document).ready(function () {
 				},
 			},
 			{ 
-				data: "gpt_status_", 
+				data: "overall_status_", 
 				width:"15%",
-				render: function (data) {  
-					return gpt_status_badge(data);
+				render: function (data,type,row) {  
+					stage = row.overall_status_codename.split(':')[0]
+					stage = stage == 'initscreening' ? 'Initial Screening' : stage == 'prescreening' ? 'Prescreening' :  stage == 'cbi' ? 'CBI' : 'Error'
+
+					return `${data} @ ${stage}`;
 				}
 			},
 			{
@@ -467,8 +499,11 @@ $(document).ready(function () {
 			});
 
 			$('#gpt-score-thre').addClass('ms-3').append(`
-				<label class="fw-medium" style="font-size:0.8rem;margin:0;">GPT Threshold: <span id="gpt-score-thre-value" >${init_gpt_score}</span>%</label>
-				<input type="range" class="form-range" value="${init_gpt_score}">
+				<div class="form-check form-switch">
+					<input class="form-check-input" type="checkbox" role="switch" id="gpt-score-toggle" checked>
+					<label class="form-check-label fw-medium" for="gpt-score-toggle" style="font-size:0.8rem;margin:0;">GPT Threshold: <span id="gpt-score-thre-value" >${init_gpt_score}</span>%</label>
+				</div>
+				<input id="gpt-score-range" type="range" class="form-range" value="${init_gpt_score}">
 			`)
 			.find('input[type="range"]').on('input change',function () {  
 				$(this).attr('value',this.value);
@@ -477,6 +512,25 @@ $(document).ready(function () {
 				// api call to filter table based on gpt score
 				console.log('threshold value:',this.value)
 				api.column('gpt_score:name').search(this.value).draw()		
+			})
+			
+			$('#gpt-score-toggle').on('change',function () {  
+				if($(this).prop('checked')) {
+					// filter on
+					$('#gpt-score-range').prop('disabled',false)
+					
+					api.column('gpt_score:name').search( 
+						$('#gpt-score-range').attr('value')
+					).draw()		
+				}
+				else {
+					// filter on
+					$('#gpt-score-range').prop('disabled',true)
+					
+					api.column('gpt_score:name').search(0).draw()		
+				}
+
+
 			})
 
 		}, //end initComplete
@@ -522,41 +576,38 @@ $(document).ready(function () {
 			});
 
 			// Linkable row / Open respective resume when clicking a candidate item 
-			$('tr',api.table().body()).each(function (row_i,element) {
-
-				let data = api.table().row(this).data()
-
-				$(this)
-				.on('click', function() {
-	
-					window.location.href = api.row(row_i).data()['href'];
-					
-					// console.log(data.id)
-					// $.ajax({
-					// 	url: get_open_resume_url+data.id,  // Replace with the URL to your Django view
-					// 	type: 'GET',
-					// 	xhrFields: {
-					// 		responseType: 'blob'
-					// 	},
-					// 	// responseType: 'arraybuffer',  // Use 'arraybuffer' to handle binary data
-					// 	// dataType: 'blob',  // Use 'blob' data type to handle binary data
-					// 	success: function(data) {
-
-					// 		var fileUrl = URL.createObjectURL(data);
+			// $('tr',api.table().body()).css('cursor','pointer').on('click',function (row_i,element) {
+			$('td.dt-resume',api.table().body()).css('cursor','pointer').on('click', function (e) {
 				
-					// 		// // Set the iframe source to display the PDF
-					// 		$(openResumeModal._element).find('iframe').attr('src', fileUrl);
+				e.stopPropagation()
 
-					// 		openResumeModal.toggle()
-
-					// 	},
-					// 	error: function(xhr, status, error) {
-					// 		console.error('Error retrieving PDF:', error);
-					// 	}
-					// });
+				const tr = $(this).closest('tr');
+				let data = api.table().row(tr).data()
 	
-				})
-				.css('cursor','pointer');
+				// window.location.href = api.row(row_i).data()['href'];
+					
+				$.ajax({
+					url: get_open_resume_url+data.id,  // Replace with the URL to your Django view
+					type: 'GET',
+					xhrFields: {
+						responseType: 'blob'
+					},
+					// responseType: 'arraybuffer',  // Use 'arraybuffer' to handle binary data
+					// dataType: 'blob',  // Use 'blob' data type to handle binary data
+					success: function(data) {
+
+						var fileUrl = URL.createObjectURL(data);
+			
+						// // Set the iframe source to display the PDF
+						$(openResumeModal._element).find('iframe').attr('src', fileUrl);
+
+						openResumeModal.toggle()
+
+					},
+					error: function(xhr, status, error) {
+						console.error('Error retrieving PDF:', error);
+					}
+				});
 	
 			});
 
@@ -646,11 +697,13 @@ $(document).ready(function () {
 
 
 			// Add event listener for opening and closing child rows (remarks)
-			$('td.dt-control',api.table().body()).on('click', function (e) {
+			// $('td.dt-control',api.table().body()).on('click', function (e) {
+			$('tr',api.table().body()).css('cursor','pointer').on('click',function (e) {
+
 				e.stopPropagation()
 
 				// current row
-				const tr = $(this).closest('tr');
+				const tr = $(this);
 				const tr_index = $(tr).index()
 				const row = api.table().row(tr);
 		 
@@ -713,6 +766,16 @@ $(document).ready(function () {
 
 	});
 
+	// trigger fullscreen modal
+	$(openResumeModal._element).find('.modal-header').find('button:eq(0)').on('click',function () {  
+		$(openResumeModal._element).find('.modal-dialog').toggleClass('modal-fullscreen')
+	})
+	
+	$(openResumeModal._element).on('hide.bs.modal',function () {  
+		$(openResumeModal._element).find('.modal-dialog').removeClass('modal-fullscreen')
+	})
+
+
 
 		
 	/* ------------------- UPLOAD FILE ------------------------- */
@@ -726,8 +789,6 @@ $(document).ready(function () {
 	const uploadResumeSubmit = $('#upload-resume-submit',uploadResumeForm);
 	const uploadResumeDefaultView = $('#upload-resumes-alert');
 	var isUploadSuccess = false;
-
-	console.log(uploadResumeForm.get(0))
 
 	// object to manipulate input[type='file']
 	const uploadResumeFileInputObj = {
@@ -1106,60 +1167,6 @@ $(document).ready(function () {
 	const jobDescInput = $('#parse-resumes-jobDesc');
 	const skillsInput = $('#parse-resumes-skills');
 	const parserUpdateCheckbox = $('#parse-config-update-checkbox')
-// 	const jobRole = 'data scientist'
-// 	const jobDesc = `This is for example is our JD for experienced data scientist:\n
-// Responsible for design, planning, and coordinating the implementation of Data Science work activities in the Group Digital with established structured processes and procedures to support PETRONAS's digital agenda.\n
-// 1) Technical & Professional Excellence
-
-// Responsible for ensuring data required for analytic models is of required quality and models are constructed to standards and deployed effectively.
-// Implement data science industry best practices, relevant cutting-edge technology, and innovation in projects to ensure the right solutions fulfill the business requirements.
-
-// 2) Technical/Skill Leadership & Solutioning
-
-// Responsible for developing appropriate technical solutions to address business pain points with insights and recommendations.
-// Implement an established analytics strategy by adopting the right technologies and technical requirements when executing projects to ensure business value generation.
-// Execute operational excellence through continuous technical and process improvement initiatives within projects to improve operations efficiency and effectiveness within own activity & projects.
-
-// 3) Technical Expertise
-
-// Track and follow up with relevant parties to ensure Technical Excellence Programmes are successfully deployed and integrated into work processes, documents, policies, and guidelines.
-// Participate in a community of practices and network with internal and external technical experts by identifying solutions to common problems and capturing and sharing existing data science knowledge for continuous excellence.
-
-
-// Be part of our DS team in at least one of the following areas:
-
-// Machine Learning
-
-// Roles: Design analytics solutions for business problems; develop, evaluate, optimize, deploy and maintain models.
-
-// Tech stack: ML Algorithms, Python, SQL, Spark, Git, Cloud Services, Deep Learning frameworks, MLOps, etc
-
-
-// Natural Language Processing
-
-// Roles: Design text analytics solutions for business problems; develop, evaluate, optimize, deploy and maintain text processing and analytics solutions.
-
-// Tech stack: Python, SQL, Git, NLTK, Deep Learning frameworks, MLOps, Text analytics, NLP, NLU, NLG, Language Models, etc
-
-
-// Computer Vision
-
-// Roles: Design Image and video analytics solutions for business problems; develop, evaluate, optimize, deploy and maintain solutions
-
-// Tech stack: Tensorflow, OpenCV, Fastai, Pytorch, MLFlow, Spark, MLlib Python, SQL, Git, Deep Learning frameworks, MLOps, etc
-
-
-// Optimization / Simulation
-
-// Roles: Design optimization/simulation analytics solutions for business problems; develop, evaluate, optimize, deploy and maintain solutions
-
-// Tech stack: mathematical/process models, Simulation modeling, AnyLogic, Simio, mixed-integer programming (linear and nonlinear), Python, Pyomo, Gurobi solver, MLOps, etc.
-
-// What are the requirements?
-
-// Bachelor's or Master's degree in Data Science, Mathematics, Engineering, Computer Science, or in any other discipline
-// At least 2 years of relevant experience covering advanced statistical analysis and machine learning.
-// Good in statistical and scripting programming languages (such as R, Python, and MATLAB)`
 
 	// parseNewResumeModal.toggle()
 

@@ -14,3 +14,4 @@ uvicorn
 gunicorn
 whitenoise
 django-session-security
+tqdm

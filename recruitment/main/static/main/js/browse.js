@@ -583,9 +583,7 @@ $(document).ready(function () {
 
 				const tr = $(this).closest('tr');
 				let data = api.table().row(tr).data()
-	
-				// window.location.href = api.row(row_i).data()['href'];
-					
+						
 				$.ajax({
 					url: get_open_resume_url+data.id,  // Replace with the URL to your Django view
 					type: 'GET',
@@ -706,57 +704,60 @@ $(document).ready(function () {
 				const tr = $(this);
 				const tr_index = $(tr).index()
 				const row = api.table().row(tr);
+
+				window.location.href = row.data()['href'];
+
 		 
-				if (row.child.isShown()) {
-					// This row is already open - close it
-					row.child.hide();
-					tr.removeClass('shown');
-				} else {
-					// Open this row
-					row.child(table_child_row(row.data())).show();
-					tr.addClass('shown');
+				// if (row.child.isShown()) {
+				// 	// This row is already open - close it
+				// 	row.child.hide();
+				// 	tr.removeClass('shown');
+				// } else {
+				// 	// Open this row
+				// 	row.child(table_child_row(row.data())).show();
+				// 	tr.addClass('shown');
 
-					// change event to save edited remarks
-					$('.table-remarks',row.child()).each(function (index,element) {  
-						// console.log(this)
-						$(this).on('change',function (e) { 
+				// 	// change event to save edited remarks
+				// 	$('.table-remarks',row.child()).each(function (index,element) {  
+				// 		// console.log(this)
+				// 		$(this).on('change',function (e) { 
 
-							let dataset = e.target.dataset
-							data = {
-								remarks: $(this).val(),
-								[dataset.stage] : dataset.stageId
-							}
+				// 			let dataset = e.target.dataset
+				// 			data = {
+				// 				remarks: $(this).val(),
+				// 				[dataset.stage] : dataset.stageId
+				// 			}
 
-							$.ajax({
-								type: "post",
-								url: dataset.formAction,
-								data: data,
-								headers: {
-									Accept: "application/json",
-								},
-								success: function (response) {
-									console.log(response)
-								},
-								error: function(a,b,c) {
-									console.log(Error(a))
-								}
-							});
+				// 			$.ajax({
+				// 				type: "post",
+				// 				url: dataset.formAction,
+				// 				data: data,
+				// 				headers: {
+				// 					Accept: "application/json",
+				// 				},
+				// 				success: function (response) {
+				// 					console.log(response)
+				// 				},
+				// 				error: function(a,b,c) {
+				// 					console.log(Error(a))
+				// 				}
+				// 			});
 							
-						})
-					})
-				}
+				// 		})
+				// 	})
+				// }
 				
-				// close other opened rows
-				const tbody = $(this).closest('tbody')
+				// // close other opened rows
+				// const tbody = $(this).closest('tbody')
 				
-				$(tbody).children().each(function (index,element) {  
-					const row = api.table().row(this)
-					if (index !== tr_index & row.child.isShown()) {
-						console.log(`row ${index} has dt-hasChild`)
-						row.child.hide();
-						$(this).removeClass('shown');
-					}
-				});
+				// $(tbody).children().each(function (index,element) {  
+				// 	const row = api.table().row(this)
+				// 	if (index !== tr_index & row.child.isShown()) {
+				// 		console.log(`row ${index} has dt-hasChild`)
+				// 		row.child.hide();
+				// 		$(this).removeClass('shown');
+				// 	}
+				// });
 
 
 			});			

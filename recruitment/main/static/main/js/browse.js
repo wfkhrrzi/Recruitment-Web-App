@@ -248,20 +248,20 @@ $(document).ready(function () {
 		order: [[1, 'asc']],
 		columnDefs: [ 
 			{
-				targets: -3,
-				createdCell: function (td, cellData, rowData, row, col) {
-					if (rowData.overall_status_.includes('not')) {
-						$(td).css('color', 'white')
-						$(td).css('background-color', 'red')
-					}
-					else if (rowData.overall_status_.includes('selected') || rowData.overall_status_.includes('recommended') || rowData.overall_status_.includes('proceed')) {
-						$(td).css('color', 'white')
-						$(td).css('background-color', 'green')
-					} 
-					else {
-						$(td).css('background-color', 'yellow')
-					}
-				}
+				// targets: -3,
+				// createdCell: function (td, cellData, rowData, row, col) {
+				// 	if (rowData.overall_status_.includes('not')) {
+				// 		$(td).css('color', 'white')
+				// 		$(td).css('background-color', 'red')
+				// 	}
+				// 	else if (rowData.overall_status_.includes('selected') || rowData.overall_status_.includes('recommended') || rowData.overall_status_.includes('proceed')) {
+				// 		$(td).css('color', 'white')
+				// 		$(td).css('background-color', 'green')
+				// 	} 
+				// 	else {
+				// 		$(td).css('background-color', 'yellow')
+				// 	}
+				// }
 			} 
 		],
 		columns: [
@@ -465,8 +465,25 @@ $(document).ready(function () {
 					stage = row.overall_status_codename.split(':')[0]
 					stage = stage == 'initscreening' ? 'Initial Screening' : stage == 'prescreening' ? 'Prescreening' :  stage == 'cbi' ? 'CBI' : 'Error'
 
-					return `${data} @ ${stage}`;
-				}
+					let output = $(`
+						<div>
+							<div class="badge rounded-pill mb-1" style="font-size:0.75rem">${data.charAt(0).toUpperCase()+data.slice(1)}</div>
+							<div style="font-size:0.75rem">@ <span class="fw-medium">${stage}</span></div>
+						</div>
+					`)
+
+					if (row.overall_status_.includes('not')) {
+						$(output).find('.badge').addClass('text-bg-danger')
+					}
+					else if (row.overall_status_.includes('selected') || row.overall_status_.includes('recommended') || row.overall_status_.includes('proceed')) {
+						$(output).find('.badge').addClass('text-bg-success')
+					} 
+					else {
+						$(output).find('.badge').addClass('text-bg-warning')
+					}
+
+					return output.html();
+				},
 			},
 			{
 				name:"source",

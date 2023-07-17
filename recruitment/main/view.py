@@ -50,7 +50,7 @@ class BrowseIndex(CustomLoginRequired, View):
                 out_status = {'id':id,'codename':codename,'status':status}
 
                 stage,phase = tuple(codename.split(':'))
-                if phase == 'ongoing': # overall_status
+                if id in [obj['overall_status'] for obj in list(Candidate.objects.values('overall_status').distinct())]: # overall_status
                     statuses['overall_status'].append(out_status)
                 elif stage == 'initscreening' :
                     if phase in ('pending','selected','not selected'):

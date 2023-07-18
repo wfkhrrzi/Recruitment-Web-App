@@ -120,11 +120,12 @@ $(document).ready(function () {
 				label:'CBI Assessment',
 				cur_remarks:remarks.cbi_remarks,
 			},
-			// overall:{
-			// 	form_action:'#',
-			// 	id:null,
-			// 	label:'Overall',
-			// },
+			overall:{
+				form_action:'#',
+				id:data.id,
+				label:'Overall',
+				cur_remarks:remarks.overall_remarks_,
+			},
 		}
 
 		let rootWrapper = $('<div>').addClass('d-flex justify-content-start gap-4');

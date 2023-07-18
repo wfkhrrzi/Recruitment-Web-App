@@ -19,7 +19,8 @@ def migrate_data():
     print('Start migration...')
 
     directory = 'C://Users//wanfakhrurrazi.wanaz//PETRONAS//Khairina Ibrahim (DS DIGITAL) - New Resumes'
-    df = pd.read_csv('C://PET DIG Projects//LOCAL Recruitment//Existing Candidates MIGRATION//new_recruitment_preprocessed.csv',)
+    # df = pd.read_csv('C://PET DIG Projects//LOCAL Recruitment//Existing Candidates MIGRATION//new_recruitment_preprocessed.csv',)
+    df = pd.read_csv('C:/PET DIG Projects/LOCAL Recruitment/existing_candidates_parsed_final.csv',)
 
     # Retrieve files in the directory
     files = os.listdir(directory)
@@ -52,10 +53,22 @@ def migrate_data():
             nationality = Nationality.objects.get(nationality=row['Nationality']),
             source = source,
             category = category,
-            gpt_score=random.randint(1, 100),
             date = date,
             referral_name = row['Referred By'],
             overall_remarks = None if row['Remark'] == 'null' or pd.isnull(row['Remark']) else row['Remark'],
+            email = row['email'],
+            highest_education = row['highest_education'],
+            years_exp = row['years_exp'],
+            CGPA = row['CGPA'],
+            recent_role = row['recent_role'],
+            recent_emp = row['recent_emp'],
+            main_skills = row['main_skills'],
+            ds_skills = row['ds_skills'],
+            ds_background = row['ds_background'],
+            phone_number = row['phone_number'],
+            gpt_score = row['gpt_score'] if not pd.isnull(row['gpt_score']) else 20,
+            gpt_status = Status.objects.get(codename='gpt_status:recommended') if row['gpt_status'] == 'Yes' else Status.objects.get(codename='gpt_status:not recommended') if row['gpt_status'] == 'No' else None
+
         )
 
         for file in files:

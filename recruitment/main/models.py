@@ -155,8 +155,8 @@ class Candidate(CreatedMixin,LastModifiedMixin,models.Model):
     phone_number = models.CharField(max_length=100,null=True)
     email = models.EmailField(max_length=100,null=True)
     highest_education = models.CharField(max_length=100,null=True) # need revision on this
-    years_exp = models.IntegerField(null=True)
-    CGPA = models.FloatField(null=True)
+    years_exp = models.CharField(max_length=100,null=True)
+    CGPA = models.CharField(max_length=100,null=True)
     recent_role = models.CharField(max_length=100,null=True)
     recent_emp = models.CharField(max_length=100,null=True)
     main_skills = models.CharField(max_length=100,null=True)

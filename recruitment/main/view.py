@@ -43,6 +43,9 @@ class BrowseIndex(CustomLoginRequired, View):
                 gpt_status=[],
                 overall_status=[],
             )
+
+            overall_status_distinct = [obj['overall_status'] for obj in list(Candidate.objects.values('overall_status').distinct())]
+
             for status_obj in lst_statuses:
                 codename:str = status_obj['codename']
                 status:str = status_obj['status']
@@ -50,14 +53,15 @@ class BrowseIndex(CustomLoginRequired, View):
                 out_status = {'id':id,'codename':codename,'status':status}
 
                 stage,phase = tuple(codename.split(':'))
-                if id in [obj['overall_status'] for obj in list(Candidate.objects.values('overall_status').distinct())]: # overall_status
-                    statuses['overall_status'].append(out_status)
-                elif stage == 'initscreening' :
+                
+                if stage == 'initscreening' :
                     if phase in ('pending','selected','not selected'):
                         statuses[stage].append(out_status)
                 elif stage in ('prescreening','cbi','gpt_status',):
                     statuses[stage].append(out_status)
 
+                if id in overall_status_distinct: # overall_status
+                    statuses['overall_status'].append(out_status)
                 # elif stage == 'prescreening':
                 #     if phase in ('pending','proceed','not proceed'):
                 #         statuses[stage].append(out_status)

@@ -55,6 +55,7 @@ def migrate_data():
             gpt_score=random.randint(1, 100),
             date = date,
             referral_name = row['Referred By'],
+            overall_remarks = None if row['Remark'] == 'null' or pd.isnull(row['Remark']) else row['Remark'],
         )
 
         for file in files:
@@ -129,7 +130,11 @@ def migrate_data():
             prescreening_list.append(prescreening)
             cbi_list.append(cbi)
 
-        elif not pd.isnull(row['Remark']) and 'screen' in row['Remark'].lower() and 'interview' in row['Remark'].lower():
+        elif not pd.isnull(row['Remark'])  \
+        and ( 'screen' in row['Remark'].lower() \
+        or 'interview' in row['Remark'].lower() \
+        or 'pre-screen' in row['Remark'].lower() \
+        or 'solution' in row['Remark'].lower() ):
 
             prescreening.is_proceed = False
             prescreening.status = Status.objects.get(codename='prescreening:not proceed')

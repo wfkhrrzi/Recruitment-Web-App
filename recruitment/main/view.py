@@ -291,6 +291,11 @@ class BrowseRowDetailsView(CustomLoginRequired,View):
                 default=Value('-'),
                 output_field=TextField(),
             ),
+            overall_remarks_=Case(
+                When(Q(overall_remarks__isnull=False),then=F('overall_remarks')),
+                default=Value('-'),
+                output_field=TextField(),
+            ),
         )[0]
 
         details = candidate.values(

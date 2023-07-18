@@ -3,6 +3,14 @@ import math
 
 register = template.Library()
 
+@register.simple_tag
+def format_status_codename(codename,status):
+    stage, phase = tuple(codename.split(':'))
+    
+    stage = 'Initial Screening' if stage == 'initscreening' else stage
+    
+    return f'{status} @ {stage}'
+
 @register.filter
 def format_card_title(value):
     words = value.split('_')

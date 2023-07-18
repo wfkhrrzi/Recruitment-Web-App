@@ -97,7 +97,7 @@
                         <select name="overall_status" id="" class="form-select table-filter">
                             <option class="table-filter-none" value="">Filter</option>
                             {% for status in statuses.overall_status %}
-                                <option value="{{status.codename}}">{{status.status|title}}</option>
+                                <option value="{{status.codename}}">{% format_status_codename status.codename status.status %}</option>
                             {% endfor %}
                         </select>
                     </th>

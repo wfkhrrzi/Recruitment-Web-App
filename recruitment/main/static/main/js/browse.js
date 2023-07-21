@@ -556,6 +556,10 @@ $(document).ready(function () {
 		drawCallback: function () {  
 			const api = this.api();
 
+			// push data source url to historyState
+			history.pushState(null,"", api.ajax.url() + "?" + $.param(api.ajax.params()) )
+			console.log('Pushed history state: ', api.ajax.params())
+
 			// Filtering column
 			$(".table-filter-wrapper", api.table().header()).each(function (i) {
 				// console.log(api.column(i));

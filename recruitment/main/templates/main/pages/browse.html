@@ -2,6 +2,8 @@
 
 {% block sidebar %}{% endblock sidebar %} <!-- overridden so does not display sidebar -->
 
+{% block tabtitle %}Candidate Browse{% endblock tabtitle %}
+
 {% load custom_templatetags %}
 
 {% block content %}
@@ -322,8 +324,9 @@
     <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.bootstrap5.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/js-base64@3.7.5/base64.min.js"></script>
-
+    
     {% load static %}
+    <script src="{% static 'main/js/cowboy_jquery-bbq_master_jquery.ba-bbq.min.js' %}"></script>
     <script src="{% static 'django_eventstream/eventsource.min.js' %}"></script>
     <script src="{% static 'django_eventstream/reconnecting-eventsource.js' %}"></script>
     <script src="{% static 'main/js/browse.js' %}"></script>

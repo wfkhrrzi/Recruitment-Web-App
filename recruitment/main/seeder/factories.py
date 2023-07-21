@@ -7,27 +7,27 @@ import random
 
 dict_status = {
     'initscreening:pending':'Yet to select',
-    'initscreening:selected':'selected',
-    'initscreening:not selected':'not selected',
-    'initscreening:proceed':'proceed',
-    'initscreening:not proceed':'not proceed',
+    'initscreening:proceed':'selected',
+    'initscreening:not proceed':'not selected',
+    'initscreening:mobility':'NA (Mobiity)',
 
-    'prescreening:pending':'pending',
-    'prescreening:send instruction':'pending instruction',
-    'prescreening:pending submission':'pending response',
-    'prescreening:assessment submitted':'ready for validation', # not needed
-    # 'prescreening:hackerrank passed':'Passed',
-    # 'prescreening:hackerrank failed':'Failed',
     'prescreening:proceed':'proceed',
     'prescreening:not proceed':'not proceed',
-    # proceed for hr prescreen
-    # proceed to CBI
+    'prescreening:send instruction':'pending instruction',
+    'prescreening:pending submission':'pending response',
+    'prescreening:proceed':'proceed',
+    'prescreening:not proceed':'not proceed',
+    'prescreening:hold':'hold',
+    'prescreening:withdraw':'withdraw',
 
     'cbi:proceed':'recommended',
     'cbi:not proceed':'not recommended',
+    'cbi:pending prescreen':'pending HR Prescreen', # default
     'cbi:pending interview':'pending interview',
     'cbi:pending result':'pending result',
     'cbi:pending schedule':'pending schedule', # add cbi:pending schedule
+    'cbi:hold':'hold',
+    'cbi:withdraw':'withdraw',
 
     'cbi_schedule:unscheduled':'unscheduled',
     'cbi_schedule:pending send RSVP':'pending RSVP invitation',
@@ -39,18 +39,10 @@ dict_status = {
 
     'gpt_status:recommended':'recommended',
     'gpt_status:not recommended':'not recommended',
-    
-    # 'proceed':'proceed',
-    # 'do not proceed':'do not proceed',
-    # 'accepted':'accepted',
-    # 'rejected':'rejected',
-    # 'pending':'pending',
-    # 'recommended':'recommended',
-    # 'not recommended':'not recommended',
 
-    'initscreening:ongoing':'ongoing initial screening',
-    'prescreening:ongoing':'ongoing prescreening',
-    'cbi:ongoing':'ongoing cbi',
+    'joining:recruited':'recruited',
+    'joining:withdraw':'withdraw',
+    'joining:pending sp':'Pending sp',
 }
 
 lst_codename = list()

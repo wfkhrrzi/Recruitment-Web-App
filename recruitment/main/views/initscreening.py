@@ -188,15 +188,15 @@ class InitialScreeningHiringUpdate(CustomLoginRequired,View):
         if is_proceed != None:
             if is_proceed == 0: #do not proceed
                 initial_screening.is_hm_proceed = False
-                initial_screening.hm_status = Status.objects.get(codename='initscreening:not selected')
+                initial_screening.hm_status = Status.objects.get(codename='initscreening:not proceed')
 
                 initial_screening.is_proceed = False
-                initial_screening.status = Status.objects.get(codename='initscreening:not selected')
+                initial_screening.status = Status.objects.get(codename='initscreening:not proceed')
                 initial_screening.date_selected = None
 
             elif is_proceed == 1: #proceed
                 initial_screening.is_hm_proceed = True
-                initial_screening.hm_status = Status.objects.get(codename='initscreening:selected')
+                initial_screening.hm_status = Status.objects.get(codename='initscreening:proceed')
                 initial_screening.hm_date_selected = datetime.now()
 
                 initial_screening.is_proceed = None
@@ -388,7 +388,7 @@ class InitialScreeningUpdate(CustomLoginRequired,View):
         if is_proceed != None:
             if int(is_proceed) == 0: #do not proceed
                 initial_screening.is_proceed = False
-                initial_screening.status = Status.objects.get(codename='initscreening:not selected')
+                initial_screening.status = Status.objects.get(codename='initscreening:not proceed')
                 
                 try:
                     initial_screening.candidate.prescreening.reset_instance()
@@ -403,7 +403,7 @@ class InitialScreeningUpdate(CustomLoginRequired,View):
             elif int(is_proceed) == 1 and not cur_is_proceed: #proceed
                 
                 initial_screening.is_proceed = True
-                initial_screening.status = Status.objects.get(codename='initscreening:selected')
+                initial_screening.status = Status.objects.get(codename='initscreening:proceed')
                 initial_screening.date_selected = datetime.now()
 
                 try:

@@ -55,7 +55,7 @@ class BrowseIndex(CustomLoginRequired, View):
                 stage,phase = tuple(codename.split(':'))
                 
                 if stage == 'initscreening' :
-                    if phase in ('pending','selected','not selected'):
+                    if phase in ('pending','proceed','not proceed'):
                         statuses[stage].append(out_status)
                 elif stage in ('prescreening','cbi','gpt_status',):
                     statuses[stage].append(out_status)
@@ -86,7 +86,7 @@ class BrowseIndex(CustomLoginRequired, View):
                     'id',
                     filter=
                         # Q(initialscreening__status__isnull=False) & 
-                        ~Q(initialscreening__status__codename__in=["initscreening:selected","initscreening:not selected"]) & 
+                        ~Q(initialscreening__status__codename__in=["initscreening:proceed","initscreening:not proceed"]) & 
                         Q(prescreening__status__isnull=True) &
                         Q(cbi__status__isnull=True)
                 ),

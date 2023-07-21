@@ -243,7 +243,8 @@ $(document).ready(function () {
 			null,
 			null,
 			null,
-			{ "search": init_gpt_score },
+			null,
+			// { "search": init_gpt_score },
 
 		],
 		order: [[1, 'asc']],
@@ -320,10 +321,10 @@ $(document).ready(function () {
 						data : data,
 						statuses_obj : statuses_initscreening,
 						options_param : {
-							'initscreening:selected': {
+							'initscreening:proceed': {
 								value: 1,
 							},
-							'initscreening:not selected': {
+							'initscreening:not proceed': {
 								value: 0,
 							},
 							'initscreening:pending': {
@@ -464,19 +465,21 @@ $(document).ready(function () {
 				width:"15%",
 				render: function (data,type,row) {  
 					stage = row.overall_status_codename.split(':')[0]
-					stage = stage == 'initscreening' ? 'Initial Screening' : stage == 'prescreening' ? 'Prescreening' :  stage == 'cbi' ? 'CBI' : 'Error'
-
+					stage = stage == 'initscreening' ? 'Initial Screening' : stage == 'prescreening' ? 'Prescreening' :  stage == 'cbi' ? 'CBI' : stage == 'joining' ? stage :  'Error'
 					let output = $(`
 						<div>
 							<div class="badge rounded-pill mb-1" style="font-size:0.75rem">${data.charAt(0).toUpperCase()+data.slice(1)}</div>
-							<div style="font-size:0.75rem">@ <span class="fw-medium">${stage}</span></div>
 						</div>
 					`)
 
-					if (row.overall_status_.includes('not')) {
+					if (stage != 'joining'){
+						output.append(`<div style="font-size:0.75rem">@ <span class="fw-medium">${stage}</span></div>`)
+					}
+
+					if (row.overall_status_.includes('not') || row.overall_status_.includes('withdraw')) {
 						$(output).find('.badge').addClass('text-bg-danger')
 					}
-					else if (row.overall_status_.includes('selected') || row.overall_status_.includes('recommended') || row.overall_status_.includes('proceed')) {
+					else if (row.overall_status_.includes('selected') || row.overall_status_.includes('recommended') || row.overall_status_.includes('proceed') || row.overall_status_.includes('recruited')) {
 						$(output).find('.badge').addClass('text-bg-success')
 					} 
 					else {
@@ -518,7 +521,7 @@ $(document).ready(function () {
 
 			$('#gpt-score-thre').addClass('ms-3').append(`
 				<div class="form-check form-switch">
-					<input class="form-check-input" type="checkbox" role="switch" id="gpt-score-toggle" checked>
+					<input class="form-check-input" type="checkbox" role="switch" id="gpt-score-toggle">
 					<label class="form-check-label fw-medium" for="gpt-score-toggle" style="font-size:0.8rem;margin:0;">GPT Threshold: <span id="gpt-score-thre-value" >${init_gpt_score}</span>%</label>
 				</div>
 				<input id="gpt-score-range" type="range" class="form-range" value="${init_gpt_score}">

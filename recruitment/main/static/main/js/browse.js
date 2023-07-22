@@ -179,10 +179,40 @@ $(document).ready(function () {
 		`;
 	}
 
-	// gpt_status initialized to 'recommended'
-	// $('.table-filter-wrapper select[name="gpt_status"]').val('gpt_status:recommended');
 
 	const init_gpt_score = 80
+
+	var tableSearchCols = []
+	var tableOrder = []
+
+	// set initial searchCol and order params based on current query strings
+	if (history.state || window.location.search) {
+		let state = null
+		if (history.state){
+			state = history.state.params
+		} else {
+			state = $.deparam(window.location.search.slice(1))
+		}
+
+		// set cols
+		state.columns.forEach(column => {
+			tableSearchCols.push({search:column.search['value']})
+		});
+		// set orders
+		state.order.forEach(order => {
+			tableOrder.push([order.column,order.dir])
+		});
+	}
+	else {
+
+		// set cols
+		for (let i = 0; i < 11; i++) {
+			tableSearchCols.push(null)			
+		}
+		// set orders
+		tableOrder.push([1,'asc'])
+	}
+	
 
 	var table = $("#table-candidates").DataTable({
 		orderCellsTop: true,
@@ -231,41 +261,8 @@ $(document).ready(function () {
 				Accept: "application/json",
 			},
 		},
-		searchCols: [
-			null,
-			null,
-			null,
-			null,
-			// { "search": "gpt_status:recommended" },
-			null,
-			null,
-			null,
-			null,
-			null,
-			null,
-			null,
-			// { "search": init_gpt_score },
-
-		],
-		order: [[1, 'asc']],
-		columnDefs: [ 
-			{
-				// targets: -3,
-				// createdCell: function (td, cellData, rowData, row, col) {
-				// 	if (rowData.overall_status_.includes('not')) {
-				// 		$(td).css('color', 'white')
-				// 		$(td).css('background-color', 'red')
-				// 	}
-				// 	else if (rowData.overall_status_.includes('selected') || rowData.overall_status_.includes('recommended') || rowData.overall_status_.includes('proceed')) {
-				// 		$(td).css('color', 'white')
-				// 		$(td).css('background-color', 'green')
-				// 	} 
-				// 	else {
-				// 		$(td).css('background-color', 'yellow')
-				// 	}
-				// }
-			} 
-		],
+		searchCols: tableSearchCols, // refer to tableSearchCols to modify initial search
+		order: tableOrder, // refer to tableOder to modify initial order 
 		columns: [
 			{
 				className: 'dt-resume',
@@ -284,29 +281,39 @@ $(document).ready(function () {
 					}
 				}
 			},
-			{ data: "name", width:"15%", render: function (data,type,row) {
-				out = $(`
-					<div>
-						<div class='d-flex gap-2 align-items-center'>
-							<div>${data}</div>
+			{ 
+				data: "name", 
+				width:"15%", 
+				render: function (data,type,row) {
+					out = $(`
+						<div>
+							<div class='d-flex gap-2 align-items-center'>
+								<div>${data}</div>
+							</div>
 						</div>
-					</div>
-				`);
+					`);
 
-				if (row.new_applicant) {
-					out.find('div.d-flex').append(`
-						<span class="badge text-bg-secondary rounded-pill fw-semibold">NEW</span>
-					`)
+					if (row.new_applicant) {
+						out.find('div.d-flex').append(`
+							<span class="badge text-bg-secondary rounded-pill fw-semibold">NEW</span>
+						`)
+					}
+
+					return out.html();
 				}
-
-				return out.html();
-			}},
-			{ data: "date", },
-			{ data: "category_" ,width:"10%",},
+			},
+			{ 
+				data: "date", 
+				width:"10%"
+			},
+			{ 
+				data: "category_" ,
+				width:"10%",
+			},
 			// gpt status column
 			{ 
 				data: "gpt_status_", 
-				width:"13%",
+				width:"10%",
 				render:function (data,type) {  
 					return gpt_status_badge(data)
 				},
@@ -314,7 +321,7 @@ $(document).ready(function () {
 			// initialscreening status column
 			{ 
 				data: "initialscreening_status", 
-				width:"13%",
+				width:"10%",
 				render:function (data,type,row) {
 					
 					return component_table_dropdown({
@@ -351,7 +358,7 @@ $(document).ready(function () {
 			// prescreening status column
 			{ 
 				data: "prescreening_status",
-				width:"13%",
+				width:"15%",
 				render:function (data,type,row) {
 					
 					return component_table_dropdown({
@@ -376,6 +383,12 @@ $(document).ready(function () {
 							},
 							'prescreening:assessment submitted': {
 								value: 4,
+							},
+							'prescreening:hold': {
+								value: 5,
+							},
+							'prescreening:withdraw': {
+								value: 6,
 							},
 						},
 						stage_update_url : prescreening_update_url,
@@ -408,7 +421,7 @@ $(document).ready(function () {
 			// cbi status column
 			{ 
 				data: "cbi_status",
-				width:"13%",
+				width:"15%",
 				render:function (data,type,row) {
 					
 					return component_table_dropdown({
@@ -432,6 +445,18 @@ $(document).ready(function () {
 							'cbi:pending result': {
 								// display: false
 								value: 4,
+							},
+							'cbi:hold': {
+								// display: false
+								value: 5,
+							},
+							'cbi:withdraw': {
+								// display: false
+								value: 6,
+							},
+							'cbi:pending prescreen': {
+								// display: false
+								value: 7,
 							},
 						},
 						stage_update_url : cbi_update_url,
@@ -524,7 +549,7 @@ $(document).ready(function () {
 					<input class="form-check-input" type="checkbox" role="switch" id="gpt-score-toggle">
 					<label class="form-check-label fw-medium" for="gpt-score-toggle" style="font-size:0.8rem;margin:0;">GPT Threshold: <span id="gpt-score-thre-value" >${init_gpt_score}</span>%</label>
 				</div>
-				<input id="gpt-score-range" type="range" class="form-range" value="${init_gpt_score}">
+				<input id="gpt-score-range" type="range" class="form-range" value="${init_gpt_score}" disabled>
 			`)
 			.find('input[type="range"]').on('input change',function () {  
 				$(this).attr('value',this.value);
@@ -554,14 +579,36 @@ $(document).ready(function () {
 
 			})
 
+			// update filtering columns
+			history.state.searchCols.forEach((column,i) => {
+				table.column(i).search(column['sSearch'])
+				let dropdown = $(`.table-filter-wrapper:eq(${$(table.column(i).header()).index() - 1})`).find('select') // change selected option in select field
+				
+				if (column['sSearch']){
+					dropdown.val(column['sSearch'])
+				} else {
+					dropdown.val("")
+				}
+			});
+
 		}, //end initComplete
 
 		drawCallback: function () {  
 			const api = this.api();
 
 			// push data source url to historyState
-			history.pushState(null,"", api.ajax.url() + "?" + $.param(api.ajax.params()) )
-			console.log('Pushed history state: ', api.ajax.params())
+			let state = {params:api.ajax.params(),searchCols:tableSearchCols,order:tableOrder}
+
+			if (triggerBackOrForward) {
+				triggerBackOrForward = false
+			} else {
+				if (history.state){
+					history.pushState(state,"", api.ajax.url() + "?" + $.param(api.ajax.params()) )
+				}
+				else {
+					history.replaceState(state,"", api.ajax.url() + "?" + $.param(api.ajax.params()) )
+				}
+			}
 
 			// Filtering column
 			$(".table-filter-wrapper", api.table().header()).each(function (i) {
@@ -585,7 +632,7 @@ $(document).ready(function () {
 				select
 					.on("change", function () {
 						if (column.search() !== this.value) {
-							// console.log(`Filter= ${this.value}`);
+							console.log(`Filter= ${this.value}`);
 							column.search(this.value).draw();
 						}
 					});
@@ -801,6 +848,29 @@ $(document).ready(function () {
 	})
 
 
+	/* ------------------- Handle history ------------------------- */
+	var triggerBackOrForward = false
+	window.addEventListener('popstate',function () {  
+		console.log('popstate fired')
+		triggerBackOrForward = true
+		
+		// set params
+		this.history.state.searchCols.forEach((column,i) => {
+			table.column(i).search(column['sSearch'])
+			
+			let dropdown = $(`.table-filter-wrapper:eq(${$(table.column(i).header()).index() - 1})`).find('select, input') // change selected option in select field
+			
+			if (column['sSearch']){
+				dropdown.val(column['sSearch'])
+			} else {
+				dropdown.val("")
+			}
+
+		});
+
+		table.draw()
+		
+	})
 
 		
 	/* ------------------- UPLOAD FILE ------------------------- */

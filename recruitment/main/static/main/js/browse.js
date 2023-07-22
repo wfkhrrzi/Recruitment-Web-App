@@ -179,10 +179,43 @@ $(document).ready(function () {
 		`;
 	}
 
-	// gpt_status initialized to 'recommended'
-	// $('.table-filter-wrapper select[name="gpt_status"]').val('gpt_status:recommended');
 
 	const init_gpt_score = 80
+
+	var tableSearchCols = []
+	var tableOrder = []
+
+	// set initial searchCol and order params based on current query strings
+	if (history.state || window.location.search) {
+
+		let state = null
+		if (history.state){
+			state = history.state
+		} else {
+			state = $.deparam(window.location.search.slice(1))
+		}
+
+		// set cols
+		state.columns.forEach(column => {
+			tableSearchCols.push({search:column.search['value']})
+		});
+		// set orders
+		state.order.forEach(order => {
+			tableOrder.push([order.column,order.dir])
+		});
+	}
+	else {
+
+		// set cols
+		for (let i = 0; i < 11; i++) {
+			tableSearchCols.push(null)			
+		}
+		// set orders
+		tableOrder.push([1,'asc'])
+	}
+	
+	console.log("table cols: ",tableSearchCols)
+	console.log("table order: ",tableOrder)
 
 	var table = $("#table-candidates").DataTable({
 		orderCellsTop: true,
@@ -231,41 +264,8 @@ $(document).ready(function () {
 				Accept: "application/json",
 			},
 		},
-		searchCols: [
-			null,
-			null,
-			null,
-			null,
-			// { "search": "gpt_status:recommended" },
-			null,
-			null,
-			null,
-			null,
-			null,
-			null,
-			null,
-			// { "search": init_gpt_score },
-
-		],
-		order: [[1, 'asc']],
-		columnDefs: [ 
-			{
-				// targets: -3,
-				// createdCell: function (td, cellData, rowData, row, col) {
-				// 	if (rowData.overall_status_.includes('not')) {
-				// 		$(td).css('color', 'white')
-				// 		$(td).css('background-color', 'red')
-				// 	}
-				// 	else if (rowData.overall_status_.includes('selected') || rowData.overall_status_.includes('recommended') || rowData.overall_status_.includes('proceed')) {
-				// 		$(td).css('color', 'white')
-				// 		$(td).css('background-color', 'green')
-				// 	} 
-				// 	else {
-				// 		$(td).css('background-color', 'yellow')
-				// 	}
-				// }
-			} 
-		],
+		searchCols: tableSearchCols, // refer to tableSearchCols to modify initial search
+		order: tableOrder, // refer to tableOder to modify initial order 
 		columns: [
 			{
 				className: 'dt-resume',
@@ -560,8 +560,31 @@ $(document).ready(function () {
 			const api = this.api();
 
 			// push data source url to historyState
-			history.pushState(null,"", api.ajax.url() + "?" + $.param(api.ajax.params()) )
-			console.log('Pushed history state: ', api.ajax.params())
+			console.log('Previous history state: ', history.state)
+			console.log('navigation: ',window.performance.getEntriesByType('navigation')[0].type)
+
+			let cur_state = history.state ? history.state : null
+			let new_state = api.ajax.params()
+			if (cur_state) {
+				cur_state['cur_draw'] += 1
+				new_state['cur_draw'] = cur_state['cur_draw']
+			} else {
+				new_state['cur_draw'] = new_state['draw']
+			}
+
+			let cur_draw_url = $.deparam(window.location.search.slice(1))['draw'] || 1 
+			console.log('cur_draw_url: ', cur_draw_url)
+			console.log('new_cur_draw: ', new_state['cur_draw'])
+
+			if (cur_draw_url !== new_state['cur_draw']){
+				history.pushState(new_state,"", api.ajax.url() + "?" + $.param(new_state) )
+			}
+			else {
+				history.replaceState(new_state,"", api.ajax.url() + "?" + $.param(new_state) )
+			}
+
+			console.log('Current history state: ', history.state)
+
 
 			// Filtering column
 			$(".table-filter-wrapper", api.table().header()).each(function (i) {
@@ -801,6 +824,12 @@ $(document).ready(function () {
 	})
 
 
+	/* ------------------- Handle history ------------------------- */
+	window.addEventListener('popstate',function () {  
+		console.log('popstate fired')
+		// console.log('navigation: ',window.performance.getEntriesByType('navigation')[0].type)
+		table.draw()
+	})
 
 		
 	/* ------------------- UPLOAD FILE ------------------------- */

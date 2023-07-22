@@ -868,6 +868,10 @@ $(document).ready(function () {
 
 		});
 
+		this.history.state.order.forEach(order => {
+			table.column(order[0]).order(order[1])
+		});
+
 		table.draw()
 		
 	})

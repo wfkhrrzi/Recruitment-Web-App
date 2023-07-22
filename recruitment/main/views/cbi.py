@@ -50,18 +50,23 @@ class CBICreate(CustomLoginRequired,View):
             return HttpResponseBadRequest('candidate id not found')
         
         try:
-            if(CBI.objects.get(candidate_id=request.POST['candidate'])):
-                if return_json(request):
-                    response = {
-                        'CBI':f'already created for candidate_id = {request.POST["candidate"]}'
-                    }
-                    
-                    if request.POST.get('initial_screening',None):
-                        response['initial_screening:update'] = 'success'    
-                    
-                    return JsonResponse(response)
+            cbi = CBI.objects.get(candidate_id=request.POST['candidate'])
             
-                return HttpResponse(response)
+            candidate.overall_status = cbi.status
+            candidate.save()
+            
+            if return_json(request):
+                response = {
+                    'CBI':f'already created for candidate_id = {request.POST["candidate"]}'
+                }
+                
+                if request.POST.get('initial_screening',None):
+                    response['initial_screening:update'] = 'success'    
+                
+                return JsonResponse(response)
+        
+            return HttpResponse(response)
+        
         except:
             pass
 

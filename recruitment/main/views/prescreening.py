@@ -49,18 +49,23 @@ class PrescreeningCreate(CustomLoginRequired,View):
             return HttpResponseBadRequest('candidate id not found')
         
         try:
-            if(Prescreening.objects.get(candidate_id=request.POST['candidate'])):
-                if return_json(request):
-                    response = {
-                        'prescreening':f'already created for candidate_id = {request.POST["candidate"]}'
-                    }
-                    
-                    if request.POST.get('initial_screening',None):
-                        response['initial_screening:update'] = 'success'    
-                    
-                    return JsonResponse(response)
-            
-                return HttpResponse(response)
+            prescreening = Prescreening.objects.get(candidate_id=request.POST['candidate'])
+
+            candidate.overall_status = prescreening.status
+            candidate.save()
+
+            if return_json(request):
+                response = {
+                    'prescreening':f'already created for candidate_id = {request.POST["candidate"]}'
+                }
+                
+                if request.POST.get('initial_screening',None):
+                    response['initial_screening:update'] = 'success'    
+                
+                return JsonResponse(response)
+        
+            return HttpResponse(response)
+        
         except:
             pass
 

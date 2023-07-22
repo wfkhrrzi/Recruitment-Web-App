@@ -551,6 +551,20 @@ $(document).ready(function () {
 
 			})
 
+			// update filtering columns
+			history.state.searchCols.forEach((column,i) => {
+				table.column(i).search(column['sSearch'])
+				let dropdown = $(`.table-filter-wrapper:eq(${$(table.column(i).header()).index() - 1})`).find('select') // change selected option in select field
+				
+				if (column['sSearch']){
+					dropdown.val(column['sSearch'])
+					console.log('Field: ',dropdown.prop('name'),'\nValue: ',dropdown.val())
+				} else {
+					dropdown.val("")
+					// console.log('Field: ',dropdown.val(),)
+				}
+			});
+
 		}, //end initComplete
 
 		drawCallback: function () {  
@@ -570,21 +584,6 @@ $(document).ready(function () {
 					history.replaceState(state,"", api.ajax.url() + "?" + $.param(api.ajax.params()) )
 				}
 			}
-
-			// update filtering columns
-			history.state.searchCols.forEach((column,i) => {
-				table.column(i).search(column['sSearch'])
-				let dropdown = $(`.table-filter-wrapper:eq(${$(table.column(i).header()).index() - 1})`).find('select') // change selected option in select field
-				
-				if (column['sSearch']){
-					dropdown.val(column['sSearch'])
-					console.log('Field: ',dropdown.prop('name'),'\nValue: ',dropdown.val())
-				} else {
-					dropdown.val("")
-					// console.log('Field: ',dropdown.val(),)
-				}
-			});
-
 
 			// Filtering column
 			$(".table-filter-wrapper", api.table().header()).each(function (i) {
@@ -833,11 +832,15 @@ $(document).ready(function () {
 		// set params
 		this.history.state.searchCols.forEach((column,i) => {
 			table.column(i).search(column['sSearch'])
+			
+			let dropdown = $(`.table-filter-wrapper:eq(${$(table.column(i).header()).index() - 1})`).find('select') // change selected option in select field
+			
 			if (column['sSearch']){
-				$(`.table-filter-wrapper:eq(${$(table.column(i).header()).index() - 1})`) // change selected option in select field
-				.find('select')
-				.val(column['sSearch'])
+				dropdown.val(column['sSearch'])
+			} else {
+				dropdown.val("")
 			}
+
 		});
 
 		table.draw()

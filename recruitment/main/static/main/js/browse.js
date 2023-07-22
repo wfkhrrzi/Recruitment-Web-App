@@ -281,29 +281,39 @@ $(document).ready(function () {
 					}
 				}
 			},
-			{ data: "name", width:"15%", render: function (data,type,row) {
-				out = $(`
-					<div>
-						<div class='d-flex gap-2 align-items-center'>
-							<div>${data}</div>
+			{ 
+				data: "name", 
+				width:"15%", 
+				render: function (data,type,row) {
+					out = $(`
+						<div>
+							<div class='d-flex gap-2 align-items-center'>
+								<div>${data}</div>
+							</div>
 						</div>
-					</div>
-				`);
+					`);
 
-				if (row.new_applicant) {
-					out.find('div.d-flex').append(`
-						<span class="badge text-bg-secondary rounded-pill fw-semibold">NEW</span>
-					`)
+					if (row.new_applicant) {
+						out.find('div.d-flex').append(`
+							<span class="badge text-bg-secondary rounded-pill fw-semibold">NEW</span>
+						`)
+					}
+
+					return out.html();
 				}
-
-				return out.html();
-			}},
-			{ data: "date", },
-			{ data: "category_" ,width:"10%",},
+			},
+			{ 
+				data: "date", 
+				width:"10%"
+			},
+			{ 
+				data: "category_" ,
+				width:"10%",
+			},
 			// gpt status column
 			{ 
 				data: "gpt_status_", 
-				width:"13%",
+				width:"10%",
 				render:function (data,type) {  
 					return gpt_status_badge(data)
 				},
@@ -311,7 +321,7 @@ $(document).ready(function () {
 			// initialscreening status column
 			{ 
 				data: "initialscreening_status", 
-				width:"13%",
+				width:"10%",
 				render:function (data,type,row) {
 					
 					return component_table_dropdown({
@@ -348,7 +358,7 @@ $(document).ready(function () {
 			// prescreening status column
 			{ 
 				data: "prescreening_status",
-				width:"13%",
+				width:"15%",
 				render:function (data,type,row) {
 					
 					return component_table_dropdown({
@@ -411,7 +421,7 @@ $(document).ready(function () {
 			// cbi status column
 			{ 
 				data: "cbi_status",
-				width:"13%",
+				width:"15%",
 				render:function (data,type,row) {
 					
 					return component_table_dropdown({
@@ -576,10 +586,8 @@ $(document).ready(function () {
 				
 				if (column['sSearch']){
 					dropdown.val(column['sSearch'])
-					console.log('Field: ',dropdown.prop('name'),'\nValue: ',dropdown.val())
 				} else {
 					dropdown.val("")
-					// console.log('Field: ',dropdown.val(),)
 				}
 			});
 
@@ -594,7 +602,6 @@ $(document).ready(function () {
 			if (triggerBackOrForward) {
 				triggerBackOrForward = false
 			} else {
-				console.log('pushState fired')
 				if (history.state){
 					history.pushState(state,"", api.ajax.url() + "?" + $.param(api.ajax.params()) )
 				}

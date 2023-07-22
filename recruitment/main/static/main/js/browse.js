@@ -374,6 +374,12 @@ $(document).ready(function () {
 							'prescreening:assessment submitted': {
 								value: 4,
 							},
+							'prescreening:hold': {
+								value: 5,
+							},
+							'prescreening:withdraw': {
+								value: 6,
+							},
 						},
 						stage_update_url : prescreening_update_url,
 						stage_id : row.prescreening_id,
@@ -429,6 +435,18 @@ $(document).ready(function () {
 							'cbi:pending result': {
 								// display: false
 								value: 4,
+							},
+							'cbi:hold': {
+								// display: false
+								value: 5,
+							},
+							'cbi:withdraw': {
+								// display: false
+								value: 6,
+							},
+							'cbi:pending prescreen': {
+								// display: false
+								value: 7,
 							},
 						},
 						stage_update_url : cbi_update_url,

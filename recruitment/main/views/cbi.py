@@ -66,7 +66,7 @@ class CBICreate(CustomLoginRequired,View):
             pass
 
         cbi = CBI(candidate=candidate)
-        cbi.status = Status.objects.get(codename='cbi:pending schedule') # change status to 'cbi:pending schedule'
+        cbi.status = Status.objects.get(codename='cbi:pending prescreen') # default to 'cbi:pending prescreen'
         cbi.created_by = request.user
 
         cbi.save()
@@ -295,18 +295,33 @@ class CBIUpdate(CustomLoginRequired,View): # mail functionality coming soon
 
             elif int(request.POST['proceed']) == 2: #pending schedule
                 
-                cbi.is_proceed = False
+                cbi.is_proceed = None
                 cbi.status = Status.objects.get(codename='cbi:pending schedule')
 
             elif int(request.POST['proceed']) == 3: #pending interview
                 
-                cbi.is_proceed = False
+                cbi.is_proceed = None
                 cbi.status = Status.objects.get(codename='cbi:pending interview')
 
             elif int(request.POST['proceed']) == 4: #pending result
                 
-                cbi.is_proceed = False
+                cbi.is_proceed = None
                 cbi.status = Status.objects.get(codename='cbi:pending result')
+
+            elif int(request.POST['proceed']) == 5: #hold
+                
+                cbi.is_proceed = None
+                cbi.status = Status.objects.get(codename='cbi:hold')
+
+            elif int(request.POST['proceed']) == 6: #withdraw
+                
+                cbi.is_proceed = False
+                cbi.status = Status.objects.get(codename='cbi:withdraw')
+
+            elif int(request.POST['proceed']) == 7: #prending prescreen
+                
+                cbi.is_proceed = None
+                cbi.status = Status.objects.get(codename='cbi:prending prescreen')
 
         # update remarks
         if request.POST.get('remarks',None) != None:

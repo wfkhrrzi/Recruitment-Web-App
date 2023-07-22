@@ -4,12 +4,12 @@ import math
 register = template.Library()
 
 @register.simple_tag
-def format_status_codename(codename,status):
+def format_status_codename(codename,status:str):
     stage, phase = tuple(codename.split(':'))
     
-    stage = 'Initial Screening' if stage == 'initscreening' else stage
+    stage:str = 'Initial Screening' if stage == 'initscreening' else stage
     
-    return f'{status} @ {stage}'
+    return f"{status.capitalize() if 'Mobility' not in status else status} @ {stage.capitalize() if stage.lower() != 'cbi' else 'CBI'}"
 
 @register.filter
 def format_card_title(value):

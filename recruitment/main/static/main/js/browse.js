@@ -187,10 +187,9 @@ $(document).ready(function () {
 
 	// set initial searchCol and order params based on current query strings
 	if (history.state || window.location.search) {
-
 		let state = null
 		if (history.state){
-			state = history.state
+			state = history.state.params
 		} else {
 			state = $.deparam(window.location.search.slice(1))
 		}
@@ -214,8 +213,6 @@ $(document).ready(function () {
 		tableOrder.push([1,'asc'])
 	}
 	
-	console.log("table cols: ",tableSearchCols)
-	console.log("table order: ",tableOrder)
 
 	var table = $("#table-candidates").DataTable({
 		orderCellsTop: true,
@@ -524,7 +521,7 @@ $(document).ready(function () {
 					<input class="form-check-input" type="checkbox" role="switch" id="gpt-score-toggle">
 					<label class="form-check-label fw-medium" for="gpt-score-toggle" style="font-size:0.8rem;margin:0;">GPT Threshold: <span id="gpt-score-thre-value" >${init_gpt_score}</span>%</label>
 				</div>
-				<input id="gpt-score-range" type="range" class="form-range" value="${init_gpt_score}">
+				<input id="gpt-score-range" type="range" class="form-range" value="${init_gpt_score}" disabled>
 			`)
 			.find('input[type="range"]').on('input change',function () {  
 				$(this).attr('value',this.value);
@@ -560,30 +557,33 @@ $(document).ready(function () {
 			const api = this.api();
 
 			// push data source url to historyState
-			console.log('Previous history state: ', history.state)
-			console.log('navigation: ',window.performance.getEntriesByType('navigation')[0].type)
+			let state = {params:api.ajax.params(),searchCols:tableSearchCols,order:tableOrder}
 
-			let cur_state = history.state ? history.state : null
-			let new_state = api.ajax.params()
-			if (cur_state) {
-				cur_state['cur_draw'] += 1
-				new_state['cur_draw'] = cur_state['cur_draw']
+			if (triggerBackOrForward) {
+				triggerBackOrForward = false
 			} else {
-				new_state['cur_draw'] = new_state['draw']
+				console.log('pushState fired')
+				if (history.state){
+					history.pushState(state,"", api.ajax.url() + "?" + $.param(api.ajax.params()) )
+				}
+				else {
+					history.replaceState(state,"", api.ajax.url() + "?" + $.param(api.ajax.params()) )
+				}
 			}
 
-			let cur_draw_url = $.deparam(window.location.search.slice(1))['draw'] || 1 
-			console.log('cur_draw_url: ', cur_draw_url)
-			console.log('new_cur_draw: ', new_state['cur_draw'])
-
-			if (cur_draw_url !== new_state['cur_draw']){
-				history.pushState(new_state,"", api.ajax.url() + "?" + $.param(new_state) )
-			}
-			else {
-				history.replaceState(new_state,"", api.ajax.url() + "?" + $.param(new_state) )
-			}
-
-			console.log('Current history state: ', history.state)
+			// update filtering columns
+			history.state.searchCols.forEach((column,i) => {
+				table.column(i).search(column['sSearch'])
+				let dropdown = $(`.table-filter-wrapper:eq(${$(table.column(i).header()).index() - 1})`).find('select') // change selected option in select field
+				
+				if (column['sSearch']){
+					dropdown.val(column['sSearch'])
+					console.log('Field: ',dropdown.prop('name'),'\nValue: ',dropdown.val())
+				} else {
+					dropdown.val("")
+					// console.log('Field: ',dropdown.val(),)
+				}
+			});
 
 
 			// Filtering column
@@ -608,7 +608,7 @@ $(document).ready(function () {
 				select
 					.on("change", function () {
 						if (column.search() !== this.value) {
-							// console.log(`Filter= ${this.value}`);
+							console.log(`Filter= ${this.value}`);
 							column.search(this.value).draw();
 						}
 					});
@@ -825,10 +825,23 @@ $(document).ready(function () {
 
 
 	/* ------------------- Handle history ------------------------- */
+	var triggerBackOrForward = false
 	window.addEventListener('popstate',function () {  
 		console.log('popstate fired')
-		// console.log('navigation: ',window.performance.getEntriesByType('navigation')[0].type)
+		triggerBackOrForward = true
+		
+		// set params
+		this.history.state.searchCols.forEach((column,i) => {
+			table.column(i).search(column['sSearch'])
+			if (column['sSearch']){
+				$(`.table-filter-wrapper:eq(${$(table.column(i).header()).index() - 1})`) // change selected option in select field
+				.find('select')
+				.val(column['sSearch'])
+			}
+		});
+
 		table.draw()
+		
 	})
 
 		

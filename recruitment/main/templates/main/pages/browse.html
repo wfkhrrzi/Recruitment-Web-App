@@ -56,7 +56,7 @@
                         <input type="date" class="form-control table-filter" placeholder="Filter Date">
                     </th>
                     <th class="table-filter-wrapper">
-                        <select name="category" id="" class="form-select table-filter">
+                        <select name="category" class="form-select table-filter">
                             <option class="table-filter-none" value="">Filter</option>
                             {% for category in category %}
                                 <option value="{{category.id}}">{{category.category|title}}</option>
@@ -64,7 +64,7 @@
                         </select>
                     </th>
                     <th class="table-filter-wrapper">
-                        <select name="gpt_status" id="" class="form-select table-filter">
+                        <select name="gpt_status" class="form-select table-filter">
                             <option class="table-filter-none" value="">Filter</option>
                             {% for status in statuses.gpt_status %}
                                 <option value="{{status.codename}}">{{status.status|title}}</option>
@@ -72,7 +72,7 @@
                         </select>
                     </th>
                     <th class="table-filter-wrapper">
-                        <select name="initscreening_status" id="" class="form-select table-filter">
+                        <select name="initscreening_status" class="form-select table-filter">
                             <option class="table-filter-none" value="">Filter</option>
                             {% for status in statuses.initscreening %}
                                 <option value="{{status.codename}}">{{status.status|title}}</option>
@@ -80,7 +80,7 @@
                         </select>
                     </th>
                     <th class="table-filter-wrapper">
-                        <select name="prescreening_status" id="" class="form-select table-filter">
+                        <select name="prescreening_status" class="form-select table-filter">
                             <option class="table-filter-none" value="">Filter</option>
                             {% for status in statuses.prescreening %}
                                 <option value="{{status.codename}}">{{status.status|title}}</option>
@@ -88,7 +88,7 @@
                         </select>
                     </th>
                     <th class="table-filter-wrapper">
-                        <select name="cbi_status" id="" class="form-select table-filter">
+                        <select name="cbi_status" class="form-select table-filter">
                             <option class="table-filter-none" value="">Filter</option>
                             {% for status in statuses.cbi %}
                                 <option value="{{status.codename}}">{{status.status|title}}</option>
@@ -96,7 +96,7 @@
                         </select>
                     </th>
                     <th class="table-filter-wrapper">
-                        <select name="overall_status" id="" class="form-select table-filter">
+                        <select name="overall_status" class="form-select table-filter">
                             <option class="table-filter-none" value="">Filter</option>
                             {% for status in statuses.overall_status %}
                                 <option value="{{status.codename}}">{% format_status_codename status.codename status.status %}</option>

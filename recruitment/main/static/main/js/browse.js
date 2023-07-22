@@ -851,7 +851,7 @@ $(document).ready(function () {
 		this.history.state.searchCols.forEach((column,i) => {
 			table.column(i).search(column['sSearch'])
 			
-			let dropdown = $(`.table-filter-wrapper:eq(${$(table.column(i).header()).index() - 1})`).find('select') // change selected option in select field
+			let dropdown = $(`.table-filter-wrapper:eq(${$(table.column(i).header()).index() - 1})`).find('select, input') // change selected option in select field
 			
 			if (column['sSearch']){
 				dropdown.val(column['sSearch'])

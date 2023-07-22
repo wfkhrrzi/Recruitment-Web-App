@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse,HttpResponse, HttpRequest, HttpResponseBadRequest, QueryDict
 from django.views import View
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt,ensure_csrf_cookie
 from django.utils.decorators import method_decorator
 from django.contrib.auth.mixins import UserPassesTestMixin
 
@@ -32,7 +32,7 @@ class PrescreeningIndex(CustomLoginRequired,View):
 
         return render(request,'main/pages/prescreening.html',context)
 
-@method_decorator(csrf_exempt,name='dispatch')
+@method_decorator(ensure_csrf_cookie,name='dispatch')
 class PrescreeningCreate(CustomLoginRequired,View):
 
     @classmethod
@@ -49,18 +49,23 @@ class PrescreeningCreate(CustomLoginRequired,View):
             return HttpResponseBadRequest('candidate id not found')
         
         try:
-            if(Prescreening.objects.get(candidate_id=request.POST['candidate'])):
-                if return_json(request):
-                    response = {
-                        'prescreening':f'already created for candidate_id = {request.POST["candidate"]}'
-                    }
-                    
-                    if request.POST.get('initial_screening',None):
-                        response['initial_screening:update'] = 'success'    
-                    
-                    return JsonResponse(response)
-            
-                return HttpResponse(response)
+            prescreening = Prescreening.objects.get(candidate_id=request.POST['candidate'])
+
+            candidate.overall_status = prescreening.status
+            candidate.save()
+
+            if return_json(request):
+                response = {
+                    'prescreening':f'already created for candidate_id = {request.POST["candidate"]}'
+                }
+                
+                if request.POST.get('initial_screening',None):
+                    response['initial_screening:update'] = 'success'    
+                
+                return JsonResponse(response)
+        
+            return HttpResponse(response)
+        
         except:
             pass
 
@@ -88,7 +93,7 @@ class PrescreeningCreate(CustomLoginRequired,View):
         )
 
 
-@method_decorator(csrf_exempt,name='dispatch')
+@method_decorator(ensure_csrf_cookie,name='dispatch')
 class PrescreeningInstructionSent(CustomLoginRequired,View): # mail functionality coming soon
 
     def post(self,request:HttpRequest,):
@@ -121,7 +126,7 @@ class PrescreeningInstructionSent(CustomLoginRequired,View): # mail functionalit
         return redirect(request.META.get('HTTP_REFERER') or reverse('main:candidate.index'))
 
 
-@method_decorator(csrf_exempt,name='dispatch')
+@method_decorator(ensure_csrf_cookie,name='dispatch')
 class PrescreeningUpdate(CustomLoginRequired,View): # mail functionality coming soon
 
     def post(self,request:HttpRequest,):
@@ -230,7 +235,7 @@ class PrescreeningUpdate(CustomLoginRequired,View): # mail functionality coming 
 
         
 
-@method_decorator(csrf_exempt,name='dispatch')
+@method_decorator(ensure_csrf_cookie,name='dispatch')
 class PrescreeningSubmissionCreate(CustomLoginRequired,View):
 
     def post(self,request:HttpRequest,):
@@ -270,7 +275,7 @@ class PrescreeningSubmissionCreate(CustomLoginRequired,View):
         return redirect(request.META.get('HTTP_REFERER') or reverse('main:candidate.index'))
     
 
-@method_decorator(csrf_exempt,name='dispatch')
+@method_decorator(ensure_csrf_cookie,name='dispatch')
 class PrescreeningSubmissionDelete(CustomLoginRequired,View):
     
     def post(self,request:HttpRequest,):

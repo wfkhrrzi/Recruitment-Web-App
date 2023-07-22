@@ -1,5 +1,9 @@
 $(document).ready(function () {
 
+	/* ------------------- Handle csrf cookie ------------------------- */
+	const csrftoken = Cookies.get('csrftoken');
+
+
 	function sleepAfterModalHide() {
 		return new Promise(resolve => setTimeout(resolve, 1000));
 	}
@@ -94,7 +98,7 @@ $(document).ready(function () {
 			url: get_details_url+`?candidate_id=${data.id}`,
 			async:false,
 			success: function (response) {
-				console.log(response)
+				// console.log(response)
 				res = response
 			}
 		});
@@ -304,7 +308,7 @@ $(document).ready(function () {
 			},
 			{ 
 				data: "date", 
-				width:"10%"
+				width:"5%"
 			},
 			{ 
 				data: "category_" ,
@@ -321,7 +325,7 @@ $(document).ready(function () {
 			// initialscreening status column
 			{ 
 				data: "initialscreening_status", 
-				width:"10%",
+				width:"15%",
 				render:function (data,type,row) {
 					
 					return component_table_dropdown({
@@ -556,7 +560,7 @@ $(document).ready(function () {
 				$('#gpt-score-thre-value').html(this.value);
 			}).on('change',function () {  
 				// api call to filter table based on gpt score
-				console.log('threshold value:',this.value)
+				// console.log('threshold value:',this.value)
 				api.column('gpt_score:name').search(this.value).draw()		
 			})
 			
@@ -575,20 +579,97 @@ $(document).ready(function () {
 					
 					api.column('gpt_score:name').search(0).draw()		
 				}
+			});
 
-
+			
+			// Filtering column
+			$(".table-filter-wrapper", api.table().header()).each(function (i) {
+				let input = $(this).find("input,select");
+				let input_group = $('<div class="input-group input-group-sm"></div>');
+				input_group
+					.append(input.prop('outerHTML'))
+					.append('<button class="btn btn-outline-danger" type="button" disabled><i class="fa fa-times"></i></button>');
+				input.replaceWith(input_group);
 			})
+
+			$(".table-filter-wrapper", api.table().header()).each(function (i) {
+				let column = api.column($(this).index());
+
+				let clearBtn = $(this).find("button");
+
+				let input = $(this).find("input[type='text']");
+				input
+					.on("keypress", function (e) {
+						if(e.which === 13) {
+							if (column.search() !== this.value) {
+								column.search(this.value).draw();
+							}
+						}
+					})
+					.on('keyup', function (e) {
+
+						if(this.value) {
+							clearBtn.prop('disabled',false)
+						} else {
+							clearBtn.prop('disabled',true)
+						}
+
+					});
+				
+				let select = $(this).find("select");
+				select
+					.on("change", function () {
+						if (column.search() !== this.value) {
+							column.search(this.value).draw();
+						}
+
+						if(this.value) {
+							clearBtn.prop('disabled',false)
+						} else {
+							clearBtn.prop('disabled',true)
+						}
+					});
+
+				let date = $(this).find("input[type='date']");
+				date
+					.on("change", function () {
+						column.search(this.value).draw();
+
+						if(this.value) {
+							clearBtn.prop('disabled',false)
+						} else {
+							clearBtn.prop('disabled',true)
+						}
+					});
+				
+				// when 'X' button is clicked
+				clearBtn.on('click',function () {
+					console.log('clear button clicked')
+					let field = input.length > 0 ? input : select.length > 0 ? select : date.length > 0 ? date : null
+					field.val("");
+					console.log(field)
+
+					$(this).prop('disabled',true)
+
+					column.search('').draw();
+				})
+			});
 
 			// update filtering columns
 			history.state.searchCols.forEach((column,i) => {
 				table.column(i).search(column['sSearch'])
-				let dropdown = $(`.table-filter-wrapper:eq(${$(table.column(i).header()).index() - 1})`).find('select') // change selected option in select field
-				
+
+				let filter = $(`.table-filter-wrapper:eq(${$(table.column(i).header()).index() - 1})`)
+				let dropdown = filter.find('select, input') // change selected option in select field
+
 				if (column['sSearch']){
 					dropdown.val(column['sSearch'])
+					filter.find('button').prop('disabled',false) // disable clear filter
 				} else {
 					dropdown.val("")
+					filter.find('button').prop('disabled',true) // enable clear filter
 				}
+
 			});
 
 		}, //end initComplete
@@ -609,43 +690,6 @@ $(document).ready(function () {
 					history.replaceState(state,"", api.ajax.url() + "?" + $.param(api.ajax.params()) )
 				}
 			}
-
-			// Filtering column
-			$(".table-filter-wrapper", api.table().header()).each(function (i) {
-				// console.log(api.column(i));
-				// console.log(api.column($(this).index()));
-				var column = api.column($(this).index());
-				var input = $(this).find("input[type='text']");
-				input
-					.on("keypress", function (e) {
-						if(e.which === 13) {
-							console.log('******** run input **********')
-							if (column.search() !== this.value) {
-								// console.log(`Filter= ${this.value}`);
-								column.search(this.value).draw();
-							}
-						}
-					})
-					
-				
-				var select = $(this).find("select");
-				select
-					.on("change", function () {
-						if (column.search() !== this.value) {
-							console.log(`Filter= ${this.value}`);
-							column.search(this.value).draw();
-						}
-					});
-
-				var date = $(this).find("input[type='date']");
-				date
-					.on("change", function () {
-						// console.log(`Filter= ${this.value}`);
-						console.log('******** run date **********')
-						column.search(this.value).draw();
-					});
-				
-			});
 
 			// Linkable row / Open respective resume when clicking a candidate item 
 			// $('tr',api.table().body()).css('cursor','pointer').on('click',function (row_i,element) {
@@ -706,14 +750,16 @@ $(document).ready(function () {
 							url: update_url,
 							data: data,
 							headers: {
-								'Accept': 'application/json'
+								'Accept': 'application/json',
+								'X-CSRFToken': csrftoken,
 							},
+							mode: 'same-origin', // Do not send CSRF token to another domain.
 							success: function (response) {
-								console.log(response)
+								// console.log(response)
 								api.draw();
 							},
 							error: function (a,b,c) {  
-								console.log(a.responseJSON);
+								// console.log(a.responseJSON);
 								api.draw();
 			
 							}
@@ -748,7 +794,6 @@ $(document).ready(function () {
 							confirmButtonText: 'Yes, I proceed',
 							cancelButtonText: 'CANCEL',
 						}).then((result) => {
-							console.log(result)
 							if (result.isConfirmed) {
 								// update executed
 								update_ajax();
@@ -805,9 +850,11 @@ $(document).ready(function () {
 								data: data,
 								headers: {
 									Accept: "application/json",
+									'X-CSRFToken': csrftoken,
 								},
+								mode: 'same-origin', // Do not send CSRF token to another domain.		
 								success: function (response) {
-									console.log(response)
+									// console.log(response)
 								},
 								error: function(a,b,c) {
 									console.log(Error(a))
@@ -858,14 +905,21 @@ $(document).ready(function () {
 		this.history.state.searchCols.forEach((column,i) => {
 			table.column(i).search(column['sSearch'])
 			
-			let dropdown = $(`.table-filter-wrapper:eq(${$(table.column(i).header()).index() - 1})`).find('select, input') // change selected option in select field
-			
+			let filter = $(`.table-filter-wrapper:eq(${$(table.column(i).header()).index() - 1})`)
+			let dropdown = filter.find('select, input') // change selected option in select field
+
 			if (column['sSearch']){
 				dropdown.val(column['sSearch'])
+				filter.find('button').prop('disabled',false) // disable clear filter
 			} else {
 				dropdown.val("")
+				filter.find('button').prop('disabled',true) // enable clear filter
 			}
 
+		});
+
+		this.history.state.order.forEach(order => {
+			table.column(order[0]).order(order[1])
 		});
 
 		table.draw()
@@ -1096,8 +1150,10 @@ $(document).ready(function () {
 				url: uploadResumeForm.prop('action'),
 				data: formData,
 				headers:{
-					'Accept':'application/json'
+					'Accept':'application/json',
+					'X-CSRFToken': csrftoken,
 				},
+				mode: 'same-origin', // Do not send CSRF token to another domain.		
 				contentType: false,
 				processData: false,
 				// actions before ajax start
@@ -1168,7 +1224,7 @@ $(document).ready(function () {
 
 	uploadResumeForm.on('submit',function (e) {  
 		e.preventDefault()
-		console.log('upload submitted');
+		// console.log('upload submitted');
 
 		let source_input = $('#upload-resumes-source-hidden').val();
 
@@ -1191,9 +1247,9 @@ $(document).ready(function () {
 			clearUploadErrorAlert();
 		}
 
-		console.log('run upload');
+		// console.log('run upload');
 
-		// executeUploadResume();
+		executeUploadResume();
 
 	})
 
@@ -1329,6 +1385,10 @@ $(document).ready(function () {
 					job_title:jobRoleInput.val(),
 					job_description:jobDescInput.val(),
 				},
+				headers: {
+					'X-CSRFToken': csrftoken,
+				},
+				mode: 'same-origin', // Do not send CSRF token to another domain.		
 				success: function (response) {
 					console.log('parser config updated.')
 					// jobRoleInput.val(response['job_title'])
@@ -1423,7 +1483,9 @@ $(document).ready(function () {
 			data: data,
 			headers: {
 				Accept: "application/json",
+				'X-CSRFToken': csrftoken,
 			},
+			mode: 'same-origin', // Do not send CSRF token to another domain.		
 			success: function (response) {
 				console.log(response)
 				resumesToParseAlert();

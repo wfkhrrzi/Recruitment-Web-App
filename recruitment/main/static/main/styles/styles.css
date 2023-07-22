@@ -76,7 +76,7 @@ html body {
 }
 
 #table-candidates, .table-dropdown, .table-filter, th.sorting{
-    font-size: 0.8rem;
+    font-size: 0.8rem !important;
 }
 
 .file-name-ellipsis {

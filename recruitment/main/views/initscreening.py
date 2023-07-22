@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse,HttpResponse, HttpRequest, HttpResponseBadRequest, QueryDict
 from django.views import View
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.utils.decorators import method_decorator
 from django.contrib.auth.mixins import UserPassesTestMixin
 from main.auth import CustomLoginRequired
@@ -119,7 +119,7 @@ class InitialScreeningIndex(CustomLoginRequired,View):
         return render(request,'main/pages/initscreening.html',context)
 
 
-@method_decorator(csrf_exempt,name='dispatch')
+@method_decorator(ensure_csrf_cookie,name='dispatch')
 class InitialScreeningCreate(CustomLoginRequired,View):
 
     def get(self,request:HttpRequest):
@@ -147,7 +147,7 @@ class InitialScreeningCreate(CustomLoginRequired,View):
         return redirect(request.META.get('HTTP_REFERER') or reverse('main:candidate.index'))
 
 
-@method_decorator(csrf_exempt,name='dispatch')
+@method_decorator(ensure_csrf_cookie,name='dispatch')
 class InitialScreeningHiringUpdate(CustomLoginRequired,View):
     
     def post(self,request: HttpRequest,):
@@ -239,7 +239,7 @@ class InitialScreeningHiringUpdate(CustomLoginRequired,View):
         )
 
 
-@method_decorator(csrf_exempt,name='dispatch')
+@method_decorator(ensure_csrf_cookie,name='dispatch')
 class InitialScreeningEvaluationCreate(CustomLoginRequired,View): # create & update
 
     @classmethod
@@ -305,7 +305,7 @@ class InitialScreeningEvaluationCreate(CustomLoginRequired,View): # create & upd
         return JsonResponse(out)
 
 
-@method_decorator(csrf_exempt,name='dispatch')
+@method_decorator(ensure_csrf_cookie,name='dispatch')
 class InitialScreeningEvaluationDelete(CustomLoginRequired,View): # create & update
 
     def post(self,request: HttpRequest):
@@ -344,7 +344,7 @@ class InitialScreeningEdit(CustomLoginRequired,View):
         return HttpResponse('return http page')
 
 
-@method_decorator(csrf_exempt,name='dispatch')
+@method_decorator(ensure_csrf_cookie,name='dispatch')
 class InitialScreeningUpdate(CustomLoginRequired,View):
     
     def post(self,request: HttpRequest,):

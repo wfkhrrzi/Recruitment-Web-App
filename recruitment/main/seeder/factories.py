@@ -9,7 +9,7 @@ dict_status = {
     'initscreening:pending':'Yet to select',
     'initscreening:proceed':'selected',
     'initscreening:not proceed':'not selected',
-    'initscreening:mobility':'NA (Mobiity)',
+    'initscreening:mobility':'NA (Mobility)',
 
     'prescreening:proceed':'proceed',
     'prescreening:not proceed':'not proceed',

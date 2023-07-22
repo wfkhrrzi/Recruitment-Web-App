@@ -10,7 +10,7 @@ from django.core import serializers
 from main.forms import ResumeSubmissionForm
 from django.shortcuts import redirect
 from django.urls import reverse
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt,ensure_csrf_cookie
 from django.utils.decorators import method_decorator
 from django.db.models import Count, Q
 from main.tasks import parse_resumes
@@ -75,7 +75,7 @@ class CandidateResumeOpen(CustomLoginRequired,View):
         return response
 
 
-@method_decorator(csrf_exempt,name='dispatch')
+@method_decorator(ensure_csrf_cookie,name='dispatch')
 class CandidateResumeCreate(CustomLoginRequired,View):
 
     def post(self,request:HttpRequest):
@@ -163,7 +163,7 @@ class ParserConfigRead(CustomLoginRequired,View):
 
         return JsonResponse(config)
 
-@method_decorator(csrf_exempt,name='dispatch')
+@method_decorator(ensure_csrf_cookie,name='dispatch')
 class ParserConfigUpdate(CustomLoginRequired,View):
 
     def post(self,request:HttpRequest):
@@ -185,7 +185,7 @@ class ParserConfigUpdate(CustomLoginRequired,View):
         return JsonResponse({'response':'success'})
 
 
-@method_decorator(csrf_exempt,name='dispatch')
+@method_decorator(ensure_csrf_cookie,name='dispatch')
 class CandidateResumeParse(CustomLoginRequired,View):
 
     def post(self,request:HttpRequest):

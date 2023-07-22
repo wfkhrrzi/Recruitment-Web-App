@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse,HttpResponse, HttpRequest, HttpResponseBadRequest, QueryDict
 from django.views import View
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt,ensure_csrf_cookie
 from django.utils.decorators import method_decorator
 from django.contrib.auth.mixins import UserPassesTestMixin
 from main.auth import CustomLoginRequired
@@ -33,7 +33,7 @@ class CBIIndex(CustomLoginRequired,View):
 
         return render(request,'main/pages/cbi.html',context)
 
-@method_decorator(csrf_exempt,name='dispatch')
+@method_decorator(ensure_csrf_cookie,name='dispatch')
 class CBICreate(CustomLoginRequired,View):
 
     @classmethod
@@ -85,7 +85,7 @@ class CBICreate(CustomLoginRequired,View):
         return redirect(request.META.get('HTTP_REFERER') or reverse('main:cbi.index',args=[cbi.id]))
 
 
-@method_decorator(csrf_exempt,name='dispatch')
+@method_decorator(ensure_csrf_cookie,name='dispatch')
 class CBIScheduleCreate(CustomLoginRequired,View): # mail functionality coming soon
 
     @classmethod
@@ -126,7 +126,7 @@ class CBIScheduleCreate(CustomLoginRequired,View): # mail functionality coming s
         return redirect(request.META.get('HTTP_REFERER') or reverse('main:candidate.index'))
 
 
-@method_decorator(csrf_exempt,name='dispatch')
+@method_decorator(ensure_csrf_cookie,name='dispatch')
 class CBIScheduleUpdate(CustomLoginRequired,View): # mail functionality coming soon
 
     def post(self,request:HttpRequest,):
@@ -160,7 +160,7 @@ class CBIScheduleUpdate(CustomLoginRequired,View): # mail functionality coming s
         return JsonResponse(form.errors)
 
 
-@method_decorator(csrf_exempt,name='dispatch')
+@method_decorator(ensure_csrf_cookie,name='dispatch')
 class CBIScheduleSendRSVP(CustomLoginRequired,View): # mail functionality coming soon
 
     def post(self,request:HttpRequest,):
@@ -223,7 +223,7 @@ class CBIScheduleGetRSVP(CustomLoginRequired,View):
         return redirect(request.META.get('HTTP_REFERER') or reverse('main:candidate.index'))
 
 
-@method_decorator(csrf_exempt,name='dispatch')
+@method_decorator(ensure_csrf_cookie,name='dispatch')
 class CBIReschedule(CustomLoginRequired,View): # mail functionality coming soon
 
     def post(self,request:HttpRequest,):
@@ -250,7 +250,7 @@ class CBIReschedule(CustomLoginRequired,View): # mail functionality coming soon
         return redirect(request.META.get('HTTP_REFERER') or reverse('main:candidate.index'))
 
 
-@method_decorator(csrf_exempt,name='dispatch')
+@method_decorator(ensure_csrf_cookie,name='dispatch')
 class CBIUpdate(CustomLoginRequired,View): # mail functionality coming soon
 
     def post(self,request:HttpRequest,):
@@ -349,7 +349,7 @@ class CBIUpdate(CustomLoginRequired,View): # mail functionality coming soon
         return redirect(request.META.get('HTTP_REFERER') or reverse('main:candidate.index'))
         
 
-@method_decorator(csrf_exempt,name='dispatch')
+@method_decorator(ensure_csrf_cookie,name='dispatch')
 class CBISubmissionCreate(CustomLoginRequired,View):
 
     def post(self,request:HttpRequest,):
@@ -389,7 +389,7 @@ class CBISubmissionCreate(CustomLoginRequired,View):
         return redirect(request.META.get('HTTP_REFERER') or reverse('main:candidate.index'))
     
 
-@method_decorator(csrf_exempt,name='dispatch')
+@method_decorator(ensure_csrf_cookie,name='dispatch')
 class CBISubmissionDelete(CustomLoginRequired,View):
     
     def post(self,request:HttpRequest,):

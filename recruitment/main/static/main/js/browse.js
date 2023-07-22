@@ -1,5 +1,9 @@
 $(document).ready(function () {
 
+	/* ------------------- Handle csrf cookie ------------------------- */
+	const csrftoken = Cookies.get('csrftoken');
+
+
 	function sleepAfterModalHide() {
 		return new Promise(resolve => setTimeout(resolve, 1000));
 	}
@@ -94,7 +98,7 @@ $(document).ready(function () {
 			url: get_details_url+`?candidate_id=${data.id}`,
 			async:false,
 			success: function (response) {
-				console.log(response)
+				// console.log(response)
 				res = response
 			}
 		});
@@ -556,7 +560,7 @@ $(document).ready(function () {
 				$('#gpt-score-thre-value').html(this.value);
 			}).on('change',function () {  
 				// api call to filter table based on gpt score
-				console.log('threshold value:',this.value)
+				// console.log('threshold value:',this.value)
 				api.column('gpt_score:name').search(this.value).draw()		
 			})
 			
@@ -612,16 +616,12 @@ $(document).ready(function () {
 
 			// Filtering column
 			$(".table-filter-wrapper", api.table().header()).each(function (i) {
-				// console.log(api.column(i));
-				// console.log(api.column($(this).index()));
 				var column = api.column($(this).index());
 				var input = $(this).find("input[type='text']");
 				input
 					.on("keypress", function (e) {
 						if(e.which === 13) {
-							console.log('******** run input **********')
 							if (column.search() !== this.value) {
-								// console.log(`Filter= ${this.value}`);
 								column.search(this.value).draw();
 							}
 						}
@@ -632,7 +632,6 @@ $(document).ready(function () {
 				select
 					.on("change", function () {
 						if (column.search() !== this.value) {
-							console.log(`Filter= ${this.value}`);
 							column.search(this.value).draw();
 						}
 					});
@@ -641,7 +640,6 @@ $(document).ready(function () {
 				date
 					.on("change", function () {
 						// console.log(`Filter= ${this.value}`);
-						console.log('******** run date **********')
 						column.search(this.value).draw();
 					});
 				
@@ -706,14 +704,16 @@ $(document).ready(function () {
 							url: update_url,
 							data: data,
 							headers: {
-								'Accept': 'application/json'
+								'Accept': 'application/json',
+								'X-CSRFToken': csrftoken,
 							},
+							mode: 'same-origin', // Do not send CSRF token to another domain.
 							success: function (response) {
-								console.log(response)
+								// console.log(response)
 								api.draw();
 							},
 							error: function (a,b,c) {  
-								console.log(a.responseJSON);
+								// console.log(a.responseJSON);
 								api.draw();
 			
 							}
@@ -748,7 +748,6 @@ $(document).ready(function () {
 							confirmButtonText: 'Yes, I proceed',
 							cancelButtonText: 'CANCEL',
 						}).then((result) => {
-							console.log(result)
 							if (result.isConfirmed) {
 								// update executed
 								update_ajax();
@@ -805,9 +804,11 @@ $(document).ready(function () {
 								data: data,
 								headers: {
 									Accept: "application/json",
+									'X-CSRFToken': csrftoken,
 								},
+								mode: 'same-origin', // Do not send CSRF token to another domain.		
 								success: function (response) {
-									console.log(response)
+									// console.log(response)
 								},
 								error: function(a,b,c) {
 									console.log(Error(a))
@@ -1100,8 +1101,10 @@ $(document).ready(function () {
 				url: uploadResumeForm.prop('action'),
 				data: formData,
 				headers:{
-					'Accept':'application/json'
+					'Accept':'application/json',
+					'X-CSRFToken': csrftoken,
 				},
+				mode: 'same-origin', // Do not send CSRF token to another domain.		
 				contentType: false,
 				processData: false,
 				// actions before ajax start
@@ -1172,7 +1175,7 @@ $(document).ready(function () {
 
 	uploadResumeForm.on('submit',function (e) {  
 		e.preventDefault()
-		console.log('upload submitted');
+		// console.log('upload submitted');
 
 		let source_input = $('#upload-resumes-source-hidden').val();
 
@@ -1195,9 +1198,9 @@ $(document).ready(function () {
 			clearUploadErrorAlert();
 		}
 
-		console.log('run upload');
+		// console.log('run upload');
 
-		// executeUploadResume();
+		executeUploadResume();
 
 	})
 
@@ -1333,6 +1336,10 @@ $(document).ready(function () {
 					job_title:jobRoleInput.val(),
 					job_description:jobDescInput.val(),
 				},
+				headers: {
+					'X-CSRFToken': csrftoken,
+				},
+				mode: 'same-origin', // Do not send CSRF token to another domain.		
 				success: function (response) {
 					console.log('parser config updated.')
 					// jobRoleInput.val(response['job_title'])
@@ -1427,7 +1434,9 @@ $(document).ready(function () {
 			data: data,
 			headers: {
 				Accept: "application/json",
+				'X-CSRFToken': csrftoken,
 			},
+			mode: 'same-origin', // Do not send CSRF token to another domain.		
 			success: function (response) {
 				console.log(response)
 				resumesToParseAlert();

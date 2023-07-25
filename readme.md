@@ -109,7 +109,7 @@ As the name suggests, this page is initially dedicated to displaying the overvie
 
 The following numbered list explain the key components in the browse page:
 
-1. **Upload Resume** button:
+1. **Upload Resume button**:
 
     Upon clicking the button, a modal dedicated to uploading resume(s) will appear that includes;  
     
@@ -120,7 +120,7 @@ The following numbered list explain the key components in the browse page:
 
     <br>
    
-2. **Parse Resume** button:
+2. **Parse Resume button**:
    
     Upon clicking the button, a modal dedicated to parsing new (uploaded) resume(s) will appear which includes;
     
@@ -131,17 +131,17 @@ The following numbered list explain the key components in the browse page:
     
     <br>
 
-3. **GPT Score Threshold** Filter:
+3. **GPT Score Threshold Filter**:
 
     Each candidate is associated with a certain value of **GPT score** which is derived from the resume parsing process. The `threshold` sets the minimum value/percentage for the score that which filters out candidates in the table that meet the condition. The `toggle` either enables or disable the GPT Score threshold filter.
 
-4. **Source** Filter: Filters out the candidates that are received from a selected source
+4. **Source Filter**: Filters out the candidates that are received from a selected source
 
 5. Table Filters: Filters out the candidates based on the selected value in specific column(s)
 
     ***For `Received Date` column, the `date input` sets the *starting value* of the range , which means the filtered received date will be from *inputted date --> current date*
 
-6. **Status** dropdowns: The users can utilize the `dropdown` to update the application status for each applicant. 
+6. **Status dropdowns**: The users can utilize the `dropdown` to update the application status for each applicant. 
     
     *Technical note: Upon the value change of the dropdown, the relevant event sends an API call in the background to the server to update the status of the stage. Then, the table is refreshed to reflect the latest change.*
 
@@ -151,19 +151,23 @@ The following numbered list explain the key components in the browse page:
 
 There are **three stages** that the candidate must undergo throughout the application process, as depicted by the process flow below.
 
-<p style="font-size:16px;font-weight:600;">Initial Screening ➡ Preassessment (HackerRank) ➡ Competency-based Interview (CBI) ➡ *Joining </p>
+<span style="font-size:16px;font-weight:600;">Initial Screening ➡ Preassessment (HackerRank) ➡ Competency-based Interview (CBI)</span>
 
 ### Initial Screening
 
-The initial screening stage involves 2 phases. 
+The initial screening stage involves 3 phases. 
 
-In the first phase, the hiring manager (HM) reviews and assesses the information of the candidates (extracted from the resume). Once the decision is made, HM updates the `Hiring Manager Screening` status whether to proceed or reject the candidate. If `status = proceed`, the process continues to the 2nd phase, otherwise (`status = proceed`) the application is not continued.
+In the first phase, the hiring manager (HM) reviews and assesses the information of the candidates (extracted from the resume). Once the decision is made, HM updates the `Hiring Manager Screening` status whether to proceed or reject the candidate. If `status = proceed`, the process continues to the 2nd phase, otherwise (`status = not proceed`) the application is not continued.
 
-The second phase requires the decision from other managers in the `DS Lead Screening` section whether to proceed with the candidate. As this part of the system is a work-in-progress, the current view is intended for the hiring manager only. Ideally, the view of this section for other managers should not display include others' vote and only diplay the only user's vote. In this case, the other managers can access the  to cast a vote. In the end, a majority vote is implemented to determine the status of the applicant, in which the status is reflected in the `Final Decision` section.
+The second phase requires decision from other DS leads in the `DS Lead Screening` section whether to proceed with the candidate. This mainly works like a vote in which the user can select relevant **checkbox(s)** and vote to proceed or reject the candidate. Please note that this part of the system is very much a work-in-progress. The current view, as illustrated in the below snippet, is intended for the hiring manager only. Ideally, the view of DS Lead Screening for other managers should only include an interface to vote for the particular candidate on his/her behalf only, <span style="color:red;">although this specific view is not yet developed</span>. As a result, while the managers can access the section to cast a vote, each of the vote remains anonymous and is only seen by the hiring manager. 
+
+In the end, a majority vote is implemented to determine the status of the applicant, in which the status is reflected in the `Final Decision` section. Logically, the majority vote indicates the final status of this stage. However, should there be any rare occasions where the candidates are unable to proceed to the next stage, the hiring manager is allowed to update the final status in this last section.
 
 ### Preasssement
 
-There are three phases involved in the preassessment (initially called Prescreening) stage, as illustrated by the below flow 
+*Note: The system frontend is not yet integrated with the backend*
+
+There are three phases involved in the preassessment stage (initially called as *Prescreening*), as illustrated by the process flow below
 
 
 
@@ -180,7 +184,7 @@ Want to update to the latest version of `colorls`?
 gem update colorls
 ```
 
-# Uninstallation
+# Deployment
 
 [(Back to top)](#table-of-contents)
 
@@ -189,12 +193,6 @@ Want to uninstall and revert back to the old style? No issues (sob). Please feel
 ```sh
 gem uninstall colorls
 ```
-
-# Contributing
-
-[(Back to top)](#table-of-contents)
-
-Your contributions are always welcome! Please have a look at the [contribution guidelines](CONTRIBUTING.md) first. :tada:
 
 # License
 

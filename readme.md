@@ -101,7 +101,6 @@ As of now, ATS entails 5 functioning web pages dedicated for the full tracking f
 ## Candidate Browse/List Page
 
 <details>
-
 <summary>Expand/collapse details</summary>
 <br>
 
@@ -149,6 +148,10 @@ The following numbered list explain the key components in the browse page:
 
 ## Stage Page
 
+<details>
+<summary>Expand/collapse details</summary>
+<br>
+
 There are **three stages** that the candidate must undergo throughout the application process, as depicted by the process flow below.
 
 <span style="font-size:16px;font-weight:600;">Initial Screening ➡ Preassessment (HackerRank) ➡ Competency-based Interview (CBI)</span>
@@ -173,26 +176,19 @@ There are three phases involved in the preassessment stage (initially called as 
 
 ATS wil handle certain automations triggered by the user, as follows
 
+</details>
 
-# Updating
+# Roadmap
 
 [(Back to top)](#table-of-contents)
 
-Want to update to the latest version of `colorls`?
-
-```sh
-gem update colorls
-```
+Content
 
 # Deployment
 
 [(Back to top)](#table-of-contents)
 
-Want to uninstall and revert back to the old style? No issues (sob). Please feel free to open an issue regarding how we can enhance `colorls`.
-
-```sh
-gem uninstall colorls
-```
+Content
 
 # License
 

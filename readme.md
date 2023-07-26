@@ -391,6 +391,27 @@ This section of documentation briefly elaborates on the deployment of ATS.
     2. `pip install -r requirements.txt`: Install the dependencies.
     3. `gunicorn --bind=0.0.0.0:8080 --timeout 600 recruitment.wsgi`: Run the production server via gunicorn.
 
+  ```yml
+  # deploy zip package to azure app service
+  - task: AzureRmWebAppDeployment@4
+    inputs:
+      ConnectionType: 'AzureRM'
+      azureSubscription: $(service_connection)
+      appType: 'webAppLinux'
+      WebAppName: $(app_name)
+      deployToSlotOrASE: true
+      ResourceGroupName: $(resource_group)
+      SlotName: $(slot_name)
+      packageForLinux:  '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+      # packageForLinux:  '$(Build.ArtifactStagingDirectory)/**/*.zip'
+      RuntimeStack: 'PYTHON|3.9'
+      DeploymentType: 'zipDeploy'
+      StartUpCommand: "source antenv/bin/activate & pip install -r requirements.txt & gunicorn --bind=0.0.0.0:8080 --timeout 600 recruitment.wsgi"
+      # StartUpCommand: "python manage.py runserver"
+      AppSettings: '-Port 8080 -RequestTimeout "10:20:00" -WEBSITE_TIME_ZONE "Singapore Standard Time" -WEBSITES_PORT 8080 -WEBSITES_ENABLE_APP_SERVICE_STORAGE true -SCM_DO_BUILD_DURING_DEPLOYMENT true -ENABLE_ORYX_BUILD true'
+      # timeoutInMinutes: 60 # Set the timeout to 60 minutes
+  ```
+
 <!-- # License
 
 [(Back to top)](#table-of-contents)

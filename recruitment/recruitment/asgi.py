@@ -7,7 +7,7 @@ For more information on this file, see
 https://docs.djangoproject.com/en/4.2/howto/deployment/asgi/
 """
 from django.core.asgi import get_asgi_application
-application = get_asgi_application()
+django_asgi_application = get_asgi_application()
 
 import os
 from django.urls import path, re_path
@@ -30,7 +30,7 @@ application = ProtocolTypeRouter({
             AuthMiddlewareStack(URLRouter(django_eventstream.routing.urlpatterns)), 
             { 'channels': ['resume_upload'] }
         ),
-        re_path(r'', get_asgi_application()),
+        re_path(r'', django_asgi_application),
     ]),
 
     'websocket':AuthMiddlewareStack(URLRouter(ws_urlpatterns))

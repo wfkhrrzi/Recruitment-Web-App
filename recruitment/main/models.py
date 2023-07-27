@@ -171,7 +171,6 @@ class Candidate(CreatedMixin,LastModifiedMixin,models.Model):
     category = models.ForeignKey(EmpCategory,on_delete=models.SET_NULL,null=True)
     overall_status = models.ForeignKey(Status,on_delete=models.SET_NULL,null=True,related_name="candidates_overall_status")
     overall_remarks = models.TextField(null=True)
-    test_column = models.TextField()
     candidate_resume = models.OneToOneField(CandidateResume, on_delete=models.SET_NULL, null=True)
 
     def __str__(self) -> str:

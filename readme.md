@@ -9,7 +9,7 @@ One of the core components in the integrated architecture of the Recruitment NWo
 
 The app is powered by **[Django](https://docs.djangoproject.com/en/4.2/intro/) framework** (backend) along with traditional **HTML/CSS/JavaScript** stack in the frontend. Therefore, intermediate knowledge of Python & Django framework may be an advantage to work with the source code.
 
-This *readme.md* aims to provide an overview of the system, installation and build steps, as well as the documentation of the source code as part of the project handover.  
+This *readme.md* aims to provide an overview of the system, installation and build steps, as well as the documentation of the source code as part of the project handover. For best viewing experience, please esure that *mermaid* plugin is enabled in the markdown viewer. 
 <br>
 
 # Table of contents
@@ -20,11 +20,14 @@ This *readme.md* aims to provide an overview of the system, installation and bui
 - [Table of contents](#table-of-contents)
 - [Local Installation](#local-installation)
 - [Overview of ATS](#overview-of-ats)
-  - [*Candidate Browse/List* page](#candidate-browselist-page)
-  - [*Application Stage* pages](#application-stage-pages)
-    - [Initial Screening](#initial-screening)
-    - [Preasssement](#preasssement)
-    - [Competency-based Interview (CBI)](#competency-based-interview-cbi)
+  - [Features](#features)
+    - [*Candidate Browse/List* page](#candidate-browselist-page)
+    - [*Application Stage* pages](#application-stage-pages)
+      - [Initial Screening](#initial-screening)
+      - [Preasssement](#preasssement)
+      - [Competency-based Interview (CBI)](#competency-based-interview-cbi)
+  - [Architecture \& Design](#architecture--design)
+  - [Code Structure](#code-structure)
 - [Deployment via Azure Pipeline in DevOps](#deployment-via-azure-pipeline-in-devops)
 </details>
 <br>
@@ -94,9 +97,13 @@ This *readme.md* aims to provide an overview of the system, installation and bui
 
 At this point, you should be able to access the ATS running in the development server. In short, the `runserver` command allows the developers to test and debug their app by running in the local server. Every changes made to the app will be imediately reflected in the browser wihout the need to set up a production server.
 
+This section encapsulates the overview of ATS in terms of the features, architecture & design, as well as the code structure.
+
+## Features
+
 As of now, ATS entails 5 functioning web pages dedicated for the full tracking capability of the candidates' application. The following explanations briefly describe their respective functions and key components embedded in the section.
 
-## *Candidate Browse/List* page
+### <ins>*Candidate Browse/List* page</ins>
 
 <details open>
 <summary>Expand/collapse details</summary>
@@ -146,7 +153,7 @@ The following numbered list explain the key components in the browse page:
 
 </details>
 
-## *Application Stage* pages
+### *Application Stage* pages
 
 <details open>
 <summary>Expand/collapse details</summary>
@@ -165,7 +172,9 @@ flowchart LR
     IS --> Prescreen --> CBI
 ```
 
-### Initial Screening<hr>
+#### <h3>Initial Screening</h3><hr>
+
+<br>
 
 ![Alt text](<readme/is page.png>)
 
@@ -185,13 +194,15 @@ flowchart LR
 
 1. In the first phase, the hiring manager (HM) reviews and assesses the information of the candidates (extracted from the resume). Once the decision is made, HM updates the **Hiring Manager Screening** status whether to proceed or reject the candidate. If `status = proceed`, the process continues to the 2nd phase, otherwise (`status = not proceed`) the application is not continued.
 
-2. The second phase requires decision from other DS leads (managers) in the **DS Lead Screening** section whether to proceed with the candidate. This mainly works like a vote in which the user can select relevant **checkbox(s)** and vote to proceed or reject the candidate. Please note that this part of the system is very much a work-in-progress. The current view, as illustrated in the below snippet, is intended for the hiring manager only. Ideally, the view of DS Lead Screening for other managers should only include an interface to vote for the particular candidate on his/her behalf only, <span style="color:red;">although this specific view is not yet developed</span>. As a result, while the managers can access the section to cast a vote, each of the vote remains anonymous and is only seen by the hiring manager.
+2. The second phase requires decision from other DS leads (managers) in the **DS Lead Screening** section whether to proceed with the candidate. This mainly works like a vote in which the user can select relevant **checkbox(s)** and vote to proceed or reject the candidate. Please note that this part of the system is very much a work-in-progress. The current view, as illustrated in the below snippet, is intended for the hiring manager only. Ideally, the view of DS Lead Screening for other managers should only include an interface to vote for the particular candidate on his/her behalf only, <span style="color:orange;">although this specific view is not yet developed</span>. As a result, while the managers can access the section to cast a vote, each of the vote remains anonymous and is only seen by the hiring manager.
 
 3. In the end, a majority vote is implemented to determine the status of the applicant, in which the status is reflected in the **Final Decision** section. Logically, the majority vote indicates the final status of this stage. However, should there be any rare occasions where the candidates are unable to proceed to the next stage, the hiring manager is allowed to update the final status in this last section.
 
-*Note: As the requirements constantly keep changing, the UI for other stages is very much underdeveloped apart from Initial Screening page. The  core processes in the backend are not much covered and that the system's frontend is not integrated with the backend yet*
+*Note: As the requirements constantly keep changing, the UI for other stages is very much underdeveloped apart from Initial Screening page. The  core processes in the backend are not much covered and that the system's frontend is not integrated with the backend yet.*
 
-### Preasssement<hr>
+#### <h3>Preasssement</h3><hr>
+
+<br>
 
 ![Alt text](readme/prescreen.png)
 
@@ -228,7 +239,9 @@ flowchart LR
 
 4. Finally, the hiring manager updates the status of the stage for the candidate.
 
-### Competency-based Interview (CBI)<hr>
+#### <h3>Competency-based Interview (CBI)</h3><hr>
+
+<br>
 
 ![Alt text](readme/cbi.png)
 
@@ -284,13 +297,28 @@ flowchart LR
 
 </details>
 
-<br>
-
 <!-- # Roadmap
 
 [(Back to top)](#table-of-contents)
 
 Content -->
+
+## Architecture & Design
+
+Refer to the architecture diagram which visually explains the environment and behaviour of ATS, and the interaction with other external components crucial for ATS.
+
+![Alt text](<readme/Recruitment NWoW App Design-ATS Architecture.drawio (2).png>)
+
+
+The ERD below illustrated the structure of the database designed for ATS as per the collected requirements.
+
+![Alt text](<readme/Recruitment NWoW App Design-(Final) Domain Class.drawio.png>)
+
+## Code Structure
+
+Content
+
+<br>
 
 # Deployment via Azure Pipeline in DevOps
 

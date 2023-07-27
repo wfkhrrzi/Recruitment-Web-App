@@ -104,13 +104,13 @@ As of now, ATS entails 5 functioning web pages dedicated for the full tracking c
 
 ![Alt text](<readme/browse page.png>)
 
-As the name suggests, this page is initially dedicated to displaying the overview/summary of all received candidates for DS department. Nevertheless, it has been gradually developed to embed CRUD functionalities to modify the application status of the candidates. The intention is that the hiring manager/execs can instantly manipulate the status/information of the large volume of candidates from a single view.
+As the name suggests, this page is initially dedicated to displaying the overview/summary of all received candidates for DS department. Nevertheless, it has been gradually developed to embed CRUD capabilities to modify the application status of the candidates. The intention is that the hiring manager/execs can instantly manipulate the status/information of the large volume of candidates from a single view. There are also resume file uploading and parsing functionalities embedded in the page.
 
 The following numbered list explain the key components in the browse page:
 
 1. **Upload Resume button**:
 
-    Upon clicking the button, a modal dedicated to uploading resume(s) will appear that includes;  
+    Upon clicking the button, a modal for uploading resume(s) will appear that includes;  
     
       * `file input` field that accepts multiple file uploads
       * `source` dropdown field to specify the source of resumes
@@ -121,7 +121,7 @@ The following numbered list explain the key components in the browse page:
    
 2. **Parse Resume button**:
    
-    Upon clicking the button, a modal dedicated to parsing new (uploaded) resume(s) will appear which includes;
+    Upon clicking the button, a modal for parsing new (uploaded) resume(s) will appear which includes;
     
     * **Count of resumes** to be parsed
     * Parser configurations input consisting of `job title` and `job description` fields to match the candidates with specific applied position
@@ -132,15 +132,15 @@ The following numbered list explain the key components in the browse page:
 
 3. **GPT Score Threshold Filter**:
 
-    Each candidate is associated with a certain value of **GPT score** which is derived from the resume parsing process. The `threshold` sets the minimum value/percentage for the score that which filters out candidates in the table that meet the condition. The `toggle` either enables or disable the GPT Score threshold filter
+    Each candidate is associated with a certain value of **GPT score** which is derived from the resume parsing process. The `threshold` sets the minimum value/percentage for the score that which filters out candidates in the table that meet the condition. The `toggle` either enables or disable the GPT Score threshold filter.
 
-4. **Source Filter**: Filters out the candidates that are received from a selected source
+4. **Source Filter**: Filters out the candidates that are received from a selected source.
 
-5. Table Filters: Filters out the candidates based on the selected value in specific column(s)
+5. Table Filters: Filters out the candidates based on the selected value in specific column(s).
 
     ***For `Received Date` column, the `date input` sets the *starting value* of the range , which means the filtered received date will be from *inputted date --> current date*
 
-6. **Status dropdowns**: The users can utilize the `dropdown` to update the application status for each applicant
+6. **Status dropdowns**: The users can utilize the `dropdown` to update the application status of a particular applicant at a certain stage.
     
     *Technical note: Upon the value change of the dropdown, the relevant event sends an API call in the background to the server to update the status of the stage. Then, the table is refreshed to reflect the latest change.*
 
@@ -189,11 +189,11 @@ flowchart LR
 
 3. In the end, a majority vote is implemented to determine the status of the applicant, in which the status is reflected in the **Final Decision** section. Logically, the majority vote indicates the final status of this stage. However, should there be any rare occasions where the candidates are unable to proceed to the next stage, the hiring manager is allowed to update the final status in this last section.
 
+*Note: As the requirements constantly keep changing, the UI for other stages is very much underdeveloped apart from Initial Screening page. The  core processes in the backend are not much covered and that the system's frontend is not integrated with the backend yet*
+
 ### Preasssement<hr>
 
 ![Alt text](readme/prescreen.png)
-
-*Note: The system frontend is not yet integrated with the backend*
 
 There are four activities involved in the preassessment stage (initially called as *Prescreening*), as illustrated by the process flow below:
 
@@ -216,6 +216,8 @@ flowchart LR
 ```
 <br>
 
+*Note: The integration of HackerRank is a recently added requirement, hence not covered in the UI & backend.*
+
 1. Once the candidate passes the initial screening stage, ATS automatically sends an invitation link to join the assessment in HackerRank via the candidate's email.
 
 2. Upon sending the email, ATS starts keeping track of the HackerRank submission by the candidate regularly, preferably on *a daily basis*. This can be done by integrating ATS with **HackerRank API** developed by Dr Bassam. ATS checks the timestamp of the submission against the assigned deadline (the date of the invitation email).
@@ -229,8 +231,6 @@ flowchart LR
 ### Competency-based Interview (CBI)<hr>
 
 ![Alt text](readme/cbi.png)
-
-*Note: The system frontend is not yet integrated with the backend*
 
 There are two phases in the CBI stage (initially called as *Prescreening*), as illustrated by the process flow below:
 
@@ -348,7 +348,7 @@ This section of documentation briefly elaborates on the deployment of ATS.
       TargetFolder: '$(System.DefaultWorkingDirectory)/recruitment'  # Destination subfolder
     ```
 
-  * Create a virtual environment in the recruitment folder and install required dependencies. Note the line `python3.9 manage.py collectstatic` which collect all static files into a single location  
+  * Create a virtual environment in that resides in the recruitment folder and install required dependencies. Note the line `python3.9 manage.py collectstatic` which collect all static files into a single location  
     
     ```yml
     # Make a venv, activate, install requirements, run collectstatic

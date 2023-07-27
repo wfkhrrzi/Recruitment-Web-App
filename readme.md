@@ -28,6 +28,7 @@ This *readme.md* aims to provide an overview of the system, installation and bui
       - [Competency-based Interview (CBI)](#competency-based-interview-cbi)
   - [Architecture \& Design](#architecture--design)
   - [Code Structure](#code-structure)
+  - [Database Migration](#database-migration)
 - [Deployment via Azure Pipeline in DevOps](#deployment-via-azure-pipeline-in-devops)
 </details>
 <br>
@@ -97,7 +98,7 @@ This *readme.md* aims to provide an overview of the system, installation and bui
 
 At this point, you should be able to access the ATS running in the development server. In short, the `runserver` command allows the developers to test and debug their app by running in the local server. Every changes made to the app will be imediately reflected in the browser wihout the need to set up a production server.
 
-This section encapsulates the overview of ATS in terms of the features, architecture & design, as well as the code structure.
+This section encapsulates the overview of ATS in terms of the features, architecture & design, code structure, and existing database migration.
 
 ## Features
 
@@ -315,6 +316,10 @@ The ERD below illustrated the structure of the database designed for ATS as per 
 ![Alt text](<readme/Recruitment NWoW App Design-(Final) Domain Class.drawio.png>)
 
 ## Code Structure
+
+Content
+
+## Database Migration
 
 Content
 

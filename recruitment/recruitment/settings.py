@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-2rs$xqpskq7=shem)go3)6s=c=ubl1qj622zz7-5@x%_#eu-ng'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -115,8 +115,8 @@ DATABASES = {
 }
 
 # Celery settings
-# CELERY_BROKER_URL = f"sqla+postgresql://{str(DATABASES['default']['USER'])}:{urllib.parse.quote(str(DATABASES['default']['PASSWORD']), safe='')}@{str(DATABASES['default']['HOST'])}:{str(DATABASES['default']['PORT'])}/{str(DATABASES['default']['NAME'])}"
-CELERY_BROKER_URL = 'sqla+sqlite:///' + str(DATABASES['default']['NAME'])
+CELERY_BROKER_URL = f"sqla+postgresql://{str(DATABASES['default']['USER'])}:{urllib.parse.quote(str(DATABASES['default']['PASSWORD']), safe='')}@{str(DATABASES['default']['HOST'])}:{str(DATABASES['default']['PORT'])}/{str(DATABASES['default']['NAME'])}"
+# CELERY_BROKER_URL = 'sqla+sqlite:///' + str(DATABASES['default']['NAME'])
 # CELERY_RESULT_BACKEND = 'db+sqlite:///' + str(DATABASES['default']['NAME'])
 CELERY_RESULT_BACKEND = 'django-db'
 CELERY_RESULT_EXTENDED = True

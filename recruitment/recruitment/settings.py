@@ -33,7 +33,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
-    # 'channels',
+    'channels',
     "whitenoise.runserver_nostatic",
     'django.contrib.admin',
     'django.contrib.auth',
@@ -59,7 +59,7 @@ AUTH_USER_MODEL = 'main.Users'
 LOGIN_URL = '/login'
 
 MIDDLEWARE = [
-    # 'django_grip.GripMiddleware',
+    'django_grip.GripMiddleware',
     'django.middleware.security.SecurityMiddleware',
     "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -91,7 +91,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'recruitment.wsgi.application'
-# ASGI_APPLICATION = 'recruitment.asgi.application'
+ASGI_APPLICATION = 'recruitment.asgi.application'
 
 EVENTSTREAM_STORAGE_CLASS = 'django_eventstream.storage.DjangoModelStorage'
 
@@ -116,10 +116,11 @@ DATABASES = {
 
 # Celery settings
 # CELERY_BROKER_URL = f"sqla+postgresql://{str(DATABASES['default']['USER'])}:{urllib.parse.quote(str(DATABASES['default']['PASSWORD']), safe='')}@{str(DATABASES['default']['HOST'])}:{str(DATABASES['default']['PORT'])}/{str(DATABASES['default']['NAME'])}"
-# # CELERY_RESULT_BACKEND = 'db+sqlite:///' + str(DATABASES['default']['NAME'])
-# CELERY_RESULT_BACKEND = 'django-db'
-# CELERY_RESULT_EXTENDED = True
-# CELERY_TASK_TRACK_STARTED = True
+CELERY_BROKER_URL = 'sqla+sqlite:///' + str(DATABASES['default']['NAME'])
+# CELERY_RESULT_BACKEND = 'db+sqlite:///' + str(DATABASES['default']['NAME'])
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_RESULT_EXTENDED = True
+CELERY_TASK_TRACK_STARTED = True
 
 # Session security
 SESSION_SECURITY_INSECURE = True
@@ -163,8 +164,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'staticfiles/'
-
-STATIC_ROOT = BASE_DIR / "staticfiles"
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
 

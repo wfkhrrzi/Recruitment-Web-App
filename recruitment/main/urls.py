@@ -11,8 +11,9 @@ from main.view import BrowseIndex, BrowseView, BrowseRowDetailsView
 app_name = 'main'
 
 urlpatterns = [
-    path('api/login', auth.login_view, name='login'),
+    path('api/login', auth.login_view, name='login_api'),
     path('login', auth.CustomLoginView.as_view(), name='login'),
+    path('logout', auth.logout, name='logout'),
     path('', view.index, name='index'),
     path('browse', BrowseIndex.as_view(), name='browse.index'),
     path('browse/<int:candidate_id>', BrowseView.as_view(), name='browse.view'),

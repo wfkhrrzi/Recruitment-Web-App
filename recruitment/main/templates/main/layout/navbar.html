@@ -17,7 +17,7 @@
 				class="nav nav-pills col-12 col-lg-auto ms-5 me-lg-auto mb-2 justify-content-center mb-md-0 fw-medium"
 			>
 				<li>
-					<a href="{% url 'main:browse.index' %}" class="nav-link px-3 text-decoration-none text-white">Home</a>
+					<a href="{% url 'main:index' %}" class="nav-link px-3 text-decoration-none text-white">Home</a>
 				</li>
 				<li>
 					<a href="{% url 'main:browse.index' %}" class="nav-link px-3 text-decoration-none text-white">Candidates</a>
@@ -29,17 +29,17 @@
 				<li><a href="#" class="nav-link px-2 text-white">About</a></li> {% endcomment %}
 			</ul>
 
-			<form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3">
+			{% comment %} <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3">
 				<input
 					type="search"
 					class="form-control form-control-dark"
 					placeholder="Search Candidate"
 					aria-label="Search Candidate"
 				/>
-			</form>
+			</form> {% endcomment %}
 
 			<div class="text-end">
-				<a href="#" role="button" class="btn btn-success btn-theme me-2 btn-sm fw-medium" style="font-size: 1rem">
+				<a href="{% url 'main:logout' %}" role="button" class="btn btn-success btn-theme me-2 btn-sm fw-medium" style="font-size: 1rem">
 					Logout
 				</a>
 				{% comment %} <button type="button" class="btn btn-warning">Sign-up</button> {% endcomment %}

@@ -151,17 +151,17 @@ class CandidateResume(Submission):
 class Candidate(CreatedMixin,LastModifiedMixin,models.Model):
     name = models.CharField(max_length=255)
     date = models.DateField(null=True)
-    referral_name = models.CharField(max_length=100,null=True)
-    phone_number = models.CharField(max_length=100,null=True)
-    email = models.EmailField(max_length=100,null=True)
-    highest_education = models.CharField(max_length=100,null=True) # need revision on this
-    years_exp = models.IntegerField(null=True)
-    CGPA = models.FloatField(null=True)
-    recent_role = models.CharField(max_length=100,null=True)
-    recent_emp = models.CharField(max_length=100,null=True)
-    main_skills = models.CharField(max_length=100,null=True)
-    ds_skills = models.CharField(max_length=100,null=True)
-    ds_background = models.CharField(max_length=100,null=True)
+    referral_name = models.CharField(max_length=255,null=True)
+    phone_number = models.CharField(max_length=255,null=True)
+    email = models.EmailField(max_length=255,null=True)
+    highest_education = models.CharField(max_length=255,null=True) # need revision on this
+    years_exp = models.CharField(max_length=255,null=True)
+    CGPA = models.CharField(max_length=255,null=True)
+    recent_role = models.CharField(max_length=255,null=True)
+    recent_emp = models.CharField(max_length=255,null=True)
+    main_skills = models.TextField(null=True)
+    ds_skills = models.TextField(null=True)
+    ds_background = models.TextField(null=True)
     hr_remarks = models.TextField(null=True)
     gpt_status = models.ForeignKey(Status,on_delete=models.SET_NULL,null=True,related_name="candidates_gpt_status")
     gpt_score = models.FloatField(null=True)
@@ -170,6 +170,7 @@ class Candidate(CreatedMixin,LastModifiedMixin,models.Model):
     nationality = models.ForeignKey(Nationality,on_delete=models.SET_NULL,null=True)
     category = models.ForeignKey(EmpCategory,on_delete=models.SET_NULL,null=True)
     overall_status = models.ForeignKey(Status,on_delete=models.SET_NULL,null=True,related_name="candidates_overall_status")
+    overall_remarks = models.TextField(null=True)
     candidate_resume = models.OneToOneField(CandidateResume, on_delete=models.SET_NULL, null=True)
 
     def __str__(self) -> str:

@@ -2,6 +2,8 @@
 
 {% block sidebar %}{% endblock sidebar %} <!-- overridden so does not display sidebar -->
 
+{% block tabtitle %}Candidate Browse{% endblock tabtitle %}
+
 {% load custom_templatetags %}
 
 {% block content %}
@@ -54,7 +56,7 @@
                         <input type="date" class="form-control table-filter" placeholder="Filter Date">
                     </th>
                     <th class="table-filter-wrapper">
-                        <select name="category" id="" class="form-select table-filter">
+                        <select name="category" class="form-select table-filter">
                             <option class="table-filter-none" value="">Filter</option>
                             {% for category in category %}
                                 <option value="{{category.id}}">{{category.category|title}}</option>
@@ -62,7 +64,7 @@
                         </select>
                     </th>
                     <th class="table-filter-wrapper">
-                        <select name="gpt_status" id="" class="form-select table-filter">
+                        <select name="gpt_status" class="form-select table-filter">
                             <option class="table-filter-none" value="">Filter</option>
                             {% for status in statuses.gpt_status %}
                                 <option value="{{status.codename}}">{{status.status|title}}</option>
@@ -70,7 +72,7 @@
                         </select>
                     </th>
                     <th class="table-filter-wrapper">
-                        <select name="initscreening_status" id="" class="form-select table-filter">
+                        <select name="initscreening_status" class="form-select table-filter">
                             <option class="table-filter-none" value="">Filter</option>
                             {% for status in statuses.initscreening %}
                                 <option value="{{status.codename}}">{{status.status|title}}</option>
@@ -78,7 +80,7 @@
                         </select>
                     </th>
                     <th class="table-filter-wrapper">
-                        <select name="prescreening_status" id="" class="form-select table-filter">
+                        <select name="prescreening_status" class="form-select table-filter">
                             <option class="table-filter-none" value="">Filter</option>
                             {% for status in statuses.prescreening %}
                                 <option value="{{status.codename}}">{{status.status|title}}</option>
@@ -86,7 +88,7 @@
                         </select>
                     </th>
                     <th class="table-filter-wrapper">
-                        <select name="cbi_status" id="" class="form-select table-filter">
+                        <select name="cbi_status" class="form-select table-filter">
                             <option class="table-filter-none" value="">Filter</option>
                             {% for status in statuses.cbi %}
                                 <option value="{{status.codename}}">{{status.status|title}}</option>
@@ -94,10 +96,10 @@
                         </select>
                     </th>
                     <th class="table-filter-wrapper">
-                        <select name="overall_status" id="" class="form-select table-filter">
+                        <select name="overall_status" class="form-select table-filter">
                             <option class="table-filter-none" value="">Filter</option>
                             {% for status in statuses.overall_status %}
-                                <option value="{{status.codename}}">{{status.status|title}}</option>
+                                <option value="{{status.codename}}">{% format_status_codename status.codename status.status %}</option>
                             {% endfor %}
                         </select>
                     </th>
@@ -270,19 +272,27 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h1 class="modal-title fs-5 text-capitalize" id="openResumeModalLabel">Open resume</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn ms-auto" aria-label="Fullscreen" 
+                    style="
+                    --bs-btn-color: var(--bs-secondary-color);
+                    --bs-btn-hover-color: var(--bs-dark);
+                    --bs-btn-active-color: var(--bs-secondary-color);
+                    --bs-btn-active-border-color: transparent;
+
+                    "
+                    >
+                        <i class="fa-solid fa-expand fa-lg"></i>
+                    </button>
+                    <button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <!-- body -->
                 <div class="modal-body" style="font-size: 0.85rem;height:60vh">
                     <!-- display resume -->
-                    {% comment %} <div class="ratio ratio-1x1"> {% endcomment %}
-                        <iframe src="" frameborder="0" style="width:100%;height: 100%;"></iframe>
-                    {% comment %} </div> {% endcomment %}
-
+                    <iframe src="" frameborder="0" style="width:100%;height: 100%;"></iframe>
                 </div>
-                <div class="modal-footer">
+                {% comment %} <div class="modal-footer">
                     <button type="button" class="btn btn-sm btn-danger" data-bs-dismiss="modal">Close</button>
-                </div>
+                </div> {% endcomment %}
 
             </div>
         </div>
@@ -304,7 +314,6 @@
 
 {% block import_scripts %}
 
-    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
     <script src="https://cdn.datatables.net/fixedheader/3.3.2/js/dataTables.fixedHeader.min.js"></script>
@@ -315,8 +324,9 @@
     <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.bootstrap5.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/js-base64@3.7.5/base64.min.js"></script>
-
+    
     {% load static %}
+    <script src="{% static 'main/js/cowboy_jquery-bbq_master_jquery.ba-bbq.min.js' %}"></script>
     <script src="{% static 'django_eventstream/eventsource.min.js' %}"></script>
     <script src="{% static 'django_eventstream/reconnecting-eventsource.js' %}"></script>
     <script src="{% static 'main/js/browse.js' %}"></script>

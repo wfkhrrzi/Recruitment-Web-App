@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse,HttpResponse, HttpRequest, HttpResponseBadRequest, QueryDict
 from django.views import View
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt,ensure_csrf_cookie
 from django.utils.decorators import method_decorator
 from django.contrib.auth.mixins import UserPassesTestMixin
 from main.auth import CustomLoginRequired
@@ -33,7 +33,7 @@ class CBIIndex(CustomLoginRequired,View):
 
         return render(request,'main/pages/cbi.html',context)
 
-@method_decorator(csrf_exempt,name='dispatch')
+@method_decorator(ensure_csrf_cookie,name='dispatch')
 class CBICreate(CustomLoginRequired,View):
 
     @classmethod
@@ -50,28 +50,33 @@ class CBICreate(CustomLoginRequired,View):
             return HttpResponseBadRequest('candidate id not found')
         
         try:
-            if(CBI.objects.get(candidate_id=request.POST['candidate'])):
-                if return_json(request):
-                    response = {
-                        'CBI':f'already created for candidate_id = {request.POST["candidate"]}'
-                    }
-                    
-                    if request.POST.get('initial_screening',None):
-                        response['initial_screening:update'] = 'success'    
-                    
-                    return JsonResponse(response)
+            cbi = CBI.objects.get(candidate_id=request.POST['candidate'])
             
-                return HttpResponse(response)
+            candidate.overall_status = cbi.status
+            candidate.save()
+            
+            if return_json(request):
+                response = {
+                    'CBI':f'already created for candidate_id = {request.POST["candidate"]}'
+                }
+                
+                if request.POST.get('initial_screening',None):
+                    response['initial_screening:update'] = 'success'    
+                
+                return JsonResponse(response)
+        
+            return HttpResponse(response)
+        
         except:
             pass
 
         cbi = CBI(candidate=candidate)
-        cbi.status = Status.objects.get(codename='cbi:pending schedule') # change status to 'cbi:pending schedule'
+        cbi.status = Status.objects.get(codename='cbi:pending prescreen') # default to 'cbi:pending prescreen'
         cbi.created_by = request.user
 
         cbi.save()
         
-        candidate.overall_status = Status.objects.get(codename='cbi:ongoing')
+        candidate.overall_status = cbi.status
         candidate.save()
 
         if return_json(request):
@@ -85,7 +90,7 @@ class CBICreate(CustomLoginRequired,View):
         return redirect(request.META.get('HTTP_REFERER') or reverse('main:cbi.index',args=[cbi.id]))
 
 
-@method_decorator(csrf_exempt,name='dispatch')
+@method_decorator(ensure_csrf_cookie,name='dispatch')
 class CBIScheduleCreate(CustomLoginRequired,View): # mail functionality coming soon
 
     @classmethod
@@ -114,6 +119,9 @@ class CBIScheduleCreate(CustomLoginRequired,View): # mail functionality coming s
         #     return 
         
         cbischedule.save()
+
+        cbi.candidate.overall_status = cbischedule.status
+        cbi.candidate.save()
         
         if return_json(request):
             return JsonResponse({
@@ -123,7 +131,7 @@ class CBIScheduleCreate(CustomLoginRequired,View): # mail functionality coming s
         return redirect(request.META.get('HTTP_REFERER') or reverse('main:candidate.index'))
 
 
-@method_decorator(csrf_exempt,name='dispatch')
+@method_decorator(ensure_csrf_cookie,name='dispatch')
 class CBIScheduleUpdate(CustomLoginRequired,View): # mail functionality coming soon
 
     def post(self,request:HttpRequest,):
@@ -157,7 +165,7 @@ class CBIScheduleUpdate(CustomLoginRequired,View): # mail functionality coming s
         return JsonResponse(form.errors)
 
 
-@method_decorator(csrf_exempt,name='dispatch')
+@method_decorator(ensure_csrf_cookie,name='dispatch')
 class CBIScheduleSendRSVP(CustomLoginRequired,View): # mail functionality coming soon
 
     def post(self,request:HttpRequest,):
@@ -220,7 +228,7 @@ class CBIScheduleGetRSVP(CustomLoginRequired,View):
         return redirect(request.META.get('HTTP_REFERER') or reverse('main:candidate.index'))
 
 
-@method_decorator(csrf_exempt,name='dispatch')
+@method_decorator(ensure_csrf_cookie,name='dispatch')
 class CBIReschedule(CustomLoginRequired,View): # mail functionality coming soon
 
     def post(self,request:HttpRequest,):
@@ -247,7 +255,7 @@ class CBIReschedule(CustomLoginRequired,View): # mail functionality coming soon
         return redirect(request.META.get('HTTP_REFERER') or reverse('main:candidate.index'))
 
 
-@method_decorator(csrf_exempt,name='dispatch')
+@method_decorator(ensure_csrf_cookie,name='dispatch')
 class CBIUpdate(CustomLoginRequired,View): # mail functionality coming soon
 
     def post(self,request:HttpRequest,):
@@ -292,18 +300,33 @@ class CBIUpdate(CustomLoginRequired,View): # mail functionality coming soon
 
             elif int(request.POST['proceed']) == 2: #pending schedule
                 
-                cbi.is_proceed = False
+                cbi.is_proceed = None
                 cbi.status = Status.objects.get(codename='cbi:pending schedule')
 
             elif int(request.POST['proceed']) == 3: #pending interview
                 
-                cbi.is_proceed = False
+                cbi.is_proceed = None
                 cbi.status = Status.objects.get(codename='cbi:pending interview')
 
             elif int(request.POST['proceed']) == 4: #pending result
                 
-                cbi.is_proceed = False
+                cbi.is_proceed = None
                 cbi.status = Status.objects.get(codename='cbi:pending result')
+
+            elif int(request.POST['proceed']) == 5: #hold
+                
+                cbi.is_proceed = None
+                cbi.status = Status.objects.get(codename='cbi:hold')
+
+            elif int(request.POST['proceed']) == 6: #withdraw
+                
+                cbi.is_proceed = False
+                cbi.status = Status.objects.get(codename='cbi:withdraw')
+
+            elif int(request.POST['proceed']) == 7: #prending prescreen
+                
+                cbi.is_proceed = None
+                cbi.status = Status.objects.get(codename='cbi:prending prescreen')
 
         # update remarks
         if request.POST.get('remarks',None) != None:
@@ -311,6 +334,9 @@ class CBIUpdate(CustomLoginRequired,View): # mail functionality coming soon
 
         cbi.last_modified_by = request.user
         cbi.save()
+
+        cbi.candidate.overall_status = cbi.status
+        cbi.candidate.save()
             
         if return_json(request):
             return JsonResponse({
@@ -328,7 +354,7 @@ class CBIUpdate(CustomLoginRequired,View): # mail functionality coming soon
         return redirect(request.META.get('HTTP_REFERER') or reverse('main:candidate.index'))
         
 
-@method_decorator(csrf_exempt,name='dispatch')
+@method_decorator(ensure_csrf_cookie,name='dispatch')
 class CBISubmissionCreate(CustomLoginRequired,View):
 
     def post(self,request:HttpRequest,):
@@ -368,7 +394,7 @@ class CBISubmissionCreate(CustomLoginRequired,View):
         return redirect(request.META.get('HTTP_REFERER') or reverse('main:candidate.index'))
     
 
-@method_decorator(csrf_exempt,name='dispatch')
+@method_decorator(ensure_csrf_cookie,name='dispatch')
 class CBISubmissionDelete(CustomLoginRequired,View):
     
     def post(self,request:HttpRequest,):

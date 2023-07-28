@@ -32,6 +32,10 @@
 			
 		</div>
 
+		<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+
+		{% include 'session_security/all.html' %}
+
 		<script
 			src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.7/dist/umd/popper.min.js"
 			integrity="sha384-zYPOMqeu1DAVkHiLqWBUTcbYfZ8osu1Nd6Z89ify25QV9guujx43ITvfi12/QExE"
@@ -42,6 +46,7 @@
 			integrity="sha384-Y4oOpwW3duJdCWv5ly8SCFYWqFDsfob/3GkgExXKV4idmbt98QcxXYs9UoXAB7BZ"
 			crossorigin="anonymous"
 		></script>
+		<script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
 		{% block import_scripts %}{% endblock import_scripts %}
 	</body>
 </html>

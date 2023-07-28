@@ -16,7 +16,8 @@ from datetime import datetime
 
 # Create your views here.
 def index(request):
-    return JsonResponse('Hello world',safe=False)
+    # return JsonResponse('Hello world',safe=False)
+    return render(request,'main/pages/home.html')
     
 
 class BrowseIndex(CustomLoginRequired, View):
@@ -42,6 +43,9 @@ class BrowseIndex(CustomLoginRequired, View):
                 gpt_status=[],
                 overall_status=[],
             )
+
+            overall_status_distinct = [obj['overall_status'] for obj in list(Candidate.objects.values('overall_status').distinct())]
+
             for status_obj in lst_statuses:
                 codename:str = status_obj['codename']
                 status:str = status_obj['status']
@@ -49,14 +53,15 @@ class BrowseIndex(CustomLoginRequired, View):
                 out_status = {'id':id,'codename':codename,'status':status}
 
                 stage,phase = tuple(codename.split(':'))
-                if phase == 'ongoing': # overall_status
-                    statuses['overall_status'].append(out_status)
-                elif stage == 'initscreening' :
-                    if phase in ('pending','selected','not selected'):
+                
+                if stage == 'initscreening' :
+                    if phase in ('pending','proceed','not proceed'):
                         statuses[stage].append(out_status)
                 elif stage in ('prescreening','cbi','gpt_status',):
                     statuses[stage].append(out_status)
 
+                if id in overall_status_distinct: # overall_status
+                    statuses['overall_status'].append(out_status)
                 # elif stage == 'prescreening':
                 #     if phase in ('pending','proceed','not proceed'):
                 #         statuses[stage].append(out_status)
@@ -81,7 +86,7 @@ class BrowseIndex(CustomLoginRequired, View):
                     'id',
                     filter=
                         # Q(initialscreening__status__isnull=False) & 
-                        ~Q(initialscreening__status__codename__in=["initscreening:selected","initscreening:not selected"]) & 
+                        ~Q(initialscreening__status__codename__in=["initscreening:proceed","initscreening:not proceed"]) & 
                         Q(prescreening__status__isnull=True) &
                         Q(cbi__status__isnull=True)
                 ),
@@ -136,7 +141,7 @@ class BrowseIndex(CustomLoginRequired, View):
                     elif dt_attr == 'gpt_score':
                         candidates = candidates.filter(**{f"{dt_attr}__gte":float(dt_filter_val)})
                     elif dt_attr == 'date':
-                        candidates = candidates.filter(**{f"{dt_attr}":datetime.strptime(dt_filter_val,'%Y-%m-%d').date()})
+                        candidates = candidates.filter(**{f"{dt_attr}__gte":datetime.strptime(dt_filter_val,'%Y-%m-%d').date()})
                     else:
                         print(dt_attr)
                         dt_attr = dt_attr.rsplit('_',1)[0]
@@ -185,6 +190,7 @@ class BrowseIndex(CustomLoginRequired, View):
                 default=Value(None)
             ),
             overall_status_=F('overall_status__status'),
+            overall_status_codename=F('overall_status__codename'),
             category_=F('category__category'),
             source_=F('source__source'),
             gpt_status_=F('gpt_status__status'),
@@ -216,7 +222,11 @@ class BrowseIndex(CustomLoginRequired, View):
                 default=Concat(
                     Value(reverse('main:initscreening.index.default')), F('initialscreening_id'), output_field=CharField(),
                 )
-            )
+            ),
+            is_resume=Case(
+                When(Q(candidate_resume__isnull=False),then=Value(True)),
+                default=Value(False)
+            ),
         )
 
         # sorting
@@ -278,6 +288,11 @@ class BrowseRowDetailsView(CustomLoginRequired,View):
             # ),
             cbi_remarks=Case(
                 When(Q(cbi__remarks__isnull=False),then=F('cbi__remarks')),
+                default=Value('-'),
+                output_field=TextField(),
+            ),
+            overall_remarks_=Case(
+                When(Q(overall_remarks__isnull=False),then=F('overall_remarks')),
                 default=Value('-'),
                 output_field=TextField(),
             ),

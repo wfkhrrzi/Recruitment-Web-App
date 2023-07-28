@@ -1,5 +1,9 @@
 $(document).ready(function () {
 
+	/* ------------------- Handle csrf cookie ------------------------- */
+	const csrftoken = Cookies.get('csrftoken');
+
+
 	function sleepAfterModalHide() {
 		return new Promise(resolve => setTimeout(resolve, 1000));
 	}
@@ -94,7 +98,7 @@ $(document).ready(function () {
 			url: get_details_url+`?candidate_id=${data.id}`,
 			async:false,
 			success: function (response) {
-				console.log(response)
+				// console.log(response)
 				res = response
 			}
 		});
@@ -120,11 +124,12 @@ $(document).ready(function () {
 				label:'CBI Assessment',
 				cur_remarks:remarks.cbi_remarks,
 			},
-			// overall:{
-			// 	form_action:'#',
-			// 	id:null,
-			// 	label:'Overall',
-			// },
+			overall:{
+				form_action:'#',
+				id:data.id,
+				label:'Overall',
+				cur_remarks:remarks.overall_remarks_,
+			},
 		}
 
 		let rootWrapper = $('<div>').addClass('d-flex justify-content-start gap-4');
@@ -178,10 +183,40 @@ $(document).ready(function () {
 		`;
 	}
 
-	// gpt_status initialized to 'recommended'
-	// $('.table-filter-wrapper select[name="gpt_status"]').val('gpt_status:recommended');
 
 	const init_gpt_score = 80
+
+	var tableSearchCols = []
+	var tableOrder = []
+
+	// set initial searchCol and order params based on current query strings
+	if (history.state || window.location.search) {
+		let state = null
+		if (history.state){
+			state = history.state.params
+		} else {
+			state = $.deparam(window.location.search.slice(1))
+		}
+
+		// set cols
+		state.columns.forEach(column => {
+			tableSearchCols.push({search:column.search['value']})
+		});
+		// set orders
+		state.order.forEach(order => {
+			tableOrder.push([order.column,order.dir])
+		});
+	}
+	else {
+
+		// set cols
+		for (let i = 0; i < 11; i++) {
+			tableSearchCols.push(null)			
+		}
+		// set orders
+		tableOrder.push([1,'asc'])
+	}
+	
 
 	var table = $("#table-candidates").DataTable({
 		orderCellsTop: true,
@@ -230,52 +265,59 @@ $(document).ready(function () {
 				Accept: "application/json",
 			},
 		},
-		searchCols: [
-			null,
-			null,
-			null,
-			null,
-			// { "search": "gpt_status:recommended" },
-			null,
-			null,
-			null,
-			null,
-			null,
-			null,
-			{ "search": init_gpt_score },
-
-		],
-		order: [[1, 'asc']],
+		searchCols: tableSearchCols, // refer to tableSearchCols to modify initial search
+		order: tableOrder, // refer to tableOder to modify initial order 
 		columns: [
 			{
-				className: 'dt-control',
+				className: 'dt-resume',
                 orderable: false,
-                data: null,
-                defaultContent: '',
-			},
-			{ data: "name", width:"15%", render: function (data,type,row) {
-				out = $(`
-					<div>
-						<div class='d-flex gap-2 align-items-center'>
-							<div>${data}</div>
-						</div>
-					</div>
-				`);
-
-				if (row.new_applicant) {
-					out.find('div.d-flex').append(`
-						<span class="badge text-bg-secondary rounded-pill fw-semibold">NEW</span>
-					`)
+                // width: "5%",
+                searchable: false,
+                data: "is_resume",
+				render: function (data,type,row) {
+					if (data){
+						return `
+							<span><i class="fa-solid fa-file fa-lg"></i></span>
+						`
+					}
+					else {
+						return ''
+					}
 				}
+			},
+			{ 
+				data: "name", 
+				width:"15%", 
+				render: function (data,type,row) {
+					out = $(`
+						<div>
+							<div class='d-flex gap-2 align-items-center'>
+								<div>${data}</div>
+							</div>
+						</div>
+					`);
 
-				return out.html();
-			}},
-			{ data: "date", },
-			{ data: "category_" ,width:"10%",},
+					if (row.new_applicant) {
+						out.find('div.d-flex').append(`
+							<span class="badge text-bg-secondary rounded-pill fw-semibold">NEW</span>
+						`)
+					}
+
+					return out.html();
+				}
+			},
+			{ 
+				data: "date", 
+				width:"5%"
+			},
+			{ 
+				data: "category_" ,
+				width:"10%",
+			},
 			// gpt status column
 			{ 
 				data: "gpt_status_", 
-				width:"13%",
+				width:"10%",
 				render:function (data,type) {  
 					return gpt_status_badge(data)
 				},
@@ -283,17 +325,17 @@ $(document).ready(function () {
 			// initialscreening status column
 			{ 
 				data: "initialscreening_status", 
-				width:"13%",
+				width:"15%",
 				render:function (data,type,row) {
 					
 					return component_table_dropdown({
 						data : data,
 						statuses_obj : statuses_initscreening,
 						options_param : {
-							'initscreening:selected': {
+							'initscreening:proceed': {
 								value: 1,
 							},
-							'initscreening:not selected': {
+							'initscreening:not proceed': {
 								value: 0,
 							},
 							'initscreening:pending': {
@@ -320,7 +362,7 @@ $(document).ready(function () {
 			// prescreening status column
 			{ 
 				data: "prescreening_status",
-				width:"13%",
+				width:"15%",
 				render:function (data,type,row) {
 					
 					return component_table_dropdown({
@@ -345,6 +387,12 @@ $(document).ready(function () {
 							},
 							'prescreening:assessment submitted': {
 								value: 4,
+							},
+							'prescreening:hold': {
+								value: 5,
+							},
+							'prescreening:withdraw': {
+								value: 6,
 							},
 						},
 						stage_update_url : prescreening_update_url,
@@ -377,7 +425,7 @@ $(document).ready(function () {
 			// cbi status column
 			{ 
 				data: "cbi_status",
-				width:"13%",
+				width:"15%",
 				render:function (data,type,row) {
 					
 					return component_table_dropdown({
@@ -401,6 +449,18 @@ $(document).ready(function () {
 							'cbi:pending result': {
 								// display: false
 								value: 4,
+							},
+							'cbi:hold': {
+								// display: false
+								value: 5,
+							},
+							'cbi:withdraw': {
+								// display: false
+								value: 6,
+							},
+							'cbi:pending prescreen': {
+								// display: false
+								value: 7,
 							},
 						},
 						stage_update_url : cbi_update_url,
@@ -430,11 +490,33 @@ $(document).ready(function () {
 				},
 			},
 			{ 
-				data: "gpt_status_", 
+				data: "overall_status_", 
 				width:"15%",
-				render: function (data) {  
-					return gpt_status_badge(data);
-				}
+				render: function (data,type,row) {  
+					stage = row.overall_status_codename.split(':')[0]
+					stage = stage == 'initscreening' ? 'Initial Screening' : stage == 'prescreening' ? 'Prescreening' :  stage == 'cbi' ? 'CBI' : stage == 'joining' ? stage :  'Error'
+					let output = $(`
+						<div>
+							<div class="badge rounded-pill mb-1" style="font-size:0.75rem">${data.charAt(0).toUpperCase()+data.slice(1)}</div>
+						</div>
+					`)
+
+					if (stage != 'joining'){
+						output.append(`<div style="font-size:0.75rem">@ <span class="fw-medium">${stage}</span></div>`)
+					}
+
+					if (row.overall_status_.includes('not') || row.overall_status_.includes('withdraw')) {
+						$(output).find('.badge').addClass('text-bg-danger')
+					}
+					else if (row.overall_status_.includes('selected') || row.overall_status_.includes('recommended') || row.overall_status_.includes('proceed') || row.overall_status_.includes('recruited')) {
+						$(output).find('.badge').addClass('text-bg-success')
+					} 
+					else {
+						$(output).find('.badge').addClass('text-bg-warning')
+					}
+
+					return output.html();
+				},
 			},
 			{
 				name:"source",
@@ -467,96 +549,181 @@ $(document).ready(function () {
 			});
 
 			$('#gpt-score-thre').addClass('ms-3').append(`
-				<label class="fw-medium" style="font-size:0.8rem;margin:0;">GPT Threshold: <span id="gpt-score-thre-value" >${init_gpt_score}</span>%</label>
-				<input type="range" class="form-range" value="${init_gpt_score}">
+				<div class="form-check form-switch">
+					<input class="form-check-input" type="checkbox" role="switch" id="gpt-score-toggle">
+					<label class="form-check-label fw-medium" for="gpt-score-toggle" style="font-size:0.8rem;margin:0;">GPT Threshold: <span id="gpt-score-thre-value" >${init_gpt_score}</span>%</label>
+				</div>
+				<input id="gpt-score-range" type="range" class="form-range" value="${init_gpt_score}" disabled>
 			`)
 			.find('input[type="range"]').on('input change',function () {  
 				$(this).attr('value',this.value);
 				$('#gpt-score-thre-value').html(this.value);
 			}).on('change',function () {  
 				// api call to filter table based on gpt score
-				console.log('threshold value:',this.value)
+				// console.log('threshold value:',this.value)
 				api.column('gpt_score:name').search(this.value).draw()		
 			})
+			
+			$('#gpt-score-toggle').on('change',function () {  
+				if($(this).prop('checked')) {
+					// filter on
+					$('#gpt-score-range').prop('disabled',false)
+					
+					api.column('gpt_score:name').search( 
+						$('#gpt-score-range').attr('value')
+					).draw()		
+				}
+				else {
+					// filter on
+					$('#gpt-score-range').prop('disabled',true)
+					
+					api.column('gpt_score:name').search(0).draw()		
+				}
+			});
+
+			
+			// Filtering column
+			$(".table-filter-wrapper", api.table().header()).each(function (i) {
+				let input = $(this).find("input,select");
+				let input_group = $('<div class="input-group input-group-sm"></div>');
+				input_group
+					.append(input.prop('outerHTML'))
+					.append('<button class="btn btn-outline-danger" type="button" disabled><i class="fa fa-times"></i></button>');
+				input.replaceWith(input_group);
+			})
+
+			$(".table-filter-wrapper", api.table().header()).each(function (i) {
+				let column = api.column($(this).index());
+
+				let clearBtn = $(this).find("button");
+
+				let input = $(this).find("input[type='text']");
+				input
+					.on("keypress", function (e) {
+						if(e.which === 13) {
+							if (column.search() !== this.value) {
+								column.search(this.value).draw();
+							}
+						}
+					})
+					.on('keyup', function (e) {
+
+						if(this.value) {
+							clearBtn.prop('disabled',false)
+						} else {
+							clearBtn.prop('disabled',true)
+						}
+
+					});
+				
+				let select = $(this).find("select");
+				select
+					.on("change", function () {
+						if (column.search() !== this.value) {
+							column.search(this.value).draw();
+						}
+
+						if(this.value) {
+							clearBtn.prop('disabled',false)
+						} else {
+							clearBtn.prop('disabled',true)
+						}
+					});
+
+				let date = $(this).find("input[type='date']");
+				date
+					.on("change", function () {
+						column.search(this.value).draw();
+
+						if(this.value) {
+							clearBtn.prop('disabled',false)
+						} else {
+							clearBtn.prop('disabled',true)
+						}
+					});
+				
+				// when 'X' button is clicked
+				clearBtn.on('click',function () {
+					console.log('clear button clicked')
+					let field = input.length > 0 ? input : select.length > 0 ? select : date.length > 0 ? date : null
+					field.val("");
+					console.log(field)
+
+					$(this).prop('disabled',true)
+
+					column.search('').draw();
+				})
+			});
+
+			// update filtering columns
+			history.state.searchCols.forEach((column,i) => {
+				table.column(i).search(column['sSearch'])
+
+				let filter = $(`.table-filter-wrapper:eq(${$(table.column(i).header()).index() - 1})`)
+				let dropdown = filter.find('select, input') // change selected option in select field
+
+				if (column['sSearch']){
+					dropdown.val(column['sSearch'])
+					filter.find('button').prop('disabled',false) // disable clear filter
+				} else {
+					dropdown.val("")
+					filter.find('button').prop('disabled',true) // enable clear filter
+				}
+
+			});
 
 		}, //end initComplete
 
 		drawCallback: function () {  
 			const api = this.api();
 
-			// Filtering column
-			$(".table-filter-wrapper", api.table().header()).each(function (i) {
-				// console.log(api.column(i));
-				// console.log(api.column($(this).index()));
-				var column = api.column($(this).index());
-				var input = $(this).find("input[type='text']");
-				input
-					.on("keypress", function (e) {
-						if(e.which === 13) {
-							console.log('******** run input **********')
-							if (column.search() !== this.value) {
-								// console.log(`Filter= ${this.value}`);
-								column.search(this.value).draw();
-							}
-						}
-					})
-					
-				
-				var select = $(this).find("select");
-				select
-					.on("change", function () {
-						if (column.search() !== this.value) {
-							// console.log(`Filter= ${this.value}`);
-							column.search(this.value).draw();
-						}
-					});
+			// push data source url to historyState
+			let state = {params:api.ajax.params(),searchCols:tableSearchCols,order:tableOrder}
 
-				var date = $(this).find("input[type='date']");
-				date
-					.on("change", function () {
-						// console.log(`Filter= ${this.value}`);
-						console.log('******** run date **********')
-						column.search(this.value).draw();
-					});
-				
-			});
+			if (triggerBackOrForward) {
+				triggerBackOrForward = false
+			} else {
+				if (history.state){
+					history.pushState(state,"", api.ajax.url() + "?" + $.param(api.ajax.params()) )
+				}
+				else {
+					history.replaceState(state,"", api.ajax.url() + "?" + $.param(api.ajax.params()) )
+				}
+			}
 
 			// Linkable row / Open respective resume when clicking a candidate item 
-			$('tr',api.table().body()).each(function (row_i,element) {
-
-				let data = api.table().row(this).data()
-
-				$(this)
-				.on('click', function() {
-	
-					// window.location.href = api.row(row_i).data()['href'];
-					
-					console.log(data.id)
-					$.ajax({
-						url: get_open_resume_url+data.id,  // Replace with the URL to your Django view
-						type: 'GET',
-						xhrFields: {
-							responseType: 'blob'
-						},
-						// responseType: 'arraybuffer',  // Use 'arraybuffer' to handle binary data
-						// dataType: 'blob',  // Use 'blob' data type to handle binary data
-						success: function(data) {
-
-							var fileUrl = URL.createObjectURL(data);
+			// $('tr',api.table().body()).css('cursor','pointer').on('click',function (row_i,element) {
+			$('td.dt-resume',api.table().body()).css('cursor','pointer').on('click', function (e) {
 				
-							// // Set the iframe source to display the PDF
-							$(openResumeModal._element).find('iframe').attr('src', fileUrl);
+				e.stopPropagation()
 
-							openResumeModal.toggle()
-
-						},
-						error: function(xhr, status, error) {
-							console.error('Error retrieving PDF:', error);
-						}
-					});
+				const tr = $(this).closest('tr');
+				let data = api.table().row(tr).data()
 	
-				})
-				.css('cursor','pointer');
+				// window.location.href = api.row(row_i).data()['href'];
+					
+				$.ajax({
+					url: get_open_resume_url+data.id,  // Replace with the URL to your Django view
+					type: 'GET',
+					xhrFields: {
+						responseType: 'blob'
+					},
+					// responseType: 'arraybuffer',  // Use 'arraybuffer' to handle binary data
+					// dataType: 'blob',  // Use 'blob' data type to handle binary data
+					success: function(data) {
+
+						var fileUrl = URL.createObjectURL(data);
+			
+						// // Set the iframe source to display the PDF
+						$(openResumeModal._element).find('iframe').attr('src', fileUrl);
+
+						openResumeModal.toggle()
+
+					},
+					error: function(xhr, status, error) {
+						console.error('Error retrieving PDF:', error);
+					}
+				});
 	
 			});
 
@@ -583,14 +750,16 @@ $(document).ready(function () {
 							url: update_url,
 							data: data,
 							headers: {
-								'Accept': 'application/json'
+								'Accept': 'application/json',
+								'X-CSRFToken': csrftoken,
 							},
+							mode: 'same-origin', // Do not send CSRF token to another domain.
 							success: function (response) {
-								console.log(response)
+								// console.log(response)
 								api.draw();
 							},
 							error: function (a,b,c) {  
-								console.log(a.responseJSON);
+								// console.log(a.responseJSON);
 								api.draw();
 			
 							}
@@ -625,7 +794,6 @@ $(document).ready(function () {
 							confirmButtonText: 'Yes, I proceed',
 							cancelButtonText: 'CANCEL',
 						}).then((result) => {
-							console.log(result)
 							if (result.isConfirmed) {
 								// update executed
 								update_ajax();
@@ -646,13 +814,18 @@ $(document).ready(function () {
 
 
 			// Add event listener for opening and closing child rows (remarks)
-			$('td.dt-control',api.table().body()).on('click', function (e) {
+			// $('td.dt-control',api.table().body()).on('click', function (e) {
+			$('tr',api.table().body()).css('cursor','pointer').on('click',function (e) {
+
 				e.stopPropagation()
 
 				// current row
-				const tr = $(this).closest('tr');
+				const tr = $(this);
 				const tr_index = $(tr).index()
 				const row = api.table().row(tr);
+
+				// window.location.href = row.data()['href']
+				// return
 		 
 				if (row.child.isShown()) {
 					// This row is already open - close it
@@ -680,9 +853,11 @@ $(document).ready(function () {
 								data: data,
 								headers: {
 									Accept: "application/json",
+									'X-CSRFToken': csrftoken,
 								},
+								mode: 'same-origin', // Do not send CSRF token to another domain.		
 								success: function (response) {
-									console.log(response)
+									// console.log(response)
 								},
 								error: function(a,b,c) {
 									console.log(Error(a))
@@ -713,6 +888,46 @@ $(document).ready(function () {
 
 	});
 
+	// trigger fullscreen modal
+	$(openResumeModal._element).find('.modal-header').find('button:eq(0)').on('click',function () {  
+		$(openResumeModal._element).find('.modal-dialog').toggleClass('modal-fullscreen')
+	})
+	
+	$(openResumeModal._element).on('hide.bs.modal',function () {  
+		$(openResumeModal._element).find('.modal-dialog').removeClass('modal-fullscreen')
+	})
+
+
+	/* ------------------- Handle history ------------------------- */
+	var triggerBackOrForward = false
+	window.addEventListener('popstate',function () {  
+		console.log('popstate fired')
+		triggerBackOrForward = true
+		
+		// set params
+		this.history.state.searchCols.forEach((column,i) => {
+			table.column(i).search(column['sSearch'])
+			
+			let filter = $(`.table-filter-wrapper:eq(${$(table.column(i).header()).index() - 1})`)
+			let dropdown = filter.find('select, input') // change selected option in select field
+
+			if (column['sSearch']){
+				dropdown.val(column['sSearch'])
+				filter.find('button').prop('disabled',false) // disable clear filter
+			} else {
+				dropdown.val("")
+				filter.find('button').prop('disabled',true) // enable clear filter
+			}
+
+		});
+
+		this.history.state.order.forEach(order => {
+			table.column(order[0]).order(order[1])
+		});
+
+		table.draw()
+		
+	})
 
 		
 	/* ------------------- UPLOAD FILE ------------------------- */
@@ -726,8 +941,6 @@ $(document).ready(function () {
 	const uploadResumeSubmit = $('#upload-resume-submit',uploadResumeForm);
 	const uploadResumeDefaultView = $('#upload-resumes-alert');
 	var isUploadSuccess = false;
-
-	console.log(uploadResumeForm.get(0))
 
 	// object to manipulate input[type='file']
 	const uploadResumeFileInputObj = {
@@ -940,8 +1153,10 @@ $(document).ready(function () {
 				url: uploadResumeForm.prop('action'),
 				data: formData,
 				headers:{
-					'Accept':'application/json'
+					'Accept':'application/json',
+					'X-CSRFToken': csrftoken,
 				},
+				mode: 'same-origin', // Do not send CSRF token to another domain.		
 				contentType: false,
 				processData: false,
 				// actions before ajax start
@@ -1012,7 +1227,7 @@ $(document).ready(function () {
 
 	uploadResumeForm.on('submit',function (e) {  
 		e.preventDefault()
-		console.log('upload submitted');
+		// console.log('upload submitted');
 
 		let source_input = $('#upload-resumes-source-hidden').val();
 
@@ -1035,9 +1250,9 @@ $(document).ready(function () {
 			clearUploadErrorAlert();
 		}
 
-		console.log('run upload');
+		// console.log('run upload');
 
-		// executeUploadResume();
+		executeUploadResume();
 
 	})
 
@@ -1106,60 +1321,6 @@ $(document).ready(function () {
 	const jobDescInput = $('#parse-resumes-jobDesc');
 	const skillsInput = $('#parse-resumes-skills');
 	const parserUpdateCheckbox = $('#parse-config-update-checkbox')
-// 	const jobRole = 'data scientist'
-// 	const jobDesc = `This is for example is our JD for experienced data scientist:\n
-// Responsible for design, planning, and coordinating the implementation of Data Science work activities in the Group Digital with established structured processes and procedures to support PETRONAS's digital agenda.\n
-// 1) Technical & Professional Excellence
-
-// Responsible for ensuring data required for analytic models is of required quality and models are constructed to standards and deployed effectively.
-// Implement data science industry best practices, relevant cutting-edge technology, and innovation in projects to ensure the right solutions fulfill the business requirements.
-
-// 2) Technical/Skill Leadership & Solutioning
-
-// Responsible for developing appropriate technical solutions to address business pain points with insights and recommendations.
-// Implement an established analytics strategy by adopting the right technologies and technical requirements when executing projects to ensure business value generation.
-// Execute operational excellence through continuous technical and process improvement initiatives within projects to improve operations efficiency and effectiveness within own activity & projects.
-
-// 3) Technical Expertise
-
-// Track and follow up with relevant parties to ensure Technical Excellence Programmes are successfully deployed and integrated into work processes, documents, policies, and guidelines.
-// Participate in a community of practices and network with internal and external technical experts by identifying solutions to common problems and capturing and sharing existing data science knowledge for continuous excellence.
-
-
-// Be part of our DS team in at least one of the following areas:
-
-// Machine Learning
-
-// Roles: Design analytics solutions for business problems; develop, evaluate, optimize, deploy and maintain models.
-
-// Tech stack: ML Algorithms, Python, SQL, Spark, Git, Cloud Services, Deep Learning frameworks, MLOps, etc
-
-
-// Natural Language Processing
-
-// Roles: Design text analytics solutions for business problems; develop, evaluate, optimize, deploy and maintain text processing and analytics solutions.
-
-// Tech stack: Python, SQL, Git, NLTK, Deep Learning frameworks, MLOps, Text analytics, NLP, NLU, NLG, Language Models, etc
-
-
-// Computer Vision
-
-// Roles: Design Image and video analytics solutions for business problems; develop, evaluate, optimize, deploy and maintain solutions
-
-// Tech stack: Tensorflow, OpenCV, Fastai, Pytorch, MLFlow, Spark, MLlib Python, SQL, Git, Deep Learning frameworks, MLOps, etc
-
-
-// Optimization / Simulation
-
-// Roles: Design optimization/simulation analytics solutions for business problems; develop, evaluate, optimize, deploy and maintain solutions
-
-// Tech stack: mathematical/process models, Simulation modeling, AnyLogic, Simio, mixed-integer programming (linear and nonlinear), Python, Pyomo, Gurobi solver, MLOps, etc.
-
-// What are the requirements?
-
-// Bachelor's or Master's degree in Data Science, Mathematics, Engineering, Computer Science, or in any other discipline
-// At least 2 years of relevant experience covering advanced statistical analysis and machine learning.
-// Good in statistical and scripting programming languages (such as R, Python, and MATLAB)`
 
 	// parseNewResumeModal.toggle()
 
@@ -1227,6 +1388,10 @@ $(document).ready(function () {
 					job_title:jobRoleInput.val(),
 					job_description:jobDescInput.val(),
 				},
+				headers: {
+					'X-CSRFToken': csrftoken,
+				},
+				mode: 'same-origin', // Do not send CSRF token to another domain.		
 				success: function (response) {
 					console.log('parser config updated.')
 					// jobRoleInput.val(response['job_title'])
@@ -1321,7 +1486,9 @@ $(document).ready(function () {
 			data: data,
 			headers: {
 				Accept: "application/json",
+				'X-CSRFToken': csrftoken,
 			},
+			mode: 'same-origin', // Do not send CSRF token to another domain.		
 			success: function (response) {
 				console.log(response)
 				resumesToParseAlert();

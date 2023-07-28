@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse,HttpResponse, HttpRequest, HttpResponseBadRequest, QueryDict
 from django.views import View
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.utils.decorators import method_decorator
 from django.contrib.auth.mixins import UserPassesTestMixin
 from main.auth import CustomLoginRequired
@@ -119,7 +119,7 @@ class InitialScreeningIndex(CustomLoginRequired,View):
         return render(request,'main/pages/initscreening.html',context)
 
 
-@method_decorator(csrf_exempt,name='dispatch')
+@method_decorator(ensure_csrf_cookie,name='dispatch')
 class InitialScreeningCreate(CustomLoginRequired,View):
 
     def get(self,request:HttpRequest):
@@ -147,7 +147,7 @@ class InitialScreeningCreate(CustomLoginRequired,View):
         return redirect(request.META.get('HTTP_REFERER') or reverse('main:candidate.index'))
 
 
-@method_decorator(csrf_exempt,name='dispatch')
+@method_decorator(ensure_csrf_cookie,name='dispatch')
 class InitialScreeningHiringUpdate(CustomLoginRequired,View):
     
     def post(self,request: HttpRequest,):
@@ -188,15 +188,15 @@ class InitialScreeningHiringUpdate(CustomLoginRequired,View):
         if is_proceed != None:
             if is_proceed == 0: #do not proceed
                 initial_screening.is_hm_proceed = False
-                initial_screening.hm_status = Status.objects.get(codename='initscreening:not selected')
+                initial_screening.hm_status = Status.objects.get(codename='initscreening:not proceed')
 
                 initial_screening.is_proceed = False
-                initial_screening.status = Status.objects.get(codename='initscreening:not selected')
+                initial_screening.status = Status.objects.get(codename='initscreening:not proceed')
                 initial_screening.date_selected = None
 
             elif is_proceed == 1: #proceed
                 initial_screening.is_hm_proceed = True
-                initial_screening.hm_status = Status.objects.get(codename='initscreening:selected')
+                initial_screening.hm_status = Status.objects.get(codename='initscreening:proceed')
                 initial_screening.hm_date_selected = datetime.now()
 
                 initial_screening.is_proceed = None
@@ -239,7 +239,7 @@ class InitialScreeningHiringUpdate(CustomLoginRequired,View):
         )
 
 
-@method_decorator(csrf_exempt,name='dispatch')
+@method_decorator(ensure_csrf_cookie,name='dispatch')
 class InitialScreeningEvaluationCreate(CustomLoginRequired,View): # create & update
 
     @classmethod
@@ -305,7 +305,7 @@ class InitialScreeningEvaluationCreate(CustomLoginRequired,View): # create & upd
         return JsonResponse(out)
 
 
-@method_decorator(csrf_exempt,name='dispatch')
+@method_decorator(ensure_csrf_cookie,name='dispatch')
 class InitialScreeningEvaluationDelete(CustomLoginRequired,View): # create & update
 
     def post(self,request: HttpRequest):
@@ -344,7 +344,7 @@ class InitialScreeningEdit(CustomLoginRequired,View):
         return HttpResponse('return http page')
 
 
-@method_decorator(csrf_exempt,name='dispatch')
+@method_decorator(ensure_csrf_cookie,name='dispatch')
 class InitialScreeningUpdate(CustomLoginRequired,View):
     
     def post(self,request: HttpRequest,):
@@ -388,7 +388,7 @@ class InitialScreeningUpdate(CustomLoginRequired,View):
         if is_proceed != None:
             if int(is_proceed) == 0: #do not proceed
                 initial_screening.is_proceed = False
-                initial_screening.status = Status.objects.get(codename='initscreening:not selected')
+                initial_screening.status = Status.objects.get(codename='initscreening:not proceed')
                 
                 try:
                     initial_screening.candidate.prescreening.reset_instance()
@@ -403,7 +403,7 @@ class InitialScreeningUpdate(CustomLoginRequired,View):
             elif int(is_proceed) == 1 and not cur_is_proceed: #proceed
                 
                 initial_screening.is_proceed = True
-                initial_screening.status = Status.objects.get(codename='initscreening:selected')
+                initial_screening.status = Status.objects.get(codename='initscreening:proceed')
                 initial_screening.date_selected = datetime.now()
 
                 try:
@@ -426,6 +426,11 @@ class InitialScreeningUpdate(CustomLoginRequired,View):
             return PrescreeningCreate.post(prescreening_request)
         
         else:
+
+            # update overall status
+            initial_screening.candidate.overall_status = initial_screening.status
+            initial_screening.candidate.save()
+
             if return_json(request):
                 return JsonResponse({
                     'initial_screening:update':'success',

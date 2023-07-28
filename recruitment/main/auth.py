@@ -9,7 +9,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.urls import reverse, reverse_lazy
 from django.views import View
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import LoginView, LogoutView, logout_then_login
+from django.contrib.auth import logout
 
 
 from .models import Users
@@ -32,7 +33,11 @@ def login_view(request):
     
     return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
+def logout(request):
+    return logout_then_login(request,login_url=reverse_lazy('main:login'))
+
 class CustomLoginView(LoginView):
     template_name = 'admin/login.html'
+    next_page = reverse_lazy('main:index')
     success_url = reverse_lazy('main:index')
     redirect_authenticated_user = True

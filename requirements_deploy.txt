@@ -10,6 +10,6 @@ eventlet
 channels==3.0.5
 django_eventstream
 django-celery-results
-uvicorn
+uvicorn[standard]
 gunicorn
 whitenoise

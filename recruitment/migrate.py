@@ -19,9 +19,9 @@ def migrate_data():
 
     print('Start migration...')
 
-    directory = 'C://Users//wanfakhrurrazi.wanaz//PETRONAS//Khairina Ibrahim (DS DIGITAL) - New Resumes'
+    directory = 'D://Study Stuffs//OneDrive - Universiti Teknologi MARA//Degree UiTM//DEGREE INTERNSHIP//PETRONAS DIGITAL//Copied Documents from Laptop//Migration Resumes'
     # df = pd.read_csv('C://PET DIG Projects//LOCAL Recruitment//Existing Candidates MIGRATION//new_recruitment_preprocessed.csv',)
-    df = pd.read_csv('C:/PET DIG Projects/LOCAL Recruitment/existing_candidates_parsed_final.csv',)
+    df = pd.read_csv('D:/Study Stuffs/OneDrive - Universiti Teknologi MARA/Degree UiTM/DEGREE INTERNSHIP/PETRONAS DIGITAL/Copied Documents from Laptop/existing_candidates_parsed_final.csv',)
 
     # Retrieve files in the directory
     files = os.listdir(directory)

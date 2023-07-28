@@ -11,7 +11,7 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 @shared_task(bind=True)
 def parse_resumes(self,job_title,job_description,resumes_json,user_id):
 
-    print({'job-title':job_title,'job-description':job_description,})
+    # print({'job-title':job_title,'job-description':job_description,})
 
     user:Users = Users.objects.get(id=user_id)
 
@@ -84,55 +84,69 @@ def parse_resumes(self,job_title,job_description,resumes_json,user_id):
     
     new_candidates_list = []
     new_initialscreening_list = []
-
-    for parsed_file in parsed_resumes:
-        for file_meta in data['file_meta']:
-            print(parsed_file['pdf_filename'] + ' | ' + os.path.splitext(os.path.basename(file_meta['name']))[0])
-            if parsed_file['pdf_filename'] == os.path.splitext(os.path.basename(file_meta['name']))[0]:
-                new_candidate = Candidate(
-                    name=parsed_file['Name'],
-                    date=file_meta['created_at'],
-                    referral_name=file_meta['referral_name'],
-                    phone_number=parsed_file['StandardizedPhoneNumber'],
-                    email=parsed_file['Email Address'],
-                    highest_education=parsed_file['Education'],
-                    years_exp=int(parsed_file['Total Years of Work Experience']),
-                    CGPA=float( parsed_file['CGPA'].split('/')[0].rstrip() ),
-                    recent_role=parsed_file['Last Role'],
-                    # recent_emp=None,
-                    # recent_role=parsed_file['Last Role'],
-                    main_skills=parsed_file['CandidateSkills'],
-                    ds_skills=parsed_file['Relevant_data scientistskills'],
-                    ds_background=parsed_file['Relevant_data scientistexperience'],
-                    source=file_meta['source'],
-                    created_by=Users.objects.get(id=user_id),
-                    gpt_status= (
-                        Status.objects.get(codename="gpt_status:not recommended") 
-                        if parsed_file['Recommendation as data scientist (Yes/No)'].lower() == 'no'
-                        else Status.objects.get(codename="gpt_status:recommended") 
-                    ),
-                    overall_status=Status.objects.get(codename='initscreening:ongoing'),
-                    candidate_resume=file_meta['instance']
-                    
-                )
-
-                new_candidates_list.append(new_candidate)
-
-                new_initialscreening_list.append(
-                    InitialScreening(
-                        candidate=new_candidate,
-                        status=Status.objects.get(codename='initscreening:pending'),
-                    )
-                )
-
-                data['file_meta'].remove(file_meta)
-
-                break
     
+    try:
+        for parsed_file in parsed_resumes:
+            for file_meta in data['file_meta']:
+                print(parsed_file['pdf_filename'] + ' | ' + os.path.splitext(os.path.basename(file_meta['name']))[0])
+                if parsed_file['pdf_filename'] == os.path.splitext(os.path.basename(file_meta['name']))[0]:
+                    new_candidate = Candidate(
+                        name=parsed_file['Name'],
+                        date=file_meta['created_at'],
+                        referral_name=file_meta['referral_name'],
+                        phone_number=parsed_file['StandardizedPhoneNumber'],
+                        email=parsed_file['Email Address'],
+                        highest_education=parsed_file['Education'],
+                        years_exp=parsed_file['Total Years of Work Experience'],
+                        CGPA=parsed_file['CGPA_value_nominator'],
+                        # CGPA=float( parsed_file['CGPA'].split('/')[0].rstrip() ),
+                        recent_role=parsed_file['Last Role'],
+                        # recent_emp=None,
+                        # recent_role=parsed_file['Last Role'],
+                        main_skills=parsed_file['CandidateSkills'],
+                        ds_skills=parsed_file['Relevant_data scientistskills'],
+                        ds_background=parsed_file['Relevant_data scientistexperience'],
+                        source=file_meta['source'],
+                        created_by=Users.objects.get(id=user_id),
+                        gpt_score=float(parsed_file['OverallCandidateScoreGPT'].split('/')[0]),
+                        gpt_status= (
+                            Status.objects.get(codename="gpt_status:not recommended") 
+                            if parsed_file['Recommendation as data scientist (Yes/No)'].lower() == 'no'
+                            else Status.objects.get(codename="gpt_status:recommended") 
+                        ),
+                        overall_status=Status.objects.get(codename='initscreening:pending'),
+                        candidate_resume=file_meta['instance']
+                        
+                    )
+
+                    new_candidate.save()
+                    new_candidates_list.append(new_candidate)
+
+                    initialscreening = InitialScreening(
+                        candidate=new_candidate,
+                        status=Status.objects.get(codename='initscreening:pending'),    
+                    )
+                    initialscreening.save()
+                    # new_initialscreening_list.append(initialscreening)
+
+                    data['file_meta'].remove(file_meta)
+
+                    break
+
+    except:
+        
+        print("*******************REVERT BACKK******************************")
+        for resume in resumes_obj:
+            resume.is_parsed = False
+            resume.is_parsing = False
+        CandidateResume.objects.bulk_update(resumes_obj,['is_parsed','is_parsing',])
+
+        return "Error in DB. Reverting resume parse status"
+
     print(new_candidates_list)
 
-    Candidate.objects.bulk_create(new_candidates_list)
-    InitialScreening.objects.bulk_create(new_initialscreening_list)
+    # Candidate.objects.bulk_create(new_candidates_list)
+    # InitialScreening.objects.bulk_create(new_initialscreening_list)
 
     # Update is_parsed to parsed resumes
     for resume in resumes_obj:

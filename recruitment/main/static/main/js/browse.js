@@ -823,6 +823,9 @@ $(document).ready(function () {
 				const tr = $(this);
 				const tr_index = $(tr).index()
 				const row = api.table().row(tr);
+
+				// window.location.href = row.data()['href']
+				// return
 		 
 				if (row.child.isShown()) {
 					// This row is already open - close it

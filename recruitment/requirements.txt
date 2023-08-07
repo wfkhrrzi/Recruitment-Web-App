@@ -10,6 +10,8 @@ eventlet
 channels==3.0.5
 django_eventstream
 django-celery-results
-uvicorn[standard]
+uvicorn
 gunicorn
 whitenoise
+django-session-security
+tqdm

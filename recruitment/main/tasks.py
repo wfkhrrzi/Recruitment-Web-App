@@ -63,7 +63,7 @@ def parse_resumes(self,job_title,job_description,resumes_json,user_id):
     # execute parsing process
     try:
         response = requests.post(
-            'http://127.0.0.1:8080/upload',
+            'http://ptsg-5dspwb04-dstats2.azurewebsites.net/upload',
             data={
                 'job_title':job_title,
                 'job-description':job_description,

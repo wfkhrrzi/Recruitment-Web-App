@@ -106,10 +106,10 @@ DATABASES = {
     # },
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'dsats_db',
-        'USER': 'wfkhrrzi@dsats-psql',
-        'PASSWORD': 'dsats-psql@2023',
-        'HOST': "dsats-psql.postgres.database.azure.com",
+        'NAME': os.environ['DBNAME'],
+        'USER': os.environ['DBUSER'],
+        'PASSWORD': os.environ['DBPASS'],
+        'HOST': os.environ['DBHOST'],
         'PORT': "5432",  # 5432 by default
     }
 }

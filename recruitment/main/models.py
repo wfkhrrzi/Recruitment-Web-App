@@ -29,11 +29,11 @@ class UsersManager(BaseUserManager):
 
 
 class Users(PermissionsMixin,AbstractBaseUser):
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
-    alias = models.CharField(max_length=100,null=True)
+    first_name = models.CharField(max_length=255)
+    last_name = models.CharField(max_length=255)
+    alias = models.CharField(max_length=255,null=True)
     user_name = models.CharField(max_length=50)
-    email = models.EmailField(max_length=100,unique=True)
+    email = models.EmailField(max_length=255,unique=True)
     password = models.CharField(max_length=200)
     user_privilege = models.ForeignKey(UserPrivilege,on_delete=models.SET_NULL,null=True)
     user_category = models.ForeignKey(UserCategory,on_delete=models.SET_NULL,null=True)

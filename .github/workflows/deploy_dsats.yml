@@ -10,6 +10,13 @@ on:
       - deploy
   workflow_dispatch:
 
+env:
+    WEBSITE_HOSTNAME: $
+    DBHOST: ${{secrets.DBHOST}}
+    DBNAME: ${{secrets.DBNAME}}
+    DBPASS: ${{secrets.DBPASS}}
+    DBUSER: ${{secrets.DBUSER}}
+
 jobs:
   build:
     runs-on: ubuntu-latest

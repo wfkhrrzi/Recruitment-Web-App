@@ -99,8 +99,6 @@ EVENTSTREAM_STORAGE_CLASS = 'django_eventstream.storage.DjangoModelStorage'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-hostname = os.environ['DBHOST']
-
 DATABASES = {
     # 'default': {
     #     'ENGINE': 'django.db.backends.sqlite3',
@@ -108,10 +106,10 @@ DATABASES = {
     # },
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ['DBNAME'],
-        'USER': os.environ['DBUSER'],
-        'PASSWORD': os.environ['DBPASS'],
-        'HOST': f"{os.environ['DBHOST']}.postgres.database.azure.com",
+        'NAME': 'dsats_db',
+        'USER': 'wfkhrrzi@dsats-psql',
+        'PASSWORD': 'dsats-psql@2023',
+        'HOST': "dsats-psql.postgres.database.azure.com",
         'PORT': "5432",  # 5432 by default
     }
 }

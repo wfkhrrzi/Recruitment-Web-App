@@ -22,13 +22,15 @@ INSTALLED_APPS = [
     'session_security',
 ]
 
+hostname = os.environ['DBHOST']
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': "dsats_db",
-        'USER': "dsats_user@ptsg-5dsppsql01",
-        'PASSWORD': "ds_dsats@2023",
-        'HOST': "ptsg-5dsppsql01.postgres.database.azure.com",
+        'NAME': os.environ['DBNAME'],
+        'USER': os.environ['DBUSER'] + "@" + hostname,
+        'PASSWORD': os.environ['DBPASS'] ,
+        'HOST': hostname + ".postgres.database.azure.com",
         'PORT': "5432",  # 5432 by default
     }
 }

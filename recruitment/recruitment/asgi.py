@@ -7,7 +7,8 @@ For more information on this file, see
 https://docs.djangoproject.com/en/4.2/howto/deployment/asgi/
 """
 import os
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'recruitment.settings')
+settings_module = "recruitment.prod_settings" if 'WEBSITE_HOSTNAME' in os.environ else 'recruitment.settings'
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', settings_module)
 
 from django.core.asgi import get_asgi_application
 django_asgi_application = get_asgi_application()

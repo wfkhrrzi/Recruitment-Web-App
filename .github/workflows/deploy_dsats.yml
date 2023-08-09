@@ -33,6 +33,12 @@ jobs:
       - name: Collect static
         working-directory: 'recruitment'
         run: python manage.py collectstatic
+
+      - name: Copy requirements.txt to /recruitment
+        uses: canastro/copy-file-action@master
+        with:
+          source: "requirements.txt"
+          target: "recruitment/requirements.txt"
         
       # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
       
